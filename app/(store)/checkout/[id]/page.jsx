@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import products from '@/data/products.json'
 
 export default function CheckoutPage({ params }) {
   const router = useRouter()
-  const product = products.find((p) => p.id === params.id)
+  const [product, setProduct] = useState(null)
+  const [loadingProduct, setLoadingProduct] = useState(true)
   
   const [formData, setFormData] = useState({
     contactMethod: 'telegram',
@@ -17,6 +17,31 @@ export default function CheckoutPage({ params }) {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const res = await fetch(`/api/products/${params.id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setProduct(data)
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err)
+      } finally {
+        setLoadingProduct(false)
+      }
+    }
+    fetchProduct()
+  }, [params.id])
+
+  if (loadingProduct) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    )
+  }
 
   if (!product) {
     return (
@@ -86,17 +111,19 @@ export default function CheckoutPage({ params }) {
             <h2 className="font-semibold text-gray-900 mb-4">Order Summary</h2>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <div className="relative w-12 h-12 mr-4">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-contain"
-                  />
-                </div>
+                {product.image && (
+                  <div className="relative w-12 h-12 mr-4">
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                )}
                 <div>
                   <p className="font-medium text-gray-900">{product.name}</p>
-                  <p className="text-sm text-gray-500">{product.period} access</p>
+                  {product.period && <p className="text-sm text-gray-500">{product.period} access</p>}
                 </div>
               </div>
               <p className="text-2xl font-bold text-gray-900">${product.price}</p>

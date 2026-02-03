@@ -1,20 +1,35 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import products from '@/data/products.json'
+import prisma from '@/lib/prisma'
+
+async function getProducts() {
+  const products = await prisma.product.findMany({
+    where: { active: true },
+    orderBy: [
+      { popular: 'desc' },
+      { createdAt: 'desc' }
+    ]
+  })
+  return products
+}
 
 function ProductCard({ product }) {
+  const features = product.features || []
+  
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
       {/* Product Image */}
       <div className="relative h-48 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-        <div className="relative w-36 h-36">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-contain drop-shadow-lg"
-          />
-        </div>
+        {product.image && (
+          <div className="relative w-36 h-36">
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-contain drop-shadow-lg"
+            />
+          </div>
+        )}
         {product.popular && (
           <span className="absolute top-3 right-3 bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
             🔥 POPULAR
@@ -28,19 +43,21 @@ function ProductCard({ product }) {
         <p className="text-gray-600 text-sm mb-4">{product.shortDescription}</p>
         
         {/* Features Preview */}
-        <ul className="space-y-1 mb-4 flex-grow">
-          {product.features.slice(0, 3).map((feature, i) => (
-            <li key={i} className="text-sm text-gray-500 flex items-center">
-              <span className="text-brand-orange mr-2">✓</span>
-              {feature}
-            </li>
-          ))}
-        </ul>
+        {features.length > 0 && (
+          <ul className="space-y-1 mb-4 flex-grow">
+            {features.slice(0, 3).map((feature, i) => (
+              <li key={i} className="text-sm text-gray-500 flex items-center">
+                <span className="text-brand-orange mr-2">✓</span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        )}
 
         {/* Price */}
         <div className="flex items-baseline mb-4">
           <span className="text-3xl font-bold text-gray-900">${product.price}</span>
-          <span className="text-gray-500 ml-2">/ {product.period}</span>
+          {product.period && <span className="text-gray-500 ml-2">/ {product.period}</span>}
         </div>
 
         {/* CTA Button */}
@@ -55,7 +72,9 @@ function ProductCard({ product }) {
   )
 }
 
-export default function Home() {
+export default async function Home() {
+  const products = await getProducts()
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Hero Section */}
@@ -86,11 +105,17 @@ export default function Home() {
       </div>
 
       {/* Products Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {products.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No products available at the moment.</p>
+        </div>
+      )}
 
       {/* Payment Methods */}
       <div className="mt-16 text-center">

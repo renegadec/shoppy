@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id               String   @id @default(cuid())
+  name             String
+  shortDescription String?
+  highlights       Json?    // Array of {title, description}
+  tagline          String?
+  price            Float
+  period           String?  // "year", "month", "3 months", etc.
+  image            String?
+  features         Json?    // Array of strings
+  popular          Boolean  @default(false)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  orders           Order[]
+}
+
+model Customer {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String?
+  phone         String?
+  telegram      String?
+  whatsapp      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  orders        Order[]
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique // Human-readable order ID like "SHP-20260203-001"
+  status        OrderStatus @default(PENDING)
+  amount        Float
+  currency      String      @default("USD")
+  
+  // Payment details
+  paymentId     String?     // NOWPayments payment ID
+  paymentStatus String?     // Raw status from payment provider
+  paidAmount    Float?
+  paidCurrency  String?
+  paidAt        DateTime?
+  
+  // Contact preference for this order
+  contactMethod String?     // "email", "telegram", "whatsapp"
+  contactValue  String?     // The actual contact value used
+  
+  // Relations
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  
+  // Delivery
+  delivered     Boolean     @default(false)
+  deliveredAt   DateTime?
+  deliveryNotes String?
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  PAID
+  PARTIALLY_PAID
+  DELIVERED
+  FAILED
+  EXPIRED
+  REFUNDED
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Hashed
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

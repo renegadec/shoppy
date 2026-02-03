@@ -1,16 +1,17 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import products from '@/data/products.json'
+import prisma from '@/lib/prisma'
 
-export async function generateStaticParams() {
-  return products.map((product) => ({
-    id: product.id,
-  }))
+async function getProduct(id) {
+  const product = await prisma.product.findUnique({
+    where: { id }
+  })
+  return product
 }
 
 export async function generateMetadata({ params }) {
-  const product = products.find((p) => p.id === params.id)
+  const product = await getProduct(params.id)
   if (!product) return { title: 'Product Not Found' }
   
   return {
@@ -19,12 +20,15 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default function ProductPage({ params }) {
-  const product = products.find((p) => p.id === params.id)
+export default async function ProductPage({ params }) {
+  const product = await getProduct(params.id)
   
-  if (!product) {
+  if (!product || !product.active) {
     notFound()
   }
+
+  const highlights = product.highlights || []
+  const features = product.features || []
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -40,15 +44,17 @@ export default function ProductPage({ params }) {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
         {/* Product Header with Image */}
         <div className="relative h-72 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
-          <div className="relative w-48 h-48">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-contain drop-shadow-lg"
-              priority
-            />
-          </div>
+          {product.image && (
+            <div className="relative w-48 h-48">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-contain drop-shadow-lg"
+                priority
+              />
+            </div>
+          )}
           {product.popular && (
             <span className="absolute top-4 right-4 bg-brand-red text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md">
               🔥 POPULAR CHOICE
@@ -66,42 +72,48 @@ export default function ProductPage({ params }) {
             <div className="mt-4 md:mt-0 md:text-right">
               <div className="flex items-baseline">
                 <span className="text-4xl font-bold text-gray-900">${product.price}</span>
-                <span className="text-gray-500 ml-2">/ {product.period}</span>
+                {product.period && <span className="text-gray-500 ml-2">/ {product.period}</span>}
               </div>
             </div>
           </div>
 
           {/* Tagline */}
-          <p className="text-lg text-gray-700 mb-6">{product.tagline}</p>
+          {product.tagline && (
+            <p className="text-lg text-gray-700 mb-6">{product.tagline}</p>
+          )}
 
           {/* Highlights */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">What You Get</h2>
-            <div className="space-y-4">
-              {product.highlights.map((item, i) => (
-                <div key={i} className="flex items-start">
-                  <span className="text-brand-orange mr-3 mt-1 text-lg">✅</span>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{item.title}</h3>
-                    <p className="text-gray-600">{item.description}</p>
+          {highlights.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">What You Get</h2>
+              <div className="space-y-4">
+                {highlights.map((item, i) => (
+                  <div key={i} className="flex items-start">
+                    <span className="text-brand-orange mr-3 mt-1 text-lg">✅</span>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{item.title}</h3>
+                      <p className="text-gray-600">{item.description}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Features */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Features Included</h2>
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {product.features.map((feature, i) => (
-                <li key={i} className="flex items-center bg-orange-50 rounded-lg px-4 py-3">
-                  <span className="text-brand-orange mr-3 text-lg">✓</span>
-                  <span className="text-gray-700">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {features.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Features Included</h2>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {features.map((feature, i) => (
+                  <li key={i} className="flex items-center bg-orange-50 rounded-lg px-4 py-3">
+                    <span className="text-brand-orange mr-3 text-lg">✓</span>
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Payment Info */}
           <div className="bg-orange-50 rounded-xl p-6 mb-8">

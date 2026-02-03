@@ -1,90 +1,111 @@
-# Digital Shop 🛒
+# Shoppy - Digital Products Store
 
-A simple digital products shop accepting cryptocurrency payments via NOWPayments.
+A digital products store accepting crypto payments via NOWPayments, with a full admin dashboard.
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (App Router)
+- **Database**: PostgreSQL (Supabase)
+- **ORM**: Prisma
+- **Auth**: NextAuth.js
+- **Styling**: Tailwind CSS
+- **Payments**: NOWPayments (crypto)
 
 ## Features
 
-- 🛍️ Clean, responsive product catalog
-- 💳 Crypto payments (USDT, BTC, ETH, and more)
-- 📱 Telegram notifications for new orders
-- 🚀 Easy deployment to Vercel
+- 🛒 Product catalog with dynamic pricing
+- 💳 Crypto payments (USDT, BTC, ETH, etc.)
+- 📦 Order tracking with unique order IDs
+- 👥 Customer management
+- 📊 Admin dashboard with analytics
+- 🔔 Telegram notifications for orders
 
 ## Setup
 
-### 1. Install Dependencies
+### 1. Clone and install
 
 ```bash
+git clone https://github.com/renegadec/shoppy.git
+cd shoppy
 npm install
 ```
 
-### 2. Configure Environment
+### 2. Set up Supabase
 
-Copy `.env.example` to `.env.local` and fill in your values:
+1. Create a free account at [supabase.com](https://supabase.com)
+2. Create a new project
+3. Go to Settings → Database → Connection string
+4. Copy the URI (use "Transaction" mode for serverless)
+
+### 3. Configure environment
+
+Copy `.env.example` to `.env.local` and fill in:
 
 ```bash
 cp .env.example .env.local
 ```
 
-Required:
-- `NOWPAYMENTS_API_KEY` - Get from [NOWPayments Dashboard](https://account.nowpayments.io/api-keys)
-- `NEXT_PUBLIC_BASE_URL` - Your domain (e.g., `https://shop.yourdomain.com`)
+Required variables:
+- `DATABASE_URL` - Supabase PostgreSQL connection string
+- `NEXTAUTH_SECRET` - Random 32+ char string (run `openssl rand -base64 32`)
+- `NEXTAUTH_URL` - Your app URL (http://localhost:3000 for dev)
+- `NOWPAYMENTS_API_KEY` - From NOWPayments dashboard
+- `TELEGRAM_BOT_TOKEN` & `TELEGRAM_CHAT_ID` - For order notifications
 
-Optional (for notifications):
-- `TELEGRAM_BOT_TOKEN` - Create via [@BotFather](https://t.me/BotFather)
-- `TELEGRAM_CHAT_ID` - Get via [@userinfobot](https://t.me/userinfobot)
-- `NOWPAYMENTS_IPN_SECRET` - For webhook verification
+### 4. Initialize database
 
-### 3. Configure NOWPayments Webhook
+```bash
+# Push schema to database
+npm run db:push
 
-In your [NOWPayments Dashboard](https://account.nowpayments.io):
-1. Go to Settings → IPN (Instant Payment Notification)
-2. Set IPN Callback URL to: `https://your-domain.com/api/webhook`
-3. Generate and save your IPN Secret
+# Seed with admin user and sample products
+npm run db:seed
+```
 
-### 4. Run Development Server
+### 5. Run development server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see your shop.
+Visit:
+- Store: http://localhost:3000
+- Admin: http://localhost:3000/admin
 
-## Deployment to Vercel
+Default admin login (change immediately!):
+- Email: admin@shoppy.co.zw
+- Password: changeme123
+
+## Deployment (Vercel)
 
 1. Push to GitHub
-2. Import project in [Vercel](https://vercel.com)
-3. Add environment variables in Vercel project settings
+2. Connect repo to Vercel
+3. Add environment variables in Vercel dashboard
 4. Deploy!
 
-### Connect Your Domain
+Note: Run `npm run db:push` and `npm run db:seed` after first deploy to set up the database.
 
-In Vercel:
-1. Go to Project Settings → Domains
-2. Add your domain from Namecheap
-3. Update Namecheap DNS to point to Vercel
+## Admin Dashboard
 
-## Customization
+Access at `/admin` after logging in:
 
-### Adding Products
+- **Dashboard** - Revenue stats, recent orders
+- **Orders** - View/filter orders, mark as delivered
+- **Products** - Add/edit/delete products
+- **Customers** - View customer list and order history
 
-Edit `data/products.json` to add or modify products.
+## API Routes
 
-### Styling
+- `POST /api/checkout` - Create payment
+- `POST /api/webhook` - NOWPayments webhook
+- `GET /api/products` - List products
+- `GET /api/products/[id]` - Get product
 
-Tailwind CSS is used for styling. Modify `tailwind.config.js` or component classes as needed.
-
-### Branding
-
-Update the header/footer in `app/layout.jsx` with your shop name and branding.
-
-## Order Flow
-
-1. Customer browses products
-2. Customer clicks "Buy Now" and enters contact info
-3. Customer is redirected to NOWPayments to pay
-4. NOWPayments sends webhook on payment confirmation
-5. You receive Telegram notification with customer details
-6. You manually deliver the product via customer's preferred contact method
+Admin routes (authenticated):
+- `/api/admin/stats` - Dashboard statistics
+- `/api/admin/orders` - Orders CRUD
+- `/api/admin/products` - Products CRUD
+- `/api/admin/customers` - Customers list
 
 ## License
 
