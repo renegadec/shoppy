@@ -2,6 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import prisma from '@/lib/prisma'
 
+// Disable caching so new products show immediately
+export const dynamic = 'force-dynamic'
+
 async function getProducts() {
   const products = await prisma.product.findMany({
     where: { active: true },
