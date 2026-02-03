@@ -132,20 +132,28 @@ export default async function Home() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 py-12">
+      <div className="bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+          <h3 className="text-2xl md:text-3xl font-bold text-white mb-4">
             Ready to get started? 🚀
           </h3>
-          <p className="text-gray-800 mb-6">
+          <p className="text-white/80 mb-8">
             Browse our products and pay with your favorite cryptocurrency
           </p>
-          <div className="flex justify-center gap-4 text-3xl">
-            <span title="USDT">💵</span>
-            <span title="Bitcoin">₿</span>
-            <span title="Ethereum">⟠</span>
-            <span title="More">🪙</span>
+          <div className="flex justify-center gap-6 text-4xl mb-8">
+            <span title="USDT" className="hover:scale-110 transition-transform cursor-pointer">💵</span>
+            <span title="Bitcoin" className="hover:scale-110 transition-transform cursor-pointer">₿</span>
+            <span title="Ethereum" className="hover:scale-110 transition-transform cursor-pointer">⟠</span>
+            <span title="More" className="hover:scale-110 transition-transform cursor-pointer">🪙</span>
           </div>
+          <a 
+            href="https://t.me/shoppyzw"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-3 rounded-full font-semibold hover:from-yellow-300 hover:to-orange-400 transition-all shadow-lg"
+          >
+            💬 Contact Us on Telegram
+          </a>
         </div>
       </div>
     </div>
