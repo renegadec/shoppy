@@ -20,11 +20,11 @@ function ProductCard({ product }) {
   const features = product.features || []
   
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
       {/* Product Image */}
-      <div className="relative h-48 bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center">
+      <div className="relative h-48 bg-gradient-to-br from-purple-100 via-violet-100 to-indigo-100 flex items-center justify-center">
         {product.image && (
-          <div className="relative w-36 h-36">
+          <div className="relative w-36 h-36 group-hover:scale-110 transition-transform duration-300">
             <Image
               src={product.image}
               alt={product.name}
@@ -34,8 +34,8 @@ function ProductCard({ product }) {
           </div>
         )}
         {product.popular && (
-          <span className="absolute top-3 right-3 bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
-            🔥 POPULAR
+          <span className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md animate-pulse">
+            🔥 HOT
           </span>
         )}
       </div>
@@ -50,7 +50,7 @@ function ProductCard({ product }) {
           <ul className="space-y-1 mb-4 flex-grow">
             {features.slice(0, 3).map((feature, i) => (
               <li key={i} className="text-sm text-gray-500 flex items-center">
-                <span className="text-brand-orange mr-2">✓</span>
+                <span className="text-purple-500 mr-2">✓</span>
                 {feature}
               </li>
             ))}
@@ -59,14 +59,14 @@ function ProductCard({ product }) {
 
         {/* Price */}
         <div className="flex items-baseline mb-4">
-          <span className="text-3xl font-bold text-gray-900">${product.price}</span>
+          <span className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">${product.price}</span>
           {product.period && <span className="text-gray-500 ml-2">/ {product.period}</span>}
         </div>
 
         {/* CTA Button */}
         <Link
           href={`/product/${product.id}`}
-          className="block w-full bg-gradient-to-r from-brand-orange to-brand-red hover:from-brand-red hover:to-brand-orange text-white text-center font-semibold py-3 px-4 rounded-xl transition-all mt-auto"
+          className="block w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-center font-semibold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-purple-500/25"
         >
           View Details
         </Link>
@@ -79,55 +79,73 @@ export default async function Home() {
   const products = await getProducts()
   
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div>
       {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          Premium Digital Products
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Get access to the best productivity tools and AI subscriptions. 
-          Pay securely with crypto — USDT, BTC, ETH and more.
-        </p>
+      <div className="bg-gradient-to-br from-purple-600 via-violet-600 to-indigo-700 text-white py-16 -mt-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            Premium Digital Products
+            <span className="block text-yellow-300">At Unbeatable Prices</span>
+          </h1>
+          <p className="text-xl text-purple-100 max-w-2xl mx-auto mb-8">
+            Get access to the best productivity tools and AI subscriptions. 
+            Pay securely with crypto — USDT, BTC, ETH and more.
+          </p>
+          
+          {/* Trust Badges */}
+          <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex items-center bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full">
+              <span className="mr-2">🔒</span>
+              <span className="text-sm font-medium">Secure Payments</span>
+            </div>
+            <div className="flex items-center bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full">
+              <span className="mr-2">⚡</span>
+              <span className="text-sm font-medium">Instant Delivery</span>
+            </div>
+            <div className="flex items-center bg-white/10 backdrop-blur-sm px-5 py-2.5 rounded-full">
+              <span className="mr-2">💬</span>
+              <span className="text-sm font-medium">24/7 Support</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Trust Badges */}
-      <div className="flex flex-wrap justify-center gap-4 mb-12">
-        <div className="flex items-center bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
-          <span className="mr-2">🔒</span>
-          <span className="text-sm text-gray-600">Secure Payments</span>
+      {/* Products Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Products</h2>
+          <p className="text-gray-600">Choose from our curated selection of premium digital products</p>
         </div>
-        <div className="flex items-center bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
-          <span className="mr-2">⚡</span>
-          <span className="text-sm text-gray-600">Instant Delivery</span>
-        </div>
-        <div className="flex items-center bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200">
-          <span className="mr-2">💬</span>
-          <span className="text-sm text-gray-600">24/7 Support</span>
-        </div>
+        
+        {/* Products Grid */}
+        {products.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No products available at the moment.</p>
+          </div>
+        )}
       </div>
 
-      {/* Products Grid */}
-      {products.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No products available at the moment.</p>
-        </div>
-      )}
-
-      {/* Payment Methods */}
-      <div className="mt-16 text-center">
-        <p className="text-gray-500 mb-4">Accepted Payment Methods</p>
-        <div className="flex justify-center gap-6 text-2xl">
-          <span title="USDT">💵</span>
-          <span title="Bitcoin">₿</span>
-          <span title="Ethereum">⟠</span>
-          <span title="More crypto">🪙</span>
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+            Ready to get started? 🚀
+          </h3>
+          <p className="text-gray-800 mb-6">
+            Browse our products and pay with your favorite cryptocurrency
+          </p>
+          <div className="flex justify-center gap-4 text-3xl">
+            <span title="USDT">💵</span>
+            <span title="Bitcoin">₿</span>
+            <span title="Ethereum">⟠</span>
+            <span title="More">🪙</span>
+          </div>
         </div>
       </div>
     </div>

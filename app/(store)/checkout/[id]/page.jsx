@@ -38,7 +38,8 @@ export default function CheckoutPage({ params }) {
   if (loadingProduct) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <p className="text-gray-500">Loading...</p>
+        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="text-gray-500 mt-4">Loading...</p>
       </div>
     )
   }
@@ -47,7 +48,7 @@ export default function CheckoutPage({ params }) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-gray-900">Product not found</h1>
-        <Link href="/" className="text-brand-orange hover:text-brand-red mt-4 inline-block">
+        <Link href="/" className="text-purple-600 hover:text-purple-800 mt-4 inline-block font-medium">
           ← Back to shop
         </Link>
       </div>
@@ -75,7 +76,6 @@ export default function CheckoutPage({ params }) {
         throw new Error(data.error || 'Something went wrong')
       }
 
-      // Redirect to NOWPayments checkout
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl
       } else {
@@ -92,27 +92,27 @@ export default function CheckoutPage({ params }) {
       {/* Back Link */}
       <Link 
         href={`/product/${product.id}`}
-        className="inline-flex items-center text-brand-orange hover:text-brand-red mb-8"
+        className="inline-flex items-center text-purple-600 hover:text-purple-800 mb-8 font-medium"
       >
         <span className="mr-2">←</span>
         Back to Product
       </Link>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-brand-orange to-brand-red px-8 py-6">
+        <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 px-8 py-6">
           <h1 className="text-2xl font-bold text-white">Checkout</h1>
-          <p className="text-orange-100">Complete your purchase</p>
+          <p className="text-purple-100">Complete your purchase</p>
         </div>
 
         <div className="p-8">
           {/* Order Summary */}
-          <div className="bg-orange-50 rounded-xl p-6 mb-8">
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 mb-8 border border-purple-100">
             <h2 className="font-semibold text-gray-900 mb-4">Order Summary</h2>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 {product.image && (
-                  <div className="relative w-12 h-12 mr-4">
+                  <div className="relative w-16 h-16 mr-4 bg-white rounded-lg p-1 shadow-sm">
                     <Image
                       src={product.image}
                       alt={product.name}
@@ -126,7 +126,7 @@ export default function CheckoutPage({ params }) {
                   {product.period && <p className="text-sm text-gray-500">{product.period} access</p>}
                 </div>
               </div>
-              <p className="text-2xl font-bold text-gray-900">${product.price}</p>
+              <p className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">${product.price}</p>
             </div>
           </div>
 
@@ -148,7 +148,7 @@ export default function CheckoutPage({ params }) {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="your@email.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition-shadow"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-shadow"
               />
             </div>
 
@@ -169,8 +169,8 @@ export default function CheckoutPage({ params }) {
                     onClick={() => setFormData({ ...formData, contactMethod: method.value })}
                     className={`p-4 rounded-xl border-2 transition-all ${
                       formData.contactMethod === method.value
-                        ? 'border-brand-orange bg-orange-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-purple-500 bg-purple-50 shadow-md'
+                        : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50/50'
                     }`}
                   >
                     <span className="text-2xl block mb-1">{method.icon}</span>
@@ -192,7 +192,7 @@ export default function CheckoutPage({ params }) {
                   value={formData.contactValue}
                   onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
                   placeholder={formData.contactMethod === 'telegram' ? '@username' : '+263...'}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-orange focus:border-brand-orange outline-none transition-shadow"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-shadow"
                 />
               </div>
             )}
@@ -208,7 +208,7 @@ export default function CheckoutPage({ params }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-brand-orange to-brand-red hover:from-brand-red hover:to-brand-orange disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all"
+              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all shadow-lg hover:shadow-purple-500/25"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -219,14 +219,14 @@ export default function CheckoutPage({ params }) {
                   Processing...
                 </span>
               ) : (
-                `Pay ${product.price} USD with Crypto`
+                `Pay $${product.price} with Crypto`
               )}
             </button>
 
             {/* Payment Info */}
             <div className="mt-6 text-center text-sm text-gray-500">
               <p>🔒 Secure payment via NOWPayments</p>
-              <p className="mt-1">You'll be redirected to complete payment with USDT, BTC, ETH, or other crypto</p>
+              <p className="mt-1">Pay with USDT, BTC, ETH, or other crypto</p>
             </div>
           </form>
         </div>
