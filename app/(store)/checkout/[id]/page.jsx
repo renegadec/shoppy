@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
-export default function CheckoutPage({ params }) {
+export default function CheckoutPage() {
   const router = useRouter()
+  const params = useParams()
   const [product, setProduct] = useState(null)
   const [loadingProduct, setLoadingProduct] = useState(true)
   
@@ -18,13 +19,24 @@ export default function CheckoutPage({ params }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const productId = Array.isArray(params?.id) ? params.id[0] : params?.id
+
   useEffect(() => {
+    if (!productId) {
+      setLoadingProduct(false)
+      return
+    }
+
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/products/${params.id}`)
+        const res = await fetch(`/api/products/${productId}`)
         if (res.ok) {
           const data = await res.json()
           setProduct(data)
+        } else {
+          // Optional: capture API error for debugging
+          const data = await res.json().catch(() => null)
+          console.warn('Failed to fetch product:', res.status, data)
         }
       } catch (err) {
         console.error('Error fetching product:', err)
@@ -33,7 +45,7 @@ export default function CheckoutPage({ params }) {
       }
     }
     fetchProduct()
-  }, [params.id])
+  }, [productId])
 
   if (loadingProduct) {
     return (

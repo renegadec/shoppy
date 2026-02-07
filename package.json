@@ -17,10 +17,11 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@prisma/client": "^5.22.0",
     "@supabase/supabase-js": "^2.94.0",
     "bcryptjs": "^3.0.3",
-    "next": "^14.2.0",
+    "next": "^16.1.6",
     "next-auth": "^4.24.13",
     "prisma": "^5.22.0",
     "react": "^18.2.0",

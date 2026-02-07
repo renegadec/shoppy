@@ -3,8 +3,14 @@ import prisma from '@/lib/prisma'
 
 export async function GET(request, { params }) {
   try {
+    const { id } = await params
+
+    if (!id || typeof id !== 'string') {
+      return NextResponse.json({ error: 'Invalid product id' }, { status: 400 })
+    }
+
     const product = await prisma.product.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
     
     if (!product || !product.active) {

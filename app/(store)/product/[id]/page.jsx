@@ -6,6 +6,10 @@ import prisma from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 
 async function getProduct(id) {
+  console.log('getProduct', id)
+
+  if(!id || typeof id !== 'string') return null
+
   const product = await prisma.product.findUnique({
     where: { id }
   })
@@ -23,7 +27,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductPage({ params }) {
-  const product = await getProduct(params.id)
+  const { id } = await params
+
+  const product = await getProduct(id)
   
   if (!product || !product.active) {
     notFound()
