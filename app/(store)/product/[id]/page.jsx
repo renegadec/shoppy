@@ -2,6 +2,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import prisma from '@/lib/prisma'
+import {
+  FireIcon,
+  CheckCircleIcon,
+  CheckIcon,
+  CreditCardIcon,
+  LockClosedIcon,
+  ArrowLeftIcon,
+} from '@heroicons/react/24/solid'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,7 +28,7 @@ export async function generateMetadata({ params }) {
   const { id } = await params
   const product = await getProduct(id)
   if (!product) return { title: 'Product Not Found' }
-  
+
   return {
     title: `${product.name} | Shoppy`,
     description: product.shortDescription,
@@ -42,11 +50,11 @@ export default async function ProductPage({ params }) {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Back Link */}
-      <Link 
-        href="/" 
-        className="inline-flex items-center text-purple-600 hover:text-purple-800 mb-8 font-medium"
+      <Link
+        href="/"
+        className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-800 mb-8 font-medium"
       >
-        <span className="mr-2">←</span>
+        <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
         Back to Products
       </Link>
 
@@ -65,8 +73,9 @@ export default async function ProductPage({ params }) {
             </div>
           )}
           {product.popular && (
-            <span className="absolute top-4 right-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md animate-pulse">
-              🔥 POPULAR CHOICE
+            <span className="absolute top-4 right-4 flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md animate-pulse">
+              <FireIcon className="h-4 w-4" aria-hidden="true" />
+              POPULAR CHOICE
             </span>
           )}
         </div>
@@ -98,7 +107,7 @@ export default async function ProductPage({ params }) {
               <div className="space-y-4">
                 {highlights.map((item, i) => (
                   <div key={i} className="flex items-start bg-gradient-to-r from-purple-50 to-transparent p-4 rounded-xl">
-                    <span className="text-purple-500 mr-3 mt-0.5 text-lg">✅</span>
+                    <CheckCircleIcon className="h-5 w-5 text-purple-600 mr-3 mt-1" aria-hidden="true" />
                     <div>
                       <h3 className="font-semibold text-gray-900">{item.title}</h3>
                       <p className="text-gray-600">{item.description}</p>
@@ -116,7 +125,7 @@ export default async function ProductPage({ params }) {
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {features.map((feature, i) => (
                   <li key={i} className="flex items-center bg-purple-50 rounded-lg px-4 py-3">
-                    <span className="text-purple-500 mr-3 text-lg">✓</span>
+                    <CheckIcon className="h-5 w-5 text-purple-600 mr-3" aria-hidden="true" />
                     <span className="text-gray-700">{feature}</span>
                   </li>
                 ))}
@@ -126,10 +135,13 @@ export default async function ProductPage({ params }) {
 
           {/* Payment Info */}
           <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 mb-8 border border-purple-100">
-            <h3 className="font-semibold text-purple-700 mb-2">💳 Payment Information</h3>
+            <h3 className="font-semibold text-purple-700 mb-2 flex items-center gap-2">
+              <CreditCardIcon className="h-5 w-5 text-purple-700" aria-hidden="true" />
+              Payment Information
+            </h3>
             <p className="text-gray-700 text-sm">
               We accept cryptocurrency payments including USDT, BTC, ETH, and many more. 
-              After payment confirmation, we'll contact you via your preferred method to deliver your product.
+              After payment confirmation, we&apos;ll contact you via your preferred method to deliver your product.
             </p>
           </div>
 
@@ -142,8 +154,9 @@ export default async function ProductPage({ params }) {
           </Link>
 
           {/* Trust Note */}
-          <p className="text-center text-gray-500 text-sm mt-4">
-            🔒 Secure payment via NOWPayments
+          <p className="text-center text-gray-500 text-sm mt-4 flex items-center justify-center gap-2">
+            <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
+            Secure payment via NOWPayments
           </p>
         </div>
       </div>
