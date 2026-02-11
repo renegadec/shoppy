@@ -3,11 +3,15 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 
-// Use service role for server-side uploads
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+function getSupabaseServerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  // Don’t crash at module load/build time if env is missing.
+  if (!url || !serviceRoleKey) return null
+
+  return createClient(url, serviceRoleKey)
+}
 
 export async function POST(request) {
   const session = await getServerSession(authOptions)
@@ -15,7 +19,15 @@ export async function POST(request) {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  
+
+  const supabase = getSupabaseServerClient()
+  if (!supabase) {
+    return NextResponse.json(
+      { error: 'Uploads are not configured (missing Supabase env vars).' },
+      { status: 500 }
+    )
+  }
+
   try {
     const formData = await request.formData()
     const file = formData.get('file')

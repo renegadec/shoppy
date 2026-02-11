@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma'
 
 // GET single product
 export async function GET(request, { params }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   
   if (!session) {
@@ -13,7 +14,7 @@ export async function GET(request, { params }) {
   
   try {
     const product = await prisma.product.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         orders: {
           take: 10,
@@ -36,6 +37,7 @@ export async function GET(request, { params }) {
 
 // UPDATE product
 export async function PUT(request, { params }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   
   if (!session) {
@@ -46,7 +48,7 @@ export async function PUT(request, { params }) {
     const data = await request.json()
     
     const product = await prisma.product.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: data.name,
         shortDescription: data.shortDescription,
@@ -70,6 +72,7 @@ export async function PUT(request, { params }) {
 
 // DELETE product
 export async function DELETE(request, { params }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   
   if (!session) {
@@ -79,13 +82,13 @@ export async function DELETE(request, { params }) {
   try {
     // Check if product has orders
     const orderCount = await prisma.order.count({
-      where: { productId: params.id }
+      where: { productId: id }
     })
     
     if (orderCount > 0) {
       // Soft delete - just mark as inactive
       await prisma.product.update({
-        where: { id: params.id },
+        where: { id },
         data: { active: false }
       })
       return NextResponse.json({ message: 'Product deactivated (has orders)' })
@@ -93,7 +96,7 @@ export async function DELETE(request, { params }) {
     
     // Hard delete if no orders
     await prisma.product.delete({
-      where: { id: params.id }
+      where: { id }
     })
     
     return NextResponse.json({ message: 'Product deleted' })

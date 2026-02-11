@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma'
 
 // GET single order
 export async function GET(request, { params }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   
   if (!session) {
@@ -13,7 +14,7 @@ export async function GET(request, { params }) {
   
   try {
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         customer: true,
         product: true
@@ -33,6 +34,7 @@ export async function GET(request, { params }) {
 
 // UPDATE order (for marking delivered, adding notes, etc.)
 export async function PUT(request, { params }) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   
   if (!session) {
@@ -55,7 +57,7 @@ export async function PUT(request, { params }) {
     if (data.deliveryNotes !== undefined) updateData.deliveryNotes = data.deliveryNotes
     
     const order = await prisma.order.update({
-      where: { id: params.id },
+      where: { id },
       data: updateData,
       include: {
         customer: true,
