@@ -4,12 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter, useParams } from 'next/navigation'
-import {
-  PaperAirplaneIcon,
-  ChatBubbleOvalLeftEllipsisIcon,
-  EnvelopeIcon,
-  LockClosedIcon,
-} from '@heroicons/react/24/solid'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -152,7 +146,7 @@ export default function CheckoutPage() {
           <form onSubmit={handleSubmit}>
             <h2 className="font-semibold text-gray-900 mb-4">Contact Information</h2>
             <p className="text-gray-600 text-sm mb-6">
-              We&apos;ll contact you here after payment to deliver your product and help with setup.
+              We'll contact you here after payment to deliver your product and help with setup.
             </p>
 
             {/* Email */}
@@ -177,22 +171,22 @@ export default function CheckoutPage() {
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { value: 'telegram', label: 'Telegram', Icon: PaperAirplaneIcon },
-                  { value: 'whatsapp', label: 'WhatsApp', Icon: ChatBubbleOvalLeftEllipsisIcon },
-                  { value: 'email', label: 'Email Only', Icon: EnvelopeIcon },
-                ].map(({ value, label, Icon }) => (
+                  { value: 'telegram', label: 'Telegram', icon: '✈️' },
+                  { value: 'whatsapp', label: 'WhatsApp', icon: '💬' },
+                  { value: 'email', label: 'Email Only', icon: '📧' },
+                ].map((method) => (
                   <button
-                    key={value}
+                    key={method.value}
                     type="button"
-                    onClick={() => setFormData({ ...formData, contactMethod: value })}
+                    onClick={() => setFormData({ ...formData, contactMethod: method.value })}
                     className={`p-4 rounded-xl border-2 transition-all ${
-                      formData.contactMethod === value
+                      formData.contactMethod === method.value
                         ? 'border-purple-500 bg-purple-50 shadow-md'
                         : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50/50'
                     }`}
                   >
-                    <Icon className="h-7 w-7 mx-auto mb-1 text-purple-600" aria-hidden="true" />
-                    <span className="text-sm font-medium">{label}</span>
+                    <span className="text-2xl block mb-1">{method.icon}</span>
+                    <span className="text-sm font-medium">{method.label}</span>
                   </button>
                 ))}
               </div>
@@ -243,10 +237,7 @@ export default function CheckoutPage() {
 
             {/* Payment Info */}
             <div className="mt-6 text-center text-sm text-gray-500">
-              <p className="flex items-center justify-center gap-2">
-                <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
-                Secure payment via NOWPayments
-              </p>
+              <p>🔒 Secure payment via NOWPayments</p>
               <p className="mt-1">Pay with USDT, BTC, ETH, or other crypto</p>
             </div>
           </form>
