@@ -105,6 +105,74 @@ const existingProducts = [
       "Priority Generation"
     ],
     popular: false
+  },
+
+  // Additional real products (examples — adjust pricing/period as needed)
+  {
+    id: "canva-pro",
+    name: "Canva Pro",
+    shortDescription: "Design like a pro — premium templates, brand kit, and exports",
+    highlights: [
+      { title: "Premium assets", description: "Millions of photos, videos, and graphics" },
+      { title: "Brand kit", description: "Logos, fonts, and colors in one place" },
+      { title: "Background remover", description: "One‑click clean cutouts" },
+      { title: "Pro exports", description: "Resize, transparent PNGs, and more" }
+    ],
+    tagline: "Create stunning designs faster with Canva Pro.",
+    price: 35,
+    period: "year",
+    image: "/images/canva-pro.png",
+    features: ["Premium templates", "Brand kit", "Magic resize", "Background remover"],
+    popular: true
+  },
+  {
+    id: "chatgpt-plus",
+    name: "ChatGPT Plus",
+    shortDescription: "Faster responses + access during peak times",
+    highlights: [
+      { title: "Faster", description: "Priority speed and reliability" },
+      { title: "Best for work", description: "Writing, planning, coding assistance" },
+      { title: "Always available", description: "Better access during peak hours" }
+    ],
+    tagline: "Upgrade your productivity with ChatGPT Plus.",
+    price: 25,
+    period: "month",
+    image: "/images/chatgpt-plus.png",
+    features: ["Priority access", "Faster responses", "Great for work"],
+    popular: false
+  },
+  {
+    id: "notion-plus",
+    name: "Notion Plus",
+    shortDescription: "Workspaces, collaboration, and powerful database notes",
+    highlights: [
+      { title: "Organize everything", description: "Docs, tasks, and databases" },
+      { title: "Collaboration", description: "Share pages and work as a team" },
+      { title: "Better limits", description: "More uploads and more power" }
+    ],
+    tagline: "Turn your notes into a system with Notion Plus.",
+    price: 15,
+    period: "month",
+    image: "/images/notion-plus.png",
+    features: ["Team collaboration", "Databases", "Better upload limits"],
+    popular: false
+  },
+
+  // $1 test product for real end-to-end payment tests
+  {
+    id: "test-product-1usd",
+    name: "Test Product (Sandbox) — $1",
+    shortDescription: "Internal testing product for checkout + payment + webhook.",
+    highlights: [
+      { title: "Testing only", description: "Do not purchase unless instructed" },
+      { title: "Fast verification", description: "Used to validate payments and webhooks" }
+    ],
+    tagline: "This product exists to test the checkout flow.",
+    price: 1,
+    period: "one-time",
+    image: "/images/test-product.png",
+    features: ["Test checkout", "Test NOWPayments", "Test webhook"],
+    popular: false
   }
 ]
 
