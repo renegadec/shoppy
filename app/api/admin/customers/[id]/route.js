@@ -5,7 +5,6 @@ import prisma from '@/lib/prisma'
 
 // GET single customer with order history
 export async function GET(request, { params }) {
-  const { id } = await params
   const session = await getServerSession(authOptions)
   
   if (!session) {
@@ -14,7 +13,7 @@ export async function GET(request, { params }) {
   
   try {
     const customer = await prisma.customer.findUnique({
-      where: { id },
+      where: { id: params.id },
       include: {
         orders: {
           orderBy: { createdAt: 'desc' },
@@ -47,7 +46,6 @@ export async function GET(request, { params }) {
 
 // UPDATE customer
 export async function PUT(request, { params }) {
-  const { id } = await params
   const session = await getServerSession(authOptions)
   
   if (!session) {
@@ -58,7 +56,7 @@ export async function PUT(request, { params }) {
     const data = await request.json()
     
     const customer = await prisma.customer.update({
-      where: { id },
+      where: { id: params.id },
       data: {
         name: data.name,
         phone: data.phone,

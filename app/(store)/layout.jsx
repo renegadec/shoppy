@@ -1,6 +1,5 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { CreditCardIcon } from '@heroicons/react/24/solid'
 
 export default function StoreLayout({ children }) {
   return (
@@ -32,7 +31,7 @@ export default function StoreLayout({ children }) {
             
             <nav className="flex items-center gap-4">
               <div className="hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                <CreditCardIcon className="h-5 w-5 text-yellow-300" aria-hidden="true" />
+                <span className="text-yellow-300">💳</span>
                 <span className="text-sm font-medium">USDT • BTC • ETH</span>
               </div>
               <a 
