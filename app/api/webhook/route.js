@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { verifyWebhookSignature } from '@/lib/nowpayments'
 import { sendTelegramNotification, formatOrderNotification } from '@/lib/telegram'
 import { updateOrderFromWebhook } from '@/lib/orders'
+import { updateTicketOrderFromWebhook } from '@/lib/tickets'
 
 export async function POST(request) {
   try {
@@ -42,31 +43,47 @@ export async function POST(request) {
       }
     }
 
-    // Update order in database
-    const updatedOrder = await updateOrderFromWebhook({
-      paymentId: payment_id?.toString(),
-      orderNumber,
-      status: payment_status,
-      paidAmount: actually_paid,
-      paidCurrency: pay_currency
-    })
+    // Update order in database (product orders vs ticket orders)
+    const isTicketOrder = orderData?.kind === 'event'
+
+    const updatedOrder = isTicketOrder
+      ? await updateTicketOrderFromWebhook({
+          paymentId: payment_id?.toString(),
+          orderNumber,
+          status: payment_status,
+          paidAmount: actually_paid,
+          paidCurrency: pay_currency,
+        })
+      : await updateOrderFromWebhook({
+          paymentId: payment_id?.toString(),
+          orderNumber,
+          status: payment_status,
+          paidAmount: actually_paid,
+          paidCurrency: pay_currency,
+        })
 
     // Handle different payment statuses
     if (payment_status === 'finished' || payment_status === 'confirmed') {
       console.log(`✅ Payment confirmed for order ${orderNumber}`)
 
-      // Send Telegram notification
-      await sendTelegramNotification(
-        formatOrderNotification({
-          orderId: orderNumber,
-          productName: updatedOrder?.product?.name || orderData.productName || 'Unknown Product',
-          amount: price_amount,
-          email: updatedOrder?.customer?.email || orderData.email || 'N/A',
-          contactMethod: updatedOrder?.contactMethod || orderData.contactMethod || 'email',
-          contactValue: updatedOrder?.contactValue || orderData.contactValue || orderData.email || 'N/A',
-          paymentStatus: 'confirmed',
-        })
-      )
+      if (isTicketOrder) {
+        await sendTelegramNotification(
+          `✅ <b>TICKET PAYMENT CONFIRMED</b>\n\nOrder: ${orderNumber}\nEvent: ${updatedOrder?.event?.title || orderData.eventTitle || 'Event'}\nEmail: ${updatedOrder?.customer?.email || orderData.email || 'N/A'}`
+        )
+      } else {
+        // Send Telegram notification
+        await sendTelegramNotification(
+          formatOrderNotification({
+            orderId: orderNumber,
+            productName: updatedOrder?.product?.name || orderData.productName || 'Unknown Product',
+            amount: price_amount,
+            email: updatedOrder?.customer?.email || orderData.email || 'N/A',
+            contactMethod: updatedOrder?.contactMethod || orderData.contactMethod || 'email',
+            contactValue: updatedOrder?.contactValue || orderData.contactValue || orderData.email || 'N/A',
+            paymentStatus: 'confirmed',
+          })
+        )
+      }
 
     } else if (payment_status === 'partially_paid') {
       await sendTelegramNotification(

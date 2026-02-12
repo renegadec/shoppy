@@ -1,0 +1,51 @@
+[
+  {
+    "slug": "shoppy-launch-party",
+    "title": "Shoppy Launch Party",
+    "subtitle": "Harare • Music • Networking",
+    "date": "2026-03-07T18:00:00+02:00",
+    "venue": "TBA, Harare",
+    "city": "Harare",
+    "fromPrice": 5,
+    "currency": "USD",
+    "image": "/images/events/shoppy-launch-party.jpg",
+    "excerpt": "Celebrate the launch with music, networking, and surprises.",
+    "description": "Join us for the official Shoppy Launch Party. Expect great music, good vibes, and a chance to meet the community.",
+    "ticketTypes": [
+      { "name": "General", "price": 5 },
+      { "name": "VIP", "price": 15 }
+    ]
+  },
+  {
+    "slug": "harare-tech-meetup",
+    "title": "Harare Tech Meetup",
+    "subtitle": "Talks • Demos • Community",
+    "date": "2026-03-21T10:00:00+02:00",
+    "venue": "TBA, Harare",
+    "city": "Harare",
+    "fromPrice": 2,
+    "currency": "USD",
+    "image": "/images/events/harare-tech-meetup.jpg",
+    "excerpt": "Short talks and demos from builders in Zimbabwe.",
+    "description": "A community meetup for founders, builders, designers, and anyone curious about tech in Zimbabwe.",
+    "ticketTypes": [
+      { "name": "Standard", "price": 2 }
+    ]
+  },
+  {
+    "slug": "bulawayo-comedy-night",
+    "title": "Bulawayo Comedy Night",
+    "subtitle": "Stand-up • Live",
+    "date": "2026-04-04T19:00:00+02:00",
+    "venue": "TBA, Bulawayo",
+    "city": "Bulawayo",
+    "fromPrice": 3,
+    "currency": "USD",
+    "image": "/images/events/bulawayo-comedy-night.jpg",
+    "excerpt": "A night of laughs with local comedians.",
+    "description": "An easy night out — local stand-up, a great crowd, and a simple ticketing experience.",
+    "ticketTypes": [
+      { "name": "General", "price": 3 }
+    ]
+  }
+]

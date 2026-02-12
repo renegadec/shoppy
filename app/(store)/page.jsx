@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/solid'
 import ServiceFinder from '@/components/ServiceFinder'
 import RotatingWord from '@/components/RotatingWord'
+import HomeUpcomingEvents from '@/components/HomeUpcomingEvents'
 
 export const dynamic = 'force-dynamic'
 
@@ -131,6 +132,32 @@ export default async function Home() {
               Go to Shop
             </Link>
           </div>
+
+          {/* Upcoming events */}
+          <HomeUpcomingEvents />
+
+          {/* How it works (tickets) */}
+          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6">
+              <p className="text-xs font-semibold text-gray-600">STEP 1</p>
+              <p className="mt-2 text-lg font-semibold text-gray-900">Pick an event</p>
+              <p className="text-sm text-gray-600 mt-1">See date, venue, and starting price.</p>
+            </div>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6">
+              <p className="text-xs font-semibold text-gray-600">STEP 2</p>
+              <p className="mt-2 text-lg font-semibold text-gray-900">Pay securely</p>
+              <p className="text-sm text-gray-600 mt-1">Pay with crypto via NOWPayments.</p>
+            </div>
+            <div className="rounded-2xl border border-gray-200 bg-white p-6">
+              <p className="text-xs font-semibold text-gray-600">STEP 3</p>
+              <p className="mt-2 text-lg font-semibold text-gray-900">Receive QR ticket</p>
+              <p className="text-sm text-gray-600 mt-1">Delivered to your email after confirmation.</p>
+            </div>
+          </div>
+
+          <p className="mt-6 text-xs text-gray-500">
+            Refund policy: refundable up to 72 hours before the event (minus fees).
+          </p>
         </div>
       </div>
     </div>

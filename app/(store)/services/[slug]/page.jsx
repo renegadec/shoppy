@@ -59,14 +59,14 @@ export default async function ServiceComingSoonPage({ params }) {
             <div>
               <h2 className="font-semibold text-gray-900">Coming soon</h2>
               <p className="text-gray-700 text-sm mt-1 leading-relaxed">
-                We’re building this service and launching it in phases. For now, you can still browse our digital products.
+                We’re building this service and launching it in phases. Event tickets are first — browse upcoming events below.
               </p>
               <div className="mt-4 flex flex-col sm:flex-row gap-3">
                 <Link
-                  href="/shop"
+                  href="/events"
                   className="inline-flex justify-center rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold hover:bg-emerald-800 transition-colors"
                 >
-                  Browse Digital Products
+                  Browse Events
                 </Link>
                 <a
                   href="https://t.me/shoppy_zw"

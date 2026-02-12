@@ -34,6 +34,7 @@ model Customer {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   orders        Order[]
+  ticketOrders  TicketOrder[]
 }
 
 model Order {
@@ -88,3 +89,89 @@ model Admin {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Event {
+  id            String            @id @default(cuid())
+  slug          String            @unique
+  title         String
+  subtitle      String?
+  description   String?
+  venue         String?
+  city          String?
+  startsAt      DateTime
+  endsAt        DateTime?
+  organizerName String?
+  organizerRef  String? // phone/email/handle (internal)
+  image         String?
+  published     Boolean           @default(false)
+  active        Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  ticketTypes   EventTicketType[]
+  ticketOrders  TicketOrder[]
+}
+
+model EventTicketType {
+  id        String      @id @default(cuid())
+  eventId   String
+  event     Event       @relation(fields: [eventId], references: [id])
+  name      String
+  price     Float
+  currency  String      @default("USD")
+  capacity  Int?
+  active    Boolean     @default(true)
+  sortOrder Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  ticketItems TicketItem[]
+}
+
+model TicketOrder {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique // EVT-YYYYMMDD-XXX
+  status        OrderStatus @default(PENDING)
+
+  amount        Float
+  currency      String      @default("USD")
+
+  paymentId     String?
+  paymentStatus String?
+  paidAmount    Float?
+  paidCurrency  String?
+  paidAt        DateTime?
+
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id])
+
+  eventId       String
+  event         Event       @relation(fields: [eventId], references: [id])
+
+  // Delivery
+  delivered     Boolean     @default(false)
+  deliveredAt   DateTime?
+  deliveryNotes String?
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  items         TicketItem[]
+}
+
+model TicketItem {
+  id            String          @id @default(cuid())
+  orderId       String
+  order         TicketOrder     @relation(fields: [orderId], references: [id])
+  ticketTypeId  String
+  ticketType    EventTicketType @relation(fields: [ticketTypeId], references: [id])
+
+  ticketCode    String          @unique
+  qrPayload     String
+
+  redeemed      Boolean         @default(false)
+  redeemedAt    DateTime?
+
+  createdAt     DateTime        @default(now())
+}
+
