@@ -6,10 +6,10 @@ export default function StoreLayout({ children }) {
   return (
     <>
       {/* Header */}
-      <header className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white sticky top-0 z-50">
+      <header className="bg-white/90 backdrop-blur sticky top-0 z-50 border-b border-gray-200">
         {/* Top bar */}
-        <div className="bg-black/20 text-center py-2 text-sm">
-         <p>Pay with crypto — USDT, BTC, ETH & more!</p>
+        <div className="bg-gray-950 text-center py-2 text-sm text-white">
+          <p>Pay with crypto — USDT, BTC, ETH & more!</p>
         </div>
         
         {/* Main header */}
@@ -25,29 +25,29 @@ export default function StoreLayout({ children }) {
                   className="object-contain"
                 />
               </div>
-              <span className="font-bold text-2xl tracking-tight">
-                shoppy<span className="text-yellow-300">.co.zw</span>
+              <span className="font-bold text-2xl tracking-tight text-gray-900">
+                shoppy<span className="text-emerald-700">.co.zw</span>
               </span>
             </Link>
             
-            <nav className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                <CreditCardIcon className="h-5 w-5 text-yellow-300" aria-hidden="true" />
-                <span className="text-sm font-medium">USDT • BTC • ETH</span>
+            <nav className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full border border-gray-200">
+                <CreditCardIcon className="h-5 w-5 text-gray-800" aria-hidden="true" />
+                <span className="text-sm font-medium text-gray-800">USDT • BTC • ETH</span>
               </div>
-              <a 
+              <a
                 href="https://t.me/shoppy_zw"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full hover:bg-white/20 transition-colors"
+                className="hidden sm:flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors"
               >
-                <span className="text-sm font-medium">Contact Us</span>
+                <span className="text-sm font-medium">Contact</span>
               </a>
-              <Link 
-                href="/"
-                className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-5 py-2 rounded-full font-semibold hover:from-yellow-300 hover:to-orange-400 transition-all shadow-lg"
+              <Link
+                href="/shop"
+                className="bg-emerald-700 text-white px-5 py-2 rounded-full font-semibold hover:bg-emerald-800 transition-colors shadow-sm"
               >
-                Shop Now
+                Shop
               </Link>
             </nav>
           </div>
@@ -55,10 +55,10 @@ export default function StoreLayout({ children }) {
       </header>
 
       {/* Main Content */}
-      <main className="min-h-screen">{children}</main>
+      <main className="min-h-screen bg-gray-50">{children}</main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 text-white">
+      <footer className="bg-gray-950 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Brand */}
@@ -73,16 +73,16 @@ export default function StoreLayout({ children }) {
                     className="object-contain"
                   />
                 </div>
-                <span className="font-bold text-xl">shoppy<span className="text-yellow-300">.co.zw</span></span>
+                <span className="font-bold text-xl">shoppy<span className="text-emerald-400">.co.zw</span></span>
               </div>
               <p className="text-gray-400 text-sm">
-                Premium digital products at unbeatable prices. Pay with crypto!
+                Premium digital products today — and Zimbabwe services (airtime, electricity, tickets) launching soon.
               </p>
             </div>
             
             {/* Payment Methods */}
             <div>
-              <h4 className="font-semibold mb-4 text-yellow-300">We Accept</h4>
+              <h4 className="font-semibold mb-4 text-emerald-400">We Accept</h4>
               <div className="flex gap-3 text-2xl">
               <span title="USDT" className="hover:scale-110 transition-transform cursor-pointer">
               <svg width="30px" height="30px" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
@@ -118,15 +118,19 @@ export default function StoreLayout({ children }) {
             
             {/* Support */}
             <div>
-              <h4 className="font-semibold mb-4 text-yellow-300">Need Help?</h4>
+              <h4 className="font-semibold mb-4 text-emerald-400">Need Help?</h4>
               <p className="text-gray-400 text-sm">
                 Reach out via Telegram or WhatsApp for instant support.
               </p>
             </div>
           </div>
           
-          <div className="border-t border-white/10 mt-8 pt-8 text-center text-gray-400 text-sm">
+          <div className="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-3 text-gray-400 text-sm">
             <p>© 2026 Shoppy. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+            </div>
           </div>
         </div>
       </footer>
