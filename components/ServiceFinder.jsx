@@ -32,9 +32,11 @@ const DEFAULT_SERVICES = [
 ]
 
 function ServiceCard({ service }) {
+  const href = service.slug === 'event-tickets' ? '/events' : `/services/${service.slug}`
+
   return (
     <Link
-      href={`/services/${service.slug}`}
+      href={href}
       className="group block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
     >
       <h3 className="text-base font-semibold text-gray-900">{service.title}</h3>

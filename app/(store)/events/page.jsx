@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { TicketIcon } from '@heroicons/react/24/solid'
-import EventCard from '@/components/EventCard'
 import { formatEventDate, getPublicEvents } from '@/lib/eventsStore'
+import EventsListWithFilters from '@/components/EventsListWithFilters'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,20 +42,7 @@ export default async function EventsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {events.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => {
-              const activePrices = (event.ticketTypes || []).map((t) => t.price).filter((p) => typeof p === 'number')
-              const from = activePrices.length ? Math.min(...activePrices) : null
-              return (
-                <EventCard
-                  key={event.slug}
-                  event={event}
-                  dateLabel={event.startsAt ? formatEventDate(event.startsAt) : null}
-                  fromPriceLabel={from != null ? (from <= 0 ? 'FREE' : `USD ${from}`) : null}
-                />
-              )
-            })}
-          </div>
+          <EventsListWithFilters events={events} formatEventDate={formatEventDate} />
         ) : (
           <div className="text-center py-16">
             <p className="text-gray-600">No events listed yet.</p>

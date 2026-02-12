@@ -18,6 +18,7 @@ const emptyEvent = {
   organizerName: '',
   organizerRef: '',
   image: '',
+  category: 'Concert',
   published: false,
   active: true,
   ticketTypes: [{ name: 'General', price: '', currency: 'USD', capacity: '', active: true, sortOrder: 0 }],
@@ -74,6 +75,7 @@ export default function AdminEventsPage() {
       organizerName: ev.organizerName || '',
       organizerRef: ev.organizerRef || '',
       image: ev.image || '',
+      category: ev.category || 'Concert',
       published: Boolean(ev.published),
       active: ev.active !== false,
       ticketTypes: (ev.ticketTypes?.length ? ev.ticketTypes : emptyEvent.ticketTypes).map((t, idx) => ({
@@ -253,14 +255,30 @@ export default function AdminEventsPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
-                <input
-                  value={formData.subtitle}
-                  onChange={(e) => setFormData((f) => ({ ...f, subtitle: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none"
-                  placeholder="Harare • Music • Networking"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+                  <input
+                    value={formData.subtitle}
+                    onChange={(e) => setFormData((f) => ({ ...f, subtitle: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    placeholder="Harare • Music • Networking"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData((f) => ({ ...f, category: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+                  >
+                    {['Concert', 'Fitness', 'Standup', 'Exhibitions', 'Conference', 'Other'].map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>

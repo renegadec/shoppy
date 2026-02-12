@@ -103,6 +103,7 @@ model Event {
   organizerName String?
   organizerRef  String? // phone/email/handle (internal)
   image         String?
+  category      String? // Concert, Fitness, Standup, Exhibitions, etc.
   published     Boolean           @default(false)
   active        Boolean           @default(true)
   createdAt     DateTime          @default(now())

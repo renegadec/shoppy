@@ -39,6 +39,7 @@ export async function POST(request) {
       organizerName: data.organizerName || null,
       organizerRef: data.organizerRef || null,
       image: data.image || null,
+      category: data.category || null,
       published: Boolean(data.published),
       active: data.active !== false,
       ticketTypes: {
