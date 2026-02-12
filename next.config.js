@@ -13,6 +13,12 @@ const nextConfig = {
       },
     ],
   },
+
+  // Ensure serverless bundles include PDFKit font metric files (AFM)
+  outputFileTracingIncludes: {
+    '/api/webhook': ['node_modules/pdfkit/js/data/*.afm'],
+    '/api/admin/ticket-orders/*': ['node_modules/pdfkit/js/data/*.afm'],
+  },
 }
 
 module.exports = nextConfig
