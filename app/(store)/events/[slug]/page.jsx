@@ -62,7 +62,7 @@ export default async function EventDetailsPage({ params }) {
                 <div key={t.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-gray-200 p-4">
                   <div>
                     <p className="font-semibold text-gray-900">{t.name}</p>
-                    <p className="text-sm text-gray-600">Mobile QR ticket • Refundable up to 72h before event (minus fees)</p>
+                    <p className="text-sm text-gray-600">Mobile QR + PDF ticket (name included) • Refundable up to 72h before event (minus fees)</p>
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end gap-3">

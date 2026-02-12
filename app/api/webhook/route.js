@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 import { verifyWebhookSignature } from '@/lib/nowpayments'
 import { sendTelegramNotification, formatOrderNotification } from '@/lib/telegram'
 import { updateOrderFromWebhook } from '@/lib/orders'
@@ -72,10 +73,16 @@ export async function POST(request) {
           `✅ <b>TICKET PAYMENT CONFIRMED</b>\n\nOrder: ${orderNumber}\nEvent: ${updatedOrder?.event?.title || orderData.eventTitle || 'Event'}\nEmail: ${updatedOrder?.customer?.email || orderData.email || 'N/A'}`
         )
 
-        // Email QR tickets
+        // Email QR + PDF tickets
         try {
           const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
           await sendTicketEmail({ order: updatedOrder, baseUrl })
+
+          // Mark delivered (email sent)
+          await prisma.ticketOrder.update({
+            where: { id: updatedOrder.id },
+            data: { delivered: true, deliveredAt: new Date() },
+          })
         } catch (e) {
           console.error('Failed to send ticket email:', e)
           await sendTelegramNotification(

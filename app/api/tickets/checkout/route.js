@@ -7,7 +7,7 @@ import { createTicketOrder } from '@/lib/tickets'
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { email, eventId, ticketTypeId, quantity } = body
+    const { email, customerName, eventId, ticketTypeId, quantity } = body
 
     if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     if (!eventId) return NextResponse.json({ error: 'Event is required' }, { status: 400 })
@@ -31,6 +31,7 @@ export async function POST(request) {
 
     const order = await createTicketOrder({
       email,
+      customerName,
       eventId: event.id,
       items: [{ ticketTypeId, qty }],
     })
@@ -43,6 +44,45 @@ export async function POST(request) {
       email,
       eventSlug: event.slug,
       eventTitle: event.title,
+    }
+
+    // Free tickets: skip NOWPayments and mark paid immediately
+    if (order.amount <= 0) {
+      const updated = await prisma.ticketOrder.update({
+        where: { id: order.id },
+        data: {
+          status: 'PAID',
+          paymentStatus: 'free',
+          paidAmount: 0,
+          paidCurrency: 'USD',
+          paidAt: new Date(),
+        },
+        include: { customer: true, event: true, items: { include: { ticketType: true } } },
+      })
+
+      // Send ticket email immediately
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
+        await import('@/lib/email').then(({ sendTicketEmail }) => sendTicketEmail({ order: updated, baseUrl }))
+
+        await prisma.ticketOrder.update({
+          where: { id: updated.id },
+          data: { delivered: true, deliveredAt: new Date() },
+        })
+      } catch (e) {
+        console.error('Failed to send free ticket email:', e)
+      }
+
+      await sendTelegramNotification(
+        `🎟️ <b>FREE TICKET ORDER</b>\n\nOrder: ${updated.orderNumber}\nEvent: ${event.title}\nTicket: ${ticketType.name} x${qty}\nName: ${customerName || 'N/A'}\nEmail: ${email}\nStatus: paid (free)`
+      )
+
+      return NextResponse.json({
+        success: true,
+        orderNumber: updated.orderNumber,
+        redirectUrl: `${baseUrl}/tickets/success?order=${updated.orderNumber}`,
+        free: true,
+      })
     }
 
     const payment = await createPayment({
@@ -60,7 +100,7 @@ export async function POST(request) {
     })
 
     await sendTelegramNotification(
-      `🎟️ <b>NEW TICKET ORDER</b>\n\nOrder: ${order.orderNumber}\nEvent: ${event.title}\nTicket: ${ticketType.name} x${qty}\nAmount: $${order.amount}\nEmail: ${email}\nStatus: pending`
+      `🎟️ <b>NEW TICKET ORDER</b>\n\nOrder: ${order.orderNumber}\nEvent: ${event.title}\nTicket: ${ticketType.name} x${qty}\nName: ${customerName || 'N/A'}\nEmail: ${email}\nStatus: pending`
     )
 
     return NextResponse.json({

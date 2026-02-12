@@ -13,13 +13,14 @@ export default function TicketCheckoutClient() {
   const initialQty = Number(sp.get('qty') || 1)
 
   const [qty, setQty] = useState(Math.max(1, initialQty))
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const canSubmit = useMemo(() => {
-    return Boolean(eventId && ticketTypeId && email && qty >= 1)
-  }, [eventId, ticketTypeId, email, qty])
+    return Boolean(eventId && ticketTypeId && name && email && qty >= 1)
+  }, [eventId, ticketTypeId, name, email, qty])
 
   useEffect(() => {
     setQty(Math.max(1, initialQty))
@@ -37,6 +38,7 @@ export default function TicketCheckoutClient() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          customerName: name,
           email,
           eventId,
           ticketTypeId,
@@ -52,7 +54,12 @@ export default function TicketCheckoutClient() {
         return
       }
 
-      throw new Error('No payment URL returned')
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl
+        return
+      }
+
+      throw new Error('No redirect URL returned')
     } catch (err) {
       setError(err.message || 'Something went wrong')
       setLoading(false)
@@ -70,7 +77,17 @@ export default function TicketCheckoutClient() {
         <p className="text-gray-600 mt-2">Enter your email and pay to receive your QR ticket(s).</p>
 
         <form onSubmit={submit} className="mt-8">
-          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <label className="block text-sm font-medium text-gray-700">Full name</label>
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
+            className="mt-2 w-full rounded-2xl bg-gray-50 text-gray-900 px-4 py-3 outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-emerald-600"
+          />
+
+          <label className="block text-sm font-medium text-gray-700 mt-5">Email</label>
           <input
             type="email"
             required
