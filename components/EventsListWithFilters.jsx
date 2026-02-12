@@ -5,7 +5,23 @@ import EventCard from '@/components/EventCard'
 
 const TABS = ['All', 'Concert', 'Fitness', 'Standup', 'Exhibitions', 'Conference', 'Other']
 
-export default function EventsListWithFilters({ events, formatEventDate }) {
+function formatEventDateClient(d) {
+  try {
+    const dateObj = d instanceof Date ? d : new Date(d)
+    return new Intl.DateTimeFormat('en-ZW', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(dateObj)
+  } catch {
+    return String(d)
+  }
+}
+
+export default function EventsListWithFilters({ events }) {
   const [tab, setTab] = useState('All')
   const [q, setQ] = useState('')
 
@@ -59,7 +75,7 @@ export default function EventsListWithFilters({ events, formatEventDate }) {
             <EventCard
               key={event.slug}
               event={event}
-              dateLabel={event.startsAt ? formatEventDate(event.startsAt) : null}
+              dateLabel={event.startsAt ? formatEventDateClient(event.startsAt) : null}
               fromPriceLabel={from != null ? (from <= 0 ? 'FREE' : `USD ${from}`) : null}
             />
           )

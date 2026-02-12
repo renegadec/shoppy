@@ -42,7 +42,7 @@ export default async function EventsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {events.length > 0 ? (
-          <EventsListWithFilters events={events} formatEventDate={formatEventDate} />
+          <EventsListWithFilters events={events} />
         ) : (
           <div className="text-center py-16">
             <p className="text-gray-600">No events listed yet.</p>
