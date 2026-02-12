@@ -9,6 +9,7 @@ const navItems = [
   { href: '/admin/orders', label: 'Orders', icon: '📦' },
   { href: '/admin/products', label: 'Products', icon: '🏷️' },
   { href: '/admin/events', label: 'Events', icon: '🎟️' },
+  { href: '/admin/ticket-orders', label: 'Ticket Orders', icon: '🧾' },
   { href: '/admin/customers', label: 'Customers', icon: '👥' },
 ]
 
