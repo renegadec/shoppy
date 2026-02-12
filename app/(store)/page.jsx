@@ -61,18 +61,18 @@ export default async function Home() {
               </div>
 
               {/* Trust row */}
-              <div className="mt-8 flex gap-3 overflow-x-auto pb-1 sm:pb-0 sm:grid sm:grid-cols-3 sm:gap-3">
-                <div className="min-w-[240px] sm:min-w-0 rounded-2xl bg-gray-50 border border-gray-200 p-4">
+              <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
                   <ShieldCheckIcon className="h-5 w-5 text-emerald-700" />
                   <p className="mt-2 text-sm font-semibold text-gray-900">Trust-first</p>
                   <p className="text-xs text-gray-600 mt-1">Clear steps and transparent delivery.</p>
                 </div>
-                <div className="min-w-[240px] sm:min-w-0 rounded-2xl bg-gray-50 border border-gray-200 p-4">
+                <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
                   <CreditCardIcon className="h-5 w-5 text-emerald-700" />
                   <p className="mt-2 text-sm font-semibold text-gray-900">Crypto payments</p>
                   <p className="text-xs text-gray-600 mt-1">USDT • BTC • ETH and more.</p>
                 </div>
-                <div className="min-w-[240px] sm:min-w-0 rounded-2xl bg-gray-50 border border-gray-200 p-4">
+                <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
                   <BoltIcon className="h-5 w-5 text-emerald-700" />
                   <p className="mt-2 text-sm font-semibold text-gray-900">Fast processing</p>
                   <p className="text-xs text-gray-600 mt-1">Quick turnaround where possible.</p>
@@ -99,18 +99,18 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="mt-8 flex gap-4 overflow-x-auto pb-1 md:pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-5">
-            <div className="min-w-[280px] md:min-w-0 rounded-2xl border border-gray-200 p-6">
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="rounded-2xl border border-gray-200 p-6">
               <LockClosedIcon className="h-6 w-6 text-emerald-700" />
               <h3 className="font-semibold text-gray-900 mt-3">Secure checkout</h3>
               <p className="text-sm text-gray-600 mt-1">We use trusted payment infrastructure and keep the flow simple.</p>
             </div>
-            <div className="min-w-[280px] md:min-w-0 rounded-2xl border border-gray-200 p-6">
+            <div className="rounded-2xl border border-gray-200 p-6">
               <PhoneIcon className="h-6 w-6 text-emerald-700" />
               <h3 className="font-semibold text-gray-900 mt-3">Fast support</h3>
               <p className="text-sm text-gray-600 mt-1">Get help quickly via Telegram/WhatsApp when you need it.</p>
             </div>
-            <div className="min-w-[280px] md:min-w-0 rounded-2xl border border-gray-200 p-6">
+            <div className="rounded-2xl border border-gray-200 p-6">
               <TicketIcon className="h-6 w-6 text-emerald-700" />
               <h3 className="font-semibold text-gray-900 mt-3">More services soon</h3>
               <p className="text-sm text-gray-600 mt-1">
