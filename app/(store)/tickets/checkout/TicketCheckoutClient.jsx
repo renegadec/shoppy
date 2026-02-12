@@ -11,6 +11,7 @@ export default function TicketCheckoutClient() {
   const eventId = sp.get('eventId')
   const ticketTypeId = sp.get('ticketTypeId')
   const initialQty = Number(sp.get('qty') || 1)
+  const isFree = sp.get('free') === '1'
 
   const [qty, setQty] = useState(Math.max(1, initialQty))
   const [name, setName] = useState('')
@@ -74,7 +75,9 @@ export default function TicketCheckoutClient() {
 
       <div className="mt-6 bg-white rounded-3xl border border-gray-200 shadow-sm p-8">
         <h1 className="text-2xl font-bold text-gray-900">Ticket checkout</h1>
-        <p className="text-gray-600 mt-2">Enter your email and pay to receive your QR ticket(s).</p>
+        <p className="text-gray-600 mt-2">
+          {isFree ? 'This is a free event. Enter your details to receive your ticket.' : 'Enter your details and pay to receive your QR ticket(s).'}
+        </p>
 
         <form onSubmit={submit} className="mt-8">
           <label className="block text-sm font-medium text-gray-700">Full name</label>
@@ -133,12 +136,14 @@ export default function TicketCheckoutClient() {
             disabled={!canSubmit || loading}
             className="mt-8 w-full inline-flex justify-center rounded-2xl bg-emerald-700 text-white px-6 py-3 font-bold shadow-sm hover:bg-emerald-800 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Redirecting…' : 'Pay with Crypto'}
+            {loading ? 'Processing…' : isFree ? 'Get free ticket' : 'Pay with Crypto'}
           </button>
 
-          <p className="mt-4 text-xs text-gray-500 flex items-center justify-center gap-2">
-            <LockClosedIcon className="h-4 w-4" /> Secure payment via NOWPayments
-          </p>
+          {!isFree && (
+            <p className="mt-4 text-xs text-gray-500 flex items-center justify-center gap-2">
+              <LockClosedIcon className="h-4 w-4" /> Secure payment via NOWPayments
+            </p>
+          )}
 
           <p className="mt-2 text-xs text-gray-500 text-center">
             Refund policy: refundable up to 72 hours before the event (minus fees).

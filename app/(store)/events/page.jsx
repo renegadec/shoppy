@@ -51,7 +51,7 @@ export default async function EventsPage() {
                   key={event.slug}
                   event={event}
                   dateLabel={event.startsAt ? formatEventDate(event.startsAt) : null}
-                  fromPriceLabel={from != null ? `USD ${from}` : null}
+                  fromPriceLabel={from != null ? (from <= 0 ? 'FREE' : `USD ${from}`) : null}
                 />
               )
             })}

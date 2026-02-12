@@ -38,8 +38,8 @@ export default function EventCard({ event, dateLabel, fromPriceLabel }) {
 
             {fromPriceLabel && (
               <div className="shrink-0 text-right">
-                <p className="text-xs text-gray-500">From</p>
-                <p className="text-sm font-semibold text-emerald-700 whitespace-nowrap">{fromPriceLabel}</p>
+                <p className="text-xs text-gray-500">{fromPriceLabel === 'FREE' ? 'Entry' : 'From'}</p>
+                <p className={`text-sm font-semibold whitespace-nowrap ${fromPriceLabel === 'FREE' ? 'text-emerald-700' : 'text-emerald-700'}`}>{fromPriceLabel}</p>
               </div>
             )}
           </div>
