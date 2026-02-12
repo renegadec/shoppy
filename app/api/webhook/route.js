@@ -3,6 +3,7 @@ import { verifyWebhookSignature } from '@/lib/nowpayments'
 import { sendTelegramNotification, formatOrderNotification } from '@/lib/telegram'
 import { updateOrderFromWebhook } from '@/lib/orders'
 import { updateTicketOrderFromWebhook } from '@/lib/tickets'
+import { sendTicketEmail } from '@/lib/email'
 
 export async function POST(request) {
   try {
@@ -70,6 +71,17 @@ export async function POST(request) {
         await sendTelegramNotification(
           `✅ <b>TICKET PAYMENT CONFIRMED</b>\n\nOrder: ${orderNumber}\nEvent: ${updatedOrder?.event?.title || orderData.eventTitle || 'Event'}\nEmail: ${updatedOrder?.customer?.email || orderData.email || 'N/A'}`
         )
+
+        // Email QR tickets
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
+          await sendTicketEmail({ order: updatedOrder, baseUrl })
+        } catch (e) {
+          console.error('Failed to send ticket email:', e)
+          await sendTelegramNotification(
+            `⚠️ <b>TICKET EMAIL FAILED</b>\n\nOrder: ${orderNumber}\nReason: ${e?.message || 'Unknown error'}`
+          )
+        }
       } else {
         // Send Telegram notification
         await sendTelegramNotification(

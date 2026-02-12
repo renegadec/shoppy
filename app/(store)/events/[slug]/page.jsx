@@ -20,6 +20,14 @@ export default async function EventDetailsPage({ params }) {
       </Link>
 
       <div className="mt-6 bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+        {/* Hero image */}
+        {event.image && (
+          <div className="relative w-full aspect-[16/9] bg-gray-100">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
+          </div>
+        )}
+
         <div className="p-8">
           <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-700 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
             <TicketIcon className="h-4 w-4 text-emerald-700" /> Ticketed Event
