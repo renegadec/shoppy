@@ -23,8 +23,8 @@ export async function POST(_request, { params }) {
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
-    await sendTicketEmail({ order, baseUrl })
-    return NextResponse.json({ success: true })
+    const info = await sendTicketEmail({ order, baseUrl })
+    return NextResponse.json({ success: true, ...info })
   } catch (e) {
     console.error('Resend ticket email failed:', e)
     return NextResponse.json({ error: e?.message || 'Failed to resend' }, { status: 500 })
