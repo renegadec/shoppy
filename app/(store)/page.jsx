@@ -17,13 +17,13 @@ export default async function Home() {
     <div>
       {/* Hero */}
       <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-8 sm:pt-12 sm:pb-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
               <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-700 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
                 <LockClosedIcon className="h-4 w-4 text-gray-800" /> Secure checkout • Mobile-first
               </p>
-              <h1 className="text-4xl md:text-6xl font-bold mt-4 leading-tight tracking-tight text-gray-900">
+              <h1 className="text-4xl md:text-6xl font-bold mt-4 leading-[1.05] tracking-tight text-gray-900">
                 Simple payments,
                 <span className="block">
                   <span className="relative inline-block">
@@ -61,18 +61,18 @@ export default async function Home() {
               </div>
 
               {/* Trust row */}
-              <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
+              <div className="mt-8 flex gap-3 overflow-x-auto pb-1 sm:pb-0 sm:grid sm:grid-cols-3 sm:gap-3">
+                <div className="min-w-[240px] sm:min-w-0 rounded-2xl bg-gray-50 border border-gray-200 p-4">
                   <ShieldCheckIcon className="h-5 w-5 text-emerald-700" />
                   <p className="mt-2 text-sm font-semibold text-gray-900">Trust-first</p>
                   <p className="text-xs text-gray-600 mt-1">Clear steps and transparent delivery.</p>
                 </div>
-                <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
+                <div className="min-w-[240px] sm:min-w-0 rounded-2xl bg-gray-50 border border-gray-200 p-4">
                   <CreditCardIcon className="h-5 w-5 text-emerald-700" />
                   <p className="mt-2 text-sm font-semibold text-gray-900">Crypto payments</p>
                   <p className="text-xs text-gray-600 mt-1">USDT • BTC • ETH and more.</p>
                 </div>
-                <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
+                <div className="min-w-[240px] sm:min-w-0 rounded-2xl bg-gray-50 border border-gray-200 p-4">
                   <BoltIcon className="h-5 w-5 text-emerald-700" />
                   <p className="mt-2 text-sm font-semibold text-gray-900">Fast processing</p>
                   <p className="text-xs text-gray-600 mt-1">Quick turnaround where possible.</p>
@@ -99,18 +99,18 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <div className="rounded-2xl border border-gray-200 p-6">
+          <div className="mt-8 flex gap-4 overflow-x-auto pb-1 md:pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-5">
+            <div className="min-w-[280px] md:min-w-0 rounded-2xl border border-gray-200 p-6">
               <LockClosedIcon className="h-6 w-6 text-emerald-700" />
               <h3 className="font-semibold text-gray-900 mt-3">Secure checkout</h3>
               <p className="text-sm text-gray-600 mt-1">We use trusted payment infrastructure and keep the flow simple.</p>
             </div>
-            <div className="rounded-2xl border border-gray-200 p-6">
+            <div className="min-w-[280px] md:min-w-0 rounded-2xl border border-gray-200 p-6">
               <PhoneIcon className="h-6 w-6 text-emerald-700" />
               <h3 className="font-semibold text-gray-900 mt-3">Fast support</h3>
               <p className="text-sm text-gray-600 mt-1">Get help quickly via Telegram/WhatsApp when you need it.</p>
             </div>
-            <div className="rounded-2xl border border-gray-200 p-6">
+            <div className="min-w-[280px] md:min-w-0 rounded-2xl border border-gray-200 p-6">
               <TicketIcon className="h-6 w-6 text-emerald-700" />
               <h3 className="font-semibold text-gray-900 mt-3">More services soon</h3>
               <p className="text-sm text-gray-600 mt-1">
