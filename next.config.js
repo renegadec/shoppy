@@ -14,8 +14,7 @@ const nextConfig = {
     ],
   },
 
-  // Ensure serverless bundles include PDFKit font metric files (AFM)
-  // Used when generating PDF ticket attachments.
+  // (legacy) output tracing includes kept for safety
   outputFileTracingIncludes: {
     '/api/webhook': ['node_modules/pdfkit/js/data/**'],
     '/api/tickets/checkout': ['node_modules/pdfkit/js/data/**'],
