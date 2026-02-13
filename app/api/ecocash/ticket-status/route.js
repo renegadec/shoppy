@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { getEcoCashC2BTransactionStatus } from '@/lib/ecocashStatus'
+import { sendTelegramNotification } from '@/lib/telegram'
+import { sendTicketEmail } from '@/lib/email'
 
 export async function POST(request) {
   try {
@@ -36,7 +38,7 @@ export async function POST(request) {
 
     const s = String(status?.status || '').toUpperCase()
     if (s === 'SUCCESS') {
-      await prisma.ticketOrder.update({
+      const updated = await prisma.ticketOrder.update({
         where: { id: order.id },
         data: {
           status: 'PAID',
@@ -46,7 +48,31 @@ export async function POST(request) {
           paidCurrency: status?.amount?.currency ?? order.currency,
           providerRef: status?.ecocashReference || order.providerRef,
         },
+        include: { customer: true, event: true, items: { include: { ticketType: true } } },
       })
+
+      // Send tickets by email once (idempotent)
+      if (!updated.delivered) {
+        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ''
+        try {
+          await sendTicketEmail({ order: updated, baseUrl })
+
+          await prisma.ticketOrder.update({
+            where: { id: updated.id },
+            data: { delivered: true, deliveredAt: new Date() },
+          })
+
+          await sendTelegramNotification(
+            `✅ <b>ECOCASH TICKET PAYMENT CONFIRMED</b>\n\nOrder: ${updated.orderNumber}\nEvent: ${updated.event?.title || 'Event'}\nEmail: ${updated.customer?.email || 'N/A'}\nRef: ${status?.ecocashReference || 'N/A'}`
+          )
+        } catch (e) {
+          console.error('Failed to send ticket email (EcoCash):', e)
+          await sendTelegramNotification(
+            `⚠️ <b>ECOCASH TICKET EMAIL FAILED</b>\n\nOrder: ${updated.orderNumber}\nReason: ${e?.message || 'Unknown error'}`
+          )
+        }
+      }
+
     } else {
       await prisma.ticketOrder.update({
         where: { id: order.id },
