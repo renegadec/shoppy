@@ -45,11 +45,16 @@ model Order {
   currency      String      @default("USD")
   
   // Payment details
-  paymentId     String?     // NOWPayments payment ID
+  paymentMethod String      @default("crypto") // ecocash | card | crypto
+  paymentId     String?     // Provider payment identifier (NOWPayments payment ID or EcoCash sourceReference UUID)
+  providerRef   String?     // Provider reference (e.g., EcoCash ecocashReference)
   paymentStatus String?     // Raw status from payment provider
   paidAmount    Float?
   paidCurrency  String?
   paidAt        DateTime?
+
+  // EcoCash-specific (for status lookups)
+  ecocashMsisdn String?
   
   // Contact preference for this order
   contactMethod String?     // "email", "telegram", "whatsapp"

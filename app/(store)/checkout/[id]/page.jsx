@@ -21,6 +21,8 @@ export default function CheckoutPage() {
     contactMethod: 'telegram',
     contactValue: '',
     email: '',
+    paymentMethod: 'crypto',
+    customerMsisdn: '',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -56,7 +58,7 @@ export default function CheckoutPage() {
   if (loadingProduct) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
-        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
         <p className="text-gray-500 mt-4">Loading...</p>
       </div>
     )
@@ -66,7 +68,7 @@ export default function CheckoutPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-12 text-center">
         <h1 className="text-2xl font-bold text-gray-900">Product not found</h1>
-        <Link href="/" className="text-purple-600 hover:text-purple-800 mt-4 inline-block font-medium">
+        <Link href="/" className="text-emerald-700 hover:text-emerald-800 mt-4 inline-block font-medium">
           ← Back to shop
         </Link>
       </div>
@@ -110,7 +112,7 @@ export default function CheckoutPage() {
       {/* Back Link */}
       <Link 
         href={`/product/${product.id}`}
-        className="inline-flex items-center text-purple-600 hover:text-purple-800 mb-8 font-medium"
+        className="inline-flex items-center text-emerald-700 hover:text-emerald-800 mb-8 font-medium"
       >
         <span className="mr-2">←</span>
         Back to Product
@@ -118,14 +120,14 @@ export default function CheckoutPage() {
 
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 px-8 py-6">
+        <div className="bg-emerald-700 px-8 py-6">
           <h1 className="text-2xl font-bold text-white">Checkout</h1>
-          <p className="text-purple-100">Complete your purchase</p>
+          <p className="text-emerald-100">Complete your purchase</p>
         </div>
 
         <div className="p-8">
           {/* Order Summary */}
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6 mb-8 border border-purple-100">
+          <div className="bg-emerald-50 rounded-xl p-6 mb-8 border border-emerald-100">
             <h2 className="font-semibold text-gray-900 mb-4">Order Summary</h2>
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -144,7 +146,7 @@ export default function CheckoutPage() {
                   {product.period && <p className="text-sm text-gray-500">{product.period} access</p>}
                 </div>
               </div>
-              <p className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">${product.price}</p>
+              <p className="text-2xl font-bold text-emerald-700">${product.price}</p>
             </div>
           </div>
 
@@ -166,7 +168,7 @@ export default function CheckoutPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="your@email.com"
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-shadow"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
               />
             </div>
 
@@ -187,11 +189,11 @@ export default function CheckoutPage() {
                     onClick={() => setFormData({ ...formData, contactMethod: value })}
                     className={`p-4 rounded-xl border-2 transition-all ${
                       formData.contactMethod === value
-                        ? 'border-purple-500 bg-purple-50 shadow-md'
-                        : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50/50'
+                        ? 'border-emerald-600 bg-emerald-50 shadow-md'
+                        : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/50'
                     }`}
                   >
-                    <Icon className="h-7 w-7 mx-auto mb-1 text-purple-600" aria-hidden="true" />
+                    <Icon className="h-7 w-7 mx-auto mb-1 text-emerald-700" aria-hidden="true" />
                     <span className="text-sm font-medium">{label}</span>
                   </button>
                 ))}
@@ -210,8 +212,63 @@ export default function CheckoutPage() {
                   value={formData.contactValue}
                   onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
                   placeholder={formData.contactMethod === 'telegram' ? '@username' : '+263...'}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-shadow"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
                 />
+              </div>
+            )}
+
+            {/* Payment Method */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Payment Method
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { value: 'ecocash', label: 'EcoCash' },
+                  { value: 'crypto', label: 'Crypto' },
+                  { value: 'card', label: 'Card (Soon)', disabled: true },
+                ].map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    disabled={m.disabled}
+                    onClick={() => setFormData({ ...formData, paymentMethod: m.value })}
+                    className={`p-4 rounded-xl border-2 transition-all text-left ${
+                      formData.paymentMethod === m.value
+                        ? 'border-emerald-600 bg-emerald-50 shadow-md'
+                        : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/50'
+                    } ${m.disabled ? 'opacity-50 cursor-not-allowed hover:bg-white hover:border-gray-200' : ''}`}
+                  >
+                    <div className="text-sm font-semibold text-gray-900">{m.label}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {m.value === 'ecocash'
+                        ? 'Pay using your EcoCash wallet'
+                        : m.value === 'crypto'
+                          ? 'Pay with USDT, BTC, ETH, and more'
+                          : 'Coming soon'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* EcoCash phone number */}
+            {formData.paymentMethod === 'ecocash' && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  EcoCash Phone Number (MSISDN)
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={formData.customerMsisdn}
+                  onChange={(e) => setFormData({ ...formData, customerMsisdn: e.target.value })}
+                  placeholder="26377xxxxxxx"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
+                />
+                <p className="text-xs text-gray-500 mt-2">
+                  Use international format without + (e.g. 26377...). You will receive a prompt on your phone.
+                </p>
               </div>
             )}
 
@@ -226,7 +283,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all shadow-lg hover:shadow-purple-500/25"
+              className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all shadow-lg hover:shadow-emerald-500/25"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -236,6 +293,10 @@ export default function CheckoutPage() {
                   </svg>
                   Processing...
                 </span>
+              ) : formData.paymentMethod === 'ecocash' ? (
+                `Pay $${product.price} with EcoCash`
+              ) : formData.paymentMethod === 'card' ? (
+                `Pay $${product.price} with Card`
               ) : (
                 `Pay $${product.price} with Crypto`
               )}
@@ -245,9 +306,17 @@ export default function CheckoutPage() {
             <div className="mt-6 text-center text-sm text-gray-500">
               <p className="flex items-center justify-center gap-2">
                 <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
-                Secure payment via NOWPayments
+                {formData.paymentMethod === 'ecocash'
+                  ? 'Secure payment via EcoCash'
+                  : 'Secure payment'}
               </p>
-              <p className="mt-1">Pay with USDT, BTC, ETH, or other crypto</p>
+              {formData.paymentMethod === 'ecocash' ? (
+                <p className="mt-1">We will send a payment prompt to your phone</p>
+              ) : formData.paymentMethod === 'crypto' ? (
+                <p className="mt-1">Pay with USDT, BTC, ETH, or other crypto</p>
+              ) : (
+                <p className="mt-1">Payment method coming soon</p>
+              )}
             </div>
           </form>
         </div>

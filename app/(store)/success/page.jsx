@@ -5,7 +5,11 @@ export const metadata = {
   title: 'Payment Successful | Shoppy',
 }
 
-export default function SuccessPage() {
+export default async function SuccessPage({ searchParams }) {
+  const params = await searchParams
+  const pending = params?.pending === '1' || params?.pending === 'true'
+  const method = params?.method || ''
+
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden text-center p-12">
@@ -15,12 +19,19 @@ export default function SuccessPage() {
         </div>
 
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Payment Received!
+          {pending ? 'Payment Pending' : 'Payment Received!'}
         </h1>
 
         <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          Thank you for your purchase! We&apos;ve received your payment and will contact you shortly 
-          to deliver your product and help with setup.
+          {pending ? (
+            method === 'ecocash' ? (
+              <>We&apos;ve sent a payment prompt to your phone. Please confirm the EcoCash payment to complete your order.</>
+            ) : (
+              <>Your payment is being processed. Please wait for confirmation.</>
+            )
+          ) : (
+            <>Thank you for your purchase! We&apos;ve received your payment and will contact you shortly to deliver your product and help with setup.</>
+          )}
         </p>
 
         {/* What's Next */}
@@ -32,7 +43,7 @@ export default function SuccessPage() {
           <ul className="space-y-2 text-gray-700">
             <li className="flex items-start">
               <span className="text-brand-orange mr-2">1.</span>
-              <span>We&apos;ll verify your payment (usually within a few minutes)</span>
+              <span>We&apos;ll verify your payment{pending ? ' (this can take a moment after you confirm on your phone)' : ' (usually within a few minutes)'}</span>
             </li>
             <li className="flex items-start">
               <span className="text-brand-orange mr-2">2.</span>
