@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
 import { CheckCircleIcon, InboxArrowDownIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
 
 export const metadata = {
@@ -9,6 +10,7 @@ export default async function SuccessPage({ searchParams }) {
   const params = await searchParams
   const pending = params?.pending === '1' || params?.pending === 'true'
   const method = params?.method || ''
+  const orderNumber = params?.order || ''
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -33,6 +35,10 @@ export default async function SuccessPage({ searchParams }) {
             <>Thank you for your purchase! We&apos;ve received your payment and will contact you shortly to deliver your product and help with setup.</>
           )}
         </p>
+
+        {pending && method === 'ecocash' && orderNumber && (
+          <EcoCashPendingPoll kind="product" orderNumber={orderNumber} />
+        )}
 
         {/* What's Next */}
         <div className="bg-orange-50 rounded-xl p-6 mb-8 text-left">

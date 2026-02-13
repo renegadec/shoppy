@@ -1,13 +1,23 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import crypto from 'crypto'
 import { createPayment } from '@/lib/nowpayments'
+import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { createTicketOrder } from '@/lib/tickets'
 
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { email, customerName, eventId, ticketTypeId, quantity } = body
+    const {
+      email,
+      customerName,
+      eventId,
+      ticketTypeId,
+      quantity,
+      paymentMethod = 'crypto',
+      customerMsisdn,
+    } = body
 
     if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     if (!eventId) return NextResponse.json({ error: 'Event is required' }, { status: 400 })
@@ -85,19 +95,53 @@ export async function POST(request) {
       })
     }
 
-    const payment = await createPayment({
-      priceAmount: order.amount,
-      priceCurrency: 'usd',
-      orderId: `${order.orderNumber}|${Buffer.from(JSON.stringify(orderData)).toString('base64')}`,
-      orderDescription: `Event Ticket: ${event.title} (${ticketType.name}) x${qty}`,
-      successUrl: `${baseUrl}/tickets/success?order=${order.orderNumber}`,
-      cancelUrl: `${baseUrl}/events/${event.slug}`,
-    })
+    let paymentUrl = null
+    let redirectUrl = null
 
-    await prisma.ticketOrder.update({
-      where: { id: order.id },
-      data: { paymentId: payment.id?.toString() },
-    })
+    if (paymentMethod === 'ecocash') {
+      if (!customerMsisdn) {
+        return NextResponse.json({ error: 'EcoCash phone number is required' }, { status: 400 })
+      }
+
+      const sourceReference = crypto.randomUUID()
+
+      await createEcoCashInstantC2BPayment({
+        customerMsisdn,
+        amount: order.amount,
+        currency: 'USD',
+        reason: `${order.orderNumber} - Event Ticket: ${event.title} (${ticketType.name}) x${qty}`,
+        sourceReference,
+      })
+
+      await prisma.ticketOrder.update({
+        where: { id: order.id },
+        data: {
+          paymentMethod: 'ecocash',
+          paymentId: sourceReference,
+          paymentStatus: 'ecocash_initiated',
+          ecocashMsisdn: customerMsisdn,
+        },
+      })
+
+      redirectUrl = `${baseUrl}/tickets/success?order=${order.orderNumber}&pending=1&method=ecocash`
+
+    } else {
+      const payment = await createPayment({
+        priceAmount: order.amount,
+        priceCurrency: 'usd',
+        orderId: `${order.orderNumber}|${Buffer.from(JSON.stringify(orderData)).toString('base64')}`,
+        orderDescription: `Event Ticket: ${event.title} (${ticketType.name}) x${qty}`,
+        successUrl: `${baseUrl}/tickets/success?order=${order.orderNumber}`,
+        cancelUrl: `${baseUrl}/events/${event.slug}`,
+      })
+
+      await prisma.ticketOrder.update({
+        where: { id: order.id },
+        data: { paymentMethod: 'crypto', paymentId: payment.id?.toString(), paymentStatus: 'nowpayments_initiated' },
+      })
+
+      paymentUrl = payment.invoice_url
+    }
 
     await sendTelegramNotification(
       `🎟️ <b>NEW TICKET ORDER</b>\n\nOrder: ${order.orderNumber}\nEvent: ${event.title}\nTicket: ${ticketType.name} x${qty}\nName: ${customerName || 'N/A'}\nEmail: ${email}\nStatus: pending`
@@ -106,7 +150,9 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       orderNumber: order.orderNumber,
-      paymentUrl: payment.invoice_url,
+      paymentMethod,
+      paymentUrl,
+      redirectUrl,
     })
   } catch (error) {
     console.error('Ticket checkout error:', error)

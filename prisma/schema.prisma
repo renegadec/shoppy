@@ -142,11 +142,17 @@ model TicketOrder {
   amount        Float
   currency      String      @default("USD")
 
-  paymentId     String?
+  // Payment details
+  paymentMethod String      @default("crypto") // ecocash | card | crypto
+  paymentId     String?     // Provider payment identifier
+  providerRef   String?     // Provider reference (e.g., EcoCash ecocashReference)
   paymentStatus String?
   paidAmount    Float?
   paidCurrency  String?
   paidAt        DateTime?
+
+  // EcoCash-specific
+  ecocashMsisdn String?
 
   customerId    String
   customer      Customer    @relation(fields: [customerId], references: [id])

@@ -16,12 +16,17 @@ export default function TicketCheckoutClient() {
   const [qty, setQty] = useState(Math.max(1, initialQty))
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('crypto')
+  const [customerMsisdn, setCustomerMsisdn] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const canSubmit = useMemo(() => {
-    return Boolean(eventId && ticketTypeId && name && email && qty >= 1)
-  }, [eventId, ticketTypeId, name, email, qty])
+    if (!(eventId && ticketTypeId && name && email && qty >= 1)) return false
+    if (isFree) return true
+    if (paymentMethod === 'ecocash') return Boolean(customerMsisdn)
+    return true
+  }, [eventId, ticketTypeId, name, email, qty, isFree, paymentMethod, customerMsisdn])
 
   useEffect(() => {
     setQty(Math.max(1, initialQty))
@@ -44,6 +49,8 @@ export default function TicketCheckoutClient() {
           eventId,
           ticketTypeId,
           quantity: qty,
+          paymentMethod,
+          customerMsisdn: paymentMethod === 'ecocash' ? customerMsisdn : undefined,
         }),
       })
 
@@ -80,6 +87,53 @@ export default function TicketCheckoutClient() {
         </p>
 
         <form onSubmit={submit} className="mt-8">
+          {!isFree && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700">Payment method</label>
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('crypto')}
+                  className={`rounded-2xl border px-4 py-3 text-left transition-colors ${
+                    paymentMethod === 'crypto'
+                      ? 'border-emerald-600 bg-emerald-50'
+                      : 'border-gray-200 bg-white hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">Crypto</div>
+                  <div className="text-xs text-gray-500 mt-1">Pay with USDT, BTC, ETH, and more</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('ecocash')}
+                  className={`rounded-2xl border px-4 py-3 text-left transition-colors ${
+                    paymentMethod === 'ecocash'
+                      ? 'border-emerald-600 bg-emerald-50'
+                      : 'border-gray-200 bg-white hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">EcoCash</div>
+                  <div className="text-xs text-gray-500 mt-1">Pay using your EcoCash wallet</div>
+                </button>
+              </div>
+
+              {paymentMethod === 'ecocash' && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700">EcoCash number (MSISDN)</label>
+                  <input
+                    type="tel"
+                    required
+                    value={customerMsisdn}
+                    onChange={(e) => setCustomerMsisdn(e.target.value)}
+                    placeholder="26377xxxxxxx"
+                    className="mt-2 w-full rounded-2xl bg-gray-50 text-gray-900 px-4 py-3 outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-emerald-600"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">Use international format without + (e.g. 26377...).</p>
+                </div>
+              )}
+            </div>
+          )}
           <label className="block text-sm font-medium text-gray-700">Full name</label>
           <input
             type="text"
@@ -136,12 +190,13 @@ export default function TicketCheckoutClient() {
             disabled={!canSubmit || loading}
             className="mt-8 w-full inline-flex justify-center rounded-2xl bg-emerald-700 text-white px-6 py-3 font-bold shadow-sm hover:bg-emerald-800 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Processing…' : isFree ? 'Get free ticket' : 'Pay with Crypto'}
+            {loading ? 'Processing…' : isFree ? 'Get free ticket' : paymentMethod === 'ecocash' ? 'Pay with EcoCash' : 'Pay with Crypto'}
           </button>
 
           {!isFree && (
             <p className="mt-4 text-xs text-gray-500 flex items-center justify-center gap-2">
-              <LockClosedIcon className="h-4 w-4" /> Secure payment via NOWPayments
+              <LockClosedIcon className="h-4 w-4" />{' '}
+              {paymentMethod === 'ecocash' ? 'Secure payment via EcoCash' : 'Secure payment via NOWPayments'}
             </p>
           )}
 

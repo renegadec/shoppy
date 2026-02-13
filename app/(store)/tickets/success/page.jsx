@@ -5,9 +5,13 @@ import AnimatedTick from '@/components/AnimatedTick'
 
 export const dynamic = 'force-dynamic'
 
+import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
+
 export default async function TicketSuccessPage({ searchParams }) {
   const sp = await searchParams
   const orderNumber = sp?.order
+  const pending = sp?.pending === '1' || sp?.pending === 'true'
+  const method = sp?.method || ''
 
   if (!orderNumber || typeof orderNumber !== 'string') notFound()
 
@@ -19,6 +23,7 @@ export default async function TicketSuccessPage({ searchParams }) {
   if (!order) notFound()
 
   const paid = order.status === 'PAID'
+  const showPending = pending && method === 'ecocash' && !paid
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -32,7 +37,7 @@ export default async function TicketSuccessPage({ searchParams }) {
 
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {paid ? 'Payment confirmed' : 'Payment received'}
+              {paid ? 'Payment confirmed' : showPending ? 'Payment pending' : 'Payment received'}
             </h1>
             <p className="text-gray-600 mt-2">
               Order: <span className="font-semibold text-gray-900">{order.orderNumber}</span>
@@ -42,6 +47,10 @@ export default async function TicketSuccessPage({ searchParams }) {
             </p>
           </div>
         </div>
+
+        {showPending && (
+          <EcoCashPendingPoll kind="ticket" orderNumber={order.orderNumber} />
+        )}
 
         <div className="mt-6 rounded-2xl bg-gray-50 border border-gray-200 p-5">
           <p className="font-semibold text-gray-900">Next step</p>
