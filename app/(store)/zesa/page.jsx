@@ -114,9 +114,9 @@ export default function ZesaPage() {
               <Image
                 src="/images/services/zesa.png"
                 alt="ZESA"
-                width={120}
-                height={48}
-                className="h-10 w-auto object-contain"
+                width={80}
+                height={80}
+                className="h-10 w-10 object-contain"
                 priority={false}
               />
             </div>
