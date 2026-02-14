@@ -47,10 +47,30 @@ export async function POST(request) {
       }
     }
 
-    // Update order in database (product orders vs ticket orders vs airtime)
-    const isTicketOrder = orderData?.kind === 'event'
-    const isAirtimeOrder = orderData?.kind === 'airtime'
-    const isZesaOrder = orderData?.kind === 'zesa'
+    // Update order in database (product orders vs ticket orders vs airtime/zesa)
+    // Primary: kind in orderData (when order_id contains encoded payload)
+    // Fallback: infer from orderNumber prefix / DB lookup.
+    let isTicketOrder = orderData?.kind === 'event'
+    let isAirtimeOrder = orderData?.kind === 'airtime'
+    let isZesaOrder = orderData?.kind === 'zesa'
+
+    if (!isTicketOrder && !isAirtimeOrder && !isZesaOrder) {
+      if (String(orderNumber || '').startsWith('EVT-')) isTicketOrder = true
+      if (String(orderNumber || '').startsWith('AIR-')) isAirtimeOrder = true
+      if (String(orderNumber || '').startsWith('ZESA-')) isZesaOrder = true
+
+      // If still unknown, try DB existence checks (cheap, indexed unique).
+      if (!isTicketOrder && !isAirtimeOrder && !isZesaOrder) {
+        const [a, z, t] = await Promise.all([
+          prisma.airtimeOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
+          prisma.zesaOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
+          prisma.ticketOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
+        ])
+        if (t) isTicketOrder = true
+        if (a) isAirtimeOrder = true
+        if (z) isZesaOrder = true
+      }
+    }
 
     const updatedOrder = isTicketOrder
       ? await updateTicketOrderFromWebhook({

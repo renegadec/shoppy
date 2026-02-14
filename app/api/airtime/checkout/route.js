@@ -107,10 +107,12 @@ export async function POST(request) {
       paymentUrl = `${baseUrl}/airtime/success?order=${orderNumber}&pending=1&method=ecocash`
 
     } else {
+      // NOTE: Do NOT embed large payloads in NOWPayments order_id.
+      // We rely on orderNumber + DB lookup in webhook.
       const payment = await createPayment({
         priceAmount: amountToPay,
         priceCurrency: 'usd',
-        orderId: `${orderNumber}|${Buffer.from(JSON.stringify(orderData)).toString('base64')}`,
+        orderId: orderNumber,
         orderDescription: `Airtime ${network} $${roundMoney(amt)} (+2%)`,
         successUrl: `${baseUrl}/airtime/success?order=${orderNumber}`,
         cancelUrl: `${baseUrl}/airtime`,
