@@ -32,7 +32,11 @@ const DEFAULT_SERVICES = [
 ]
 
 function ServiceCard({ service }) {
-  const href = service.slug === 'event-tickets' ? '/events' : `/services/${service.slug}`
+  const href = service.slug === 'event-tickets'
+    ? '/events'
+    : service.slug === 'airtime'
+      ? '/airtime'
+      : `/services/${service.slug}`
 
   return (
     <Link

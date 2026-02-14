@@ -5,6 +5,7 @@ import { sendTelegramNotification, formatOrderNotification } from '@/lib/telegra
 import { updateOrderFromWebhook } from '@/lib/orders'
 import { updateTicketOrderFromWebhook } from '@/lib/tickets'
 import { sendTicketEmail } from '@/lib/email'
+import { fulfillAirtimeOrderIfPaid } from '@/lib/airtimeFulfillment'
 
 export async function POST(request) {
   try {
@@ -45,8 +46,9 @@ export async function POST(request) {
       }
     }
 
-    // Update order in database (product orders vs ticket orders)
+    // Update order in database (product orders vs ticket orders vs airtime)
     const isTicketOrder = orderData?.kind === 'event'
+    const isAirtimeOrder = orderData?.kind === 'airtime'
 
     const updatedOrder = isTicketOrder
       ? await updateTicketOrderFromWebhook({
@@ -56,19 +58,43 @@ export async function POST(request) {
           paidAmount: actually_paid,
           paidCurrency: pay_currency,
         })
-      : await updateOrderFromWebhook({
-          paymentId: payment_id?.toString(),
-          orderNumber,
-          status: payment_status,
-          paidAmount: actually_paid,
-          paidCurrency: pay_currency,
-        })
+      : isAirtimeOrder
+        ? await prisma.airtimeOrder.update({
+            where: { orderNumber },
+            data: {
+              status: ['confirmed', 'finished'].includes(payment_status) ? 'PAID' : 'PENDING',
+              paymentStatus: payment_status,
+              paidAmount: actually_paid,
+              paidCurrency: pay_currency,
+              ...( ['confirmed', 'finished'].includes(payment_status) ? { paidAt: new Date() } : {} ),
+            },
+            include: { customer: true },
+          }).catch(() => null)
+        : await updateOrderFromWebhook({
+            paymentId: payment_id?.toString(),
+            orderNumber,
+            status: payment_status,
+            paidAmount: actually_paid,
+            paidCurrency: pay_currency,
+          })
 
     // Handle different payment statuses
     if (payment_status === 'finished' || payment_status === 'confirmed') {
       console.log(`✅ Payment confirmed for order ${orderNumber}`)
 
-      if (isTicketOrder) {
+      if (isAirtimeOrder) {
+        await sendTelegramNotification(
+          `✅ <b>AIRTIME PAYMENT CONFIRMED</b>\n\nOrder: ${orderNumber}\nRecipient: ${orderData?.recipientMsisdn || 'N/A'}\nNetwork: ${String(orderData?.network || '').toUpperCase() || 'N/A'}\nAirtime: $${orderData?.airtimeAmount ?? 'N/A'}`
+        )
+
+        try {
+          await fulfillAirtimeOrderIfPaid({ orderNumber })
+        } catch (e) {
+          // fulfillment already notifies on failure
+          console.error('Airtime fulfillment failed:', e)
+        }
+
+      } else if (isTicketOrder) {
         await sendTelegramNotification(
           `✅ <b>TICKET PAYMENT CONFIRMED</b>\n\nOrder: ${orderNumber}\nEvent: ${updatedOrder?.event?.title || orderData.eventTitle || 'Event'}\nEmail: ${updatedOrder?.customer?.email || orderData.email || 'N/A'}`
         )

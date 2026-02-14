@@ -11,12 +11,12 @@ model Product {
   id               String   @id @default(cuid())
   name             String
   shortDescription String?
-  highlights       Json?    // Array of {title, description}
+  highlights       Json? // Array of {title, description}
   tagline          String?
   price            Float
-  period           String?  // "year", "month", "3 months", etc.
+  period           String? // "year", "month", "3 months", etc.
   image            String?
-  features         Json?    // Array of strings
+  features         Json? // Array of strings
   popular          Boolean  @default(false)
   active           Boolean  @default(true)
   createdAt        DateTime @default(now())
@@ -25,54 +25,103 @@ model Product {
 }
 
 model Customer {
-  id            String   @id @default(cuid())
-  email         String   @unique
+  id            String         @id @default(cuid())
+  email         String         @unique
   name          String?
   phone         String?
   telegram      String?
   whatsapp      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   orders        Order[]
   ticketOrders  TicketOrder[]
+  airtimeOrders AirtimeOrder[]
 }
 
 model Order {
-  id            String      @id @default(cuid())
-  orderNumber   String      @unique // Human-readable order ID like "SHP-20260203-001"
-  status        OrderStatus @default(PENDING)
-  amount        Float
-  currency      String      @default("USD")
-  
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // Human-readable order ID like "SHP-20260203-001"
+  status      OrderStatus @default(PENDING)
+  amount      Float
+  currency    String      @default("USD")
+
   // Payment details
-  paymentMethod String      @default("crypto") // ecocash | card | crypto
-  paymentId     String?     // Provider payment identifier (NOWPayments payment ID or EcoCash sourceReference UUID)
-  providerRef   String?     // Provider reference (e.g., EcoCash ecocashReference)
-  paymentStatus String?     // Raw status from payment provider
+  paymentMethod String    @default("crypto") // ecocash | card | crypto
+  paymentId     String? // Provider payment identifier (NOWPayments payment ID or EcoCash sourceReference UUID)
+  providerRef   String? // Provider reference (e.g., EcoCash ecocashReference)
+  paymentStatus String? // Raw status from payment provider
   paidAmount    Float?
   paidCurrency  String?
   paidAt        DateTime?
 
   // EcoCash-specific (for status lookups)
   ecocashMsisdn String?
-  
+
   // Contact preference for this order
-  contactMethod String?     // "email", "telegram", "whatsapp"
-  contactValue  String?     // The actual contact value used
-  
+  contactMethod String? // "email", "telegram", "whatsapp"
+  contactValue  String? // The actual contact value used
+
   // Relations
-  customerId    String
-  customer      Customer    @relation(fields: [customerId], references: [id])
-  productId     String
-  product       Product     @relation(fields: [productId], references: [id])
-  
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+
   // Delivery
-  delivered     Boolean     @default(false)
+  delivered     Boolean   @default(false)
   deliveredAt   DateTime?
   deliveryNotes String?
-  
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AirtimeOrder {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // AIR-YYYYMMDD-XXX
+  status      OrderStatus @default(PENDING)
+
+  // What the customer wants the recipient to receive
+  airtimeAmount Float
+  currency      String @default("USD")
+  markupRate    Float  @default(0.02)
+
+  // What the customer pays (airtimeAmount * (1 + markupRate))
+  amount Float
+
+  network         String // econet | netone | telecel
+  recipientMsisdn String
+
+  // Payment details
+  paymentMethod String    @default("crypto")
+  paymentId     String?
+  providerRef   String?
+  paymentStatus String?
+  paidAmount    Float?
+  paidCurrency  String?
+  paidAt        DateTime?
+
+  // EcoCash-specific
+  ecocashMsisdn String?
+
+  // Hot Recharge fulfillment
+  hotProductId  Int?
+  hotRechargeId Int?
+  hotMessage    String?
+  hotRaw        Json?
+
+  // Contact
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  contactMethod String?
+  contactValue  String?
+
+  delivered     Boolean   @default(false)
+  deliveredAt   DateTime?
+  deliveryNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum OrderStatus {
@@ -89,15 +138,15 @@ enum OrderStatus {
 model Admin {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String   // Hashed
+  password  String // Hashed
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Event {
-  id            String            @id @default(cuid())
-  slug          String            @unique
+  id            String    @id @default(cuid())
+  slug          String    @unique
   title         String
   subtitle      String?
   description   String?
@@ -109,43 +158,43 @@ model Event {
   organizerRef  String? // phone/email/handle (internal)
   image         String?
   category      String? // Concert, Fitness, Standup, Exhibitions, etc.
-  published     Boolean           @default(false)
-  active        Boolean           @default(true)
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  published     Boolean   @default(false)
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  ticketTypes   EventTicketType[]
-  ticketOrders  TicketOrder[]
+  ticketTypes  EventTicketType[]
+  ticketOrders TicketOrder[]
 }
 
 model EventTicketType {
-  id        String      @id @default(cuid())
+  id        String   @id @default(cuid())
   eventId   String
-  event     Event       @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
   name      String
   price     Float
-  currency  String      @default("USD")
+  currency  String   @default("USD")
   capacity  Int?
-  active    Boolean     @default(true)
-  sortOrder Int         @default(0)
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   ticketItems TicketItem[]
 }
 
 model TicketOrder {
-  id            String      @id @default(cuid())
-  orderNumber   String      @unique // EVT-YYYYMMDD-XXX
-  status        OrderStatus @default(PENDING)
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // EVT-YYYYMMDD-XXX
+  status      OrderStatus @default(PENDING)
 
-  amount        Float
-  currency      String      @default("USD")
+  amount   Float
+  currency String @default("USD")
 
   // Payment details
-  paymentMethod String      @default("crypto") // ecocash | card | crypto
-  paymentId     String?     // Provider payment identifier
-  providerRef   String?     // Provider reference (e.g., EcoCash ecocashReference)
+  paymentMethod String    @default("crypto") // ecocash | card | crypto
+  paymentId     String? // Provider payment identifier
+  providerRef   String? // Provider reference (e.g., EcoCash ecocashReference)
   paymentStatus String?
   paidAmount    Float?
   paidCurrency  String?
@@ -154,36 +203,35 @@ model TicketOrder {
   // EcoCash-specific
   ecocashMsisdn String?
 
-  customerId    String
-  customer      Customer    @relation(fields: [customerId], references: [id])
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
 
-  eventId       String
-  event         Event       @relation(fields: [eventId], references: [id])
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
 
   // Delivery
-  delivered     Boolean     @default(false)
+  delivered     Boolean   @default(false)
   deliveredAt   DateTime?
   deliveryNotes String?
 
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  items         TicketItem[]
+  items TicketItem[]
 }
 
 model TicketItem {
-  id            String          @id @default(cuid())
-  orderId       String
-  order         TicketOrder     @relation(fields: [orderId], references: [id])
-  ticketTypeId  String
-  ticketType    EventTicketType @relation(fields: [ticketTypeId], references: [id])
+  id           String          @id @default(cuid())
+  orderId      String
+  order        TicketOrder     @relation(fields: [orderId], references: [id])
+  ticketTypeId String
+  ticketType   EventTicketType @relation(fields: [ticketTypeId], references: [id])
 
-  ticketCode    String          @unique
-  qrPayload     String
+  ticketCode String @unique
+  qrPayload  String
 
-  redeemed      Boolean         @default(false)
-  redeemedAt    DateTime?
+  redeemed   Boolean   @default(false)
+  redeemedAt DateTime?
 
-  createdAt     DateTime        @default(now())
+  createdAt DateTime @default(now())
 }
-

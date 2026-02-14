@@ -13,7 +13,11 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
     setError('')
 
     try {
-      const url = kind === 'ticket' ? '/api/ecocash/ticket-status' : '/api/ecocash/status'
+      const url = kind === 'ticket'
+        ? '/api/ecocash/ticket-status'
+        : kind === 'airtime'
+          ? '/api/ecocash/airtime-status'
+          : '/api/ecocash/status'
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
