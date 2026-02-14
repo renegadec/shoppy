@@ -136,7 +136,16 @@ export async function POST(request) {
       amountToPay,
     })
   } catch (error) {
-    console.error('Airtime checkout error:', error)
-    return NextResponse.json({ error: error.message || 'Failed' }, { status: 500 })
+    console.error('Airtime checkout error:', {
+      message: error?.message,
+      status: error?.status,
+      details: error?.details,
+      stack: error?.stack,
+    })
+    return NextResponse.json({
+      error: error?.message || 'Failed',
+      status: error?.status,
+      details: error?.details,
+    }, { status: 500 })
   }
 }
