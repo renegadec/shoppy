@@ -112,8 +112,8 @@ export default function ZesaPage() {
 
             <div className="shrink-0 rounded-xl bg-white/10 border border-white/20 p-2">
               <Image
-                src="/images/services/zesa.png"
-                alt="ZESA"
+                src="/images/services/zetdc.png"
+                alt="zetdc logo"
                 width={80}
                 height={80}
                 className="h-10 w-10 object-contain"
