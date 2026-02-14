@@ -39,8 +39,17 @@ export default function AirtimePage() {
         }),
       })
 
-      const data = await res.json()
-      if (!res.ok) throw new Error(data?.error || 'Failed to start checkout')
+      const text = await res.text()
+      let data = null
+      try {
+        data = text ? JSON.parse(text) : null
+      } catch {
+        data = null
+      }
+
+      if (!res.ok) {
+        throw new Error(data?.error || data?.message || text || 'Failed to start checkout')
+      }
 
       if (data?.paymentUrl) {
         window.location.href = data.paymentUrl
