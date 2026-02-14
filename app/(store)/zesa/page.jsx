@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { LockClosedIcon } from '@heroicons/react/24/solid'
 
 export default function ZesaPage() {
@@ -103,8 +104,23 @@ export default function ZesaPage() {
 
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-emerald-700 px-8 py-6">
-          <h1 className="text-2xl font-bold text-white">ZESA Tokens</h1>
-          <p className="text-emerald-100">ZETDC prepaid electricity tokens</p>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-white">ZESA Tokens</h1>
+              <p className="text-emerald-100">ZETDC prepaid electricity tokens</p>
+            </div>
+
+            <div className="shrink-0 rounded-xl bg-white/10 border border-white/20 p-2">
+              <Image
+                src="/images/services/zesa.png"
+                alt="ZESA"
+                width={120}
+                height={48}
+                className="h-10 w-auto object-contain"
+                priority={false}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="p-8">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { LockClosedIcon } from '@heroicons/react/24/solid'
 
 const NETWORKS = [
@@ -63,6 +64,28 @@ export default function AirtimePage() {
         <div className="bg-emerald-700 px-8 py-6">
           <h1 className="text-2xl font-bold text-white">Airtime Top Up</h1>
           <p className="text-emerald-100">Zimbabwe only • Econet / NetOne / Telecel</p>
+
+          <div className="mt-4 flex items-center gap-3">
+            {[
+              { src: '/images/services/econet.png', alt: 'Econet' },
+              { src: '/images/services/netone.png', alt: 'NetOne' },
+              { src: '/images/services/telecel.png', alt: 'Telecel' },
+            ].map((l) => (
+              <div
+                key={l.alt}
+                className="rounded-xl bg-white/10 border border-white/20 p-2"
+                title={l.alt}
+              >
+                <Image
+                  src={l.src}
+                  alt={l.alt}
+                  width={44}
+                  height={44}
+                  className="h-10 w-10 object-contain"
+                />
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="p-8">
