@@ -15,7 +15,7 @@ export async function POST(request) {
       eventId,
       ticketTypeId,
       quantity,
-      paymentMethod = 'crypto',
+      paymentMethod = 'ecocash',
       customerMsisdn,
     } = body
 

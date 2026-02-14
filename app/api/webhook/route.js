@@ -6,6 +6,7 @@ import { updateOrderFromWebhook } from '@/lib/orders'
 import { updateTicketOrderFromWebhook } from '@/lib/tickets'
 import { sendTicketEmail } from '@/lib/email'
 import { fulfillAirtimeOrderIfPaid } from '@/lib/airtimeFulfillment'
+import { fulfillZesaOrderIfPaid } from '@/lib/zesaFulfillment'
 
 export async function POST(request) {
   try {
@@ -49,6 +50,7 @@ export async function POST(request) {
     // Update order in database (product orders vs ticket orders vs airtime)
     const isTicketOrder = orderData?.kind === 'event'
     const isAirtimeOrder = orderData?.kind === 'airtime'
+    const isZesaOrder = orderData?.kind === 'zesa'
 
     const updatedOrder = isTicketOrder
       ? await updateTicketOrderFromWebhook({
@@ -59,24 +61,40 @@ export async function POST(request) {
           paidCurrency: pay_currency,
         })
       : isAirtimeOrder
-        ? await prisma.airtimeOrder.update({
-            where: { orderNumber },
-            data: {
-              status: ['confirmed', 'finished'].includes(payment_status) ? 'PAID' : 'PENDING',
-              paymentStatus: payment_status,
+        ? await prisma.airtimeOrder
+            .update({
+              where: { orderNumber },
+              data: {
+                status: ['confirmed', 'finished'].includes(payment_status) ? 'PAID' : 'PENDING',
+                paymentStatus: payment_status,
+                paidAmount: actually_paid,
+                paidCurrency: pay_currency,
+                ...(['confirmed', 'finished'].includes(payment_status) ? { paidAt: new Date() } : {}),
+              },
+              include: { customer: true },
+            })
+            .catch(() => null)
+        : isZesaOrder
+          ? await prisma.zesaOrder
+              .update({
+                where: { orderNumber },
+                data: {
+                  status: ['confirmed', 'finished'].includes(payment_status) ? 'PAID' : 'PENDING',
+                  paymentStatus: payment_status,
+                  paidAmount: actually_paid,
+                  paidCurrency: pay_currency,
+                  ...(['confirmed', 'finished'].includes(payment_status) ? { paidAt: new Date() } : {}),
+                },
+                include: { customer: true },
+              })
+              .catch(() => null)
+          : await updateOrderFromWebhook({
+              paymentId: payment_id?.toString(),
+              orderNumber,
+              status: payment_status,
               paidAmount: actually_paid,
               paidCurrency: pay_currency,
-              ...( ['confirmed', 'finished'].includes(payment_status) ? { paidAt: new Date() } : {} ),
-            },
-            include: { customer: true },
-          }).catch(() => null)
-        : await updateOrderFromWebhook({
-            paymentId: payment_id?.toString(),
-            orderNumber,
-            status: payment_status,
-            paidAmount: actually_paid,
-            paidCurrency: pay_currency,
-          })
+            })
 
     // Handle different payment statuses
     if (payment_status === 'finished' || payment_status === 'confirmed') {
@@ -90,8 +108,18 @@ export async function POST(request) {
         try {
           await fulfillAirtimeOrderIfPaid({ orderNumber })
         } catch (e) {
-          // fulfillment already notifies on failure
           console.error('Airtime fulfillment failed:', e)
+        }
+
+      } else if (isZesaOrder) {
+        await sendTelegramNotification(
+          `✅ <b>ZESA PAYMENT CONFIRMED</b>\n\nOrder: ${orderNumber}\nMeter: ${orderData?.meterNumber || 'N/A'}\nToken: $${orderData?.tokenAmount ?? 'N/A'}`
+        )
+
+        try {
+          await fulfillZesaOrderIfPaid({ orderNumber })
+        } catch (e) {
+          console.error('ZESA fulfillment failed:', e)
         }
 
       } else if (isTicketOrder) {
@@ -123,8 +151,8 @@ export async function POST(request) {
             productName: updatedOrder?.product?.name || orderData.productName || 'Unknown Product',
             amount: price_amount,
             email: updatedOrder?.customer?.email || orderData.email || 'N/A',
-            contactMethod: updatedOrder?.contactMethod || orderData.contactMethod || 'email',
-            contactValue: updatedOrder?.contactValue || orderData.contactValue || orderData.email || 'N/A',
+            contactMethod: 'email',
+            contactValue: updatedOrder?.customer?.email || orderData.email || 'N/A',
             paymentStatus: 'confirmed',
           })
         )

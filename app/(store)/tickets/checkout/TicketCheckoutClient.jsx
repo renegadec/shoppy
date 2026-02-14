@@ -16,7 +16,7 @@ export default function TicketCheckoutClient() {
   const [qty, setQty] = useState(Math.max(1, initialQty))
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState('crypto')
+  const [paymentMethod, setPaymentMethod] = useState('ecocash')
   const [customerMsisdn, setCustomerMsisdn] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

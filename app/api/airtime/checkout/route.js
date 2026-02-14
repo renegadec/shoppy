@@ -11,9 +11,7 @@ export async function POST(request) {
     const body = await request.json()
     const {
       email,
-      contactMethod,
-      contactValue,
-      paymentMethod = 'crypto',
+      paymentMethod = 'ecocash',
       customerMsisdn,
       network,
       recipientMsisdn,
@@ -32,9 +30,8 @@ export async function POST(request) {
     const markupRate = 0.02
     const amountToPay = computeMarkupAmount({ airtimeAmount: amt, markupRate })
 
-    if (contactMethod !== 'email' && !contactValue) {
-      return NextResponse.json({ error: 'Contact information is required' }, { status: 400 })
-    }
+    const contactMethod = 'email'
+    const contactValue = email
 
     // Find or create customer
     let customer = await prisma.customer.findUnique({ where: { email } })

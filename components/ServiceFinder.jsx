@@ -36,7 +36,9 @@ function ServiceCard({ service }) {
     ? '/events'
     : service.slug === 'airtime'
       ? '/airtime'
-      : `/services/${service.slug}`
+      : service.slug === 'electricity'
+        ? '/zesa'
+        : `/services/${service.slug}`
 
   return (
     <Link

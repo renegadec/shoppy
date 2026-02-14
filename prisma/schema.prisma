@@ -36,6 +36,7 @@ model Customer {
   orders        Order[]
   ticketOrders  TicketOrder[]
   airtimeOrders AirtimeOrder[]
+  zesaOrders    ZesaOrder[]
 }
 
 model Order {
@@ -106,6 +107,54 @@ model AirtimeOrder {
 
   // Hot Recharge fulfillment
   hotProductId  Int?
+  hotRechargeId Int?
+  hotMessage    String?
+  hotRaw        Json?
+
+  // Contact
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  contactMethod String?
+  contactValue  String?
+
+  delivered     Boolean   @default(false)
+  deliveredAt   DateTime?
+  deliveryNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ZesaOrder {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // ZESA-YYYYMMDD-XXX
+  status      OrderStatus @default(PENDING)
+
+  // What the meter should receive
+  tokenAmount Float
+  currency    String @default("USD")
+  markupRate  Float  @default(0.01)
+
+  // What the customer pays
+  amount Float
+
+  meterNumber  String
+  notifyNumber String
+
+  // Payment details
+  paymentMethod String    @default("crypto")
+  paymentId     String?
+  providerRef   String?
+  paymentStatus String?
+  paidAmount    Float?
+  paidCurrency  String?
+  paidAt        DateTime?
+
+  // EcoCash-specific
+  ecocashMsisdn String?
+
+  // Hot Recharge fulfillment
+  hotProductId  Int?    @default(41)
   hotRechargeId Int?
   hotMessage    String?
   hotRaw        Json?

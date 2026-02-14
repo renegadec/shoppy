@@ -17,7 +17,9 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
         ? '/api/ecocash/ticket-status'
         : kind === 'airtime'
           ? '/api/ecocash/airtime-status'
-          : '/api/ecocash/status'
+          : kind === 'zesa'
+            ? '/api/ecocash/zesa-status'
+            : '/api/ecocash/status'
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

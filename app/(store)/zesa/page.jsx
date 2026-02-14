@@ -4,20 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { LockClosedIcon } from '@heroicons/react/24/solid'
 
-const NETWORKS = [
-  { value: 'econet', label: 'Econet' },
-  { value: 'netone', label: 'NetOne' },
-  { value: 'telecel', label: 'Telecel' },
-]
-
-export default function AirtimePage() {
+export default function ZesaPage() {
   const [formData, setFormData] = useState({
     email: '',
     paymentMethod: 'ecocash',
     customerMsisdn: '',
-    network: 'econet',
-    recipientMsisdn: '',
-    airtimeAmount: '',
+    meterNumber: '',
+    notifyNumber: '',
+    tokenAmount: '',
   })
 
   const [loading, setLoading] = useState(false)
@@ -29,12 +23,12 @@ export default function AirtimePage() {
     setError('')
 
     try {
-      const res = await fetch('/api/airtime/checkout', {
+      const res = await fetch('/api/zesa/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          airtimeAmount: Number(formData.airtimeAmount),
+          tokenAmount: Number(formData.tokenAmount),
         }),
       })
 
@@ -61,8 +55,8 @@ export default function AirtimePage() {
 
       <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
         <div className="bg-emerald-700 px-8 py-6">
-          <h1 className="text-2xl font-bold text-white">Airtime Top Up</h1>
-          <p className="text-emerald-100">Zimbabwe only • Econet / NetOne / Telecel</p>
+          <h1 className="text-2xl font-bold text-white">ZESA Tokens</h1>
+          <p className="text-emerald-100">ZETDC prepaid electricity tokens</p>
         </div>
 
         <div className="p-8">
@@ -80,44 +74,41 @@ export default function AirtimePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Network</label>
-              <select
-                value={formData.network}
-                onChange={(e) => setFormData({ ...formData, network: e.target.value })}
+              <label className="block text-sm font-medium text-gray-700 mb-2">Meter Number (11 digits)</label>
+              <input
+                type="text"
+                required
+                value={formData.meterNumber}
+                onChange={(e) => setFormData({ ...formData, meterNumber: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-              >
-                {NETWORKS.map((n) => (
-                  <option key={n.value} value={n.value}>
-                    {n.label}
-                  </option>
-                ))}
-              </select>
+                placeholder="e.g. 12345678901"
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Recipient Phone Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Notify Number</label>
               <input
                 type="tel"
                 required
-                value={formData.recipientMsisdn}
-                onChange={(e) => setFormData({ ...formData, recipientMsisdn: e.target.value })}
+                value={formData.notifyNumber}
+                onChange={(e) => setFormData({ ...formData, notifyNumber: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 placeholder="077... or 26377..."
               />
-              <p className="text-xs text-gray-500 mt-2">Buy for yourself or someone else.</p>
+              <p className="text-xs text-gray-500 mt-2">ZETDC/Hot uses this number to send token notifications.</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Airtime Amount (USD)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Token Amount (USD)</label>
               <input
                 type="number"
                 step="0.01"
-                min="0.1"
+                min="5"
                 required
-                value={formData.airtimeAmount}
-                onChange={(e) => setFormData({ ...formData, airtimeAmount: e.target.value })}
+                value={formData.tokenAmount}
+                onChange={(e) => setFormData({ ...formData, tokenAmount: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                placeholder="e.g. 1.00"
+                placeholder="e.g. 10.00"
               />
             </div>
 
