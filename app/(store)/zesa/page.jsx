@@ -130,7 +130,38 @@ export default function ZesaPage() {
               {lookupData && (
                 <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left">
                   <p className="text-sm font-semibold text-gray-900">Meter details found</p>
-                  <pre className="mt-2 text-xs text-gray-700 whitespace-pre-wrap break-words">{JSON.stringify(lookupData, null, 2)}</pre>
+
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="rounded-lg bg-white border border-emerald-100 p-3">
+                      <p className="text-xs text-gray-500">Account name</p>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">
+                        {lookupData?.details?.AccountName || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white border border-emerald-100 p-3">
+                      <p className="text-xs text-gray-500">Status</p>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">
+                        {lookupData?.details?.Status || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white border border-emerald-100 p-3">
+                      <p className="text-xs text-gray-500">Account number</p>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">
+                        {lookupData?.accountNumber || formData.meterNumber || 'N/A'}
+                      </p>
+                    </div>
+                    <div className="rounded-lg bg-white border border-emerald-100 p-3">
+                      <p className="text-xs text-gray-500">Currency</p>
+                      <p className="text-sm font-semibold text-gray-900 mt-1">
+                        {lookupData?.details?.Currency || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <details className="mt-4">
+                    <summary className="cursor-pointer text-xs font-semibold text-gray-700">Show raw response</summary>
+                    <pre className="mt-2 text-xs text-gray-700 whitespace-pre-wrap break-words">{JSON.stringify(lookupData, null, 2)}</pre>
+                  </details>
                 </div>
               )}
 
