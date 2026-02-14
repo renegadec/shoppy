@@ -5,6 +5,7 @@ import { createPayment } from '@/lib/nowpayments'
 import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { computeMarkupAmount, hotProductIdForNetwork, generateAirtimeOrderNumber, roundMoney } from '@/lib/airtime'
+import { normalizeZwMsisdn } from '@/lib/msisdn'
 
 export async function POST(request) {
   try {
@@ -77,14 +78,15 @@ export async function POST(request) {
     let paymentUrl = null
 
     if (paymentMethod === 'ecocash') {
-      if (!customerMsisdn) {
+      const msisdn = normalizeZwMsisdn(customerMsisdn)
+      if (!msisdn) {
         return NextResponse.json({ error: 'EcoCash phone number is required' }, { status: 400 })
       }
 
       const sourceReference = crypto.randomUUID()
 
       const ecoCashResp = await createEcoCashInstantC2BPayment({
-        customerMsisdn,
+        customerMsisdn: msisdn,
         amount: amountToPay,
         currency: 'USD',
         reason: `${orderNumber} - Airtime ${network} $${roundMoney(amt)} (+2%)`,
@@ -97,7 +99,7 @@ export async function POST(request) {
           paymentMethod: 'ecocash',
           paymentId: sourceReference,
           paymentStatus: 'ecocash_initiated',
-          ecocashMsisdn: customerMsisdn,
+          ecocashMsisdn: msisdn,
           deliveryNotes: JSON.stringify({ ecocash: ecoCashResp }),
         },
       })

@@ -5,6 +5,7 @@ import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { sendTelegramNotification, formatOrderNotification } from '@/lib/telegram'
 import { createOrder } from '@/lib/orders'
 import prisma from '@/lib/prisma'
+import { normalizeZwMsisdn } from '@/lib/msisdn'
 
 export async function POST(request) {
   try {
@@ -55,14 +56,15 @@ export async function POST(request) {
     let paymentUrl = null
 
     if (paymentMethod === 'ecocash') {
-      if (!customerMsisdn) {
+      const msisdn = normalizeZwMsisdn(customerMsisdn)
+      if (!msisdn) {
         return NextResponse.json({ error: 'EcoCash phone number is required' }, { status: 400 })
       }
 
       const sourceReference = crypto.randomUUID()
 
       const ecoCashResp = await createEcoCashInstantC2BPayment({
-        customerMsisdn,
+        customerMsisdn: msisdn,
         amount: product.price,
         currency: 'USD',
         reason: `${order.orderNumber} - ${product.name}${product.period ? ` - ${product.period}` : ''}`,
@@ -75,7 +77,7 @@ export async function POST(request) {
           paymentMethod: 'ecocash',
           paymentId: sourceReference,
           paymentStatus: `ecocash_initiated`,
-          ecocashMsisdn: customerMsisdn,
+          ecocashMsisdn: msisdn,
         },
       })
 

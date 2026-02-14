@@ -162,7 +162,7 @@ export default function AirtimePage() {
                   value={formData.customerMsisdn}
                   onChange={(e) => setFormData({ ...formData, customerMsisdn: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                  placeholder="26377xxxxxxx"
+                  placeholder="0773xxxxxxx"
                 />
                 <p className="text-xs text-gray-500 mt-2">Use international format without + (e.g. 26377...).</p>
               </div>

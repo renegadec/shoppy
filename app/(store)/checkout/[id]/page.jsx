@@ -187,7 +187,7 @@ export default function CheckoutPage() {
                   required
                   value={formData.customerMsisdn}
                   onChange={(e) => setFormData({ ...formData, customerMsisdn: e.target.value })}
-                  placeholder="26377xxxxxxx"
+                  placeholder="0773xxxxxxx"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
                 />
                 <p className="text-xs text-gray-500 mt-2">

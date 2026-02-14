@@ -126,7 +126,7 @@ export default function TicketCheckoutClient() {
                     required
                     value={customerMsisdn}
                     onChange={(e) => setCustomerMsisdn(e.target.value)}
-                    placeholder="26377xxxxxxx"
+                    placeholder="0773xxxxxxx"
                     className="mt-2 w-full rounded-2xl bg-gray-50 text-gray-900 px-4 py-3 outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-emerald-600"
                   />
                   <p className="text-xs text-gray-500 mt-2">Use international format without + (e.g. 26377...).</p>

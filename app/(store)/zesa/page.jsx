@@ -49,7 +49,7 @@ export default function ZesaPage() {
 
   // Auto lookup when meter number looks complete (11 digits). Debounced.
   useEffect(() => {
-    const meter = String(formData.meterNumber || '').trim()
+    const meter = String(formData.meterNumber || '').replace(/\D/g, '')
 
     // Only auto-check when it looks like a ZETDC meter
     if (!/^[0-9]{11}$/.test(meter)) {
@@ -63,7 +63,6 @@ export default function ZesaPage() {
     }, 600)
 
     return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.meterNumber])
 
   async function handleSubmit(e) {
@@ -129,7 +128,8 @@ export default function ZesaPage() {
                 required
                 value={formData.meterNumber}
                 onChange={(e) => {
-                  setFormData({ ...formData, meterNumber: e.target.value })
+                  const normalized = e.target.value.replace(/\D/g, '')
+                  setFormData({ ...formData, meterNumber: normalized })
                 }}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 placeholder="e.g. 12345678901"
@@ -187,11 +187,11 @@ export default function ZesaPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 placeholder="077... or 26377..."
               />
-              <p className="text-xs text-gray-500 mt-2">ZETDC/Hot uses this number to send token notifications.</p>
+              <p className="text-xs text-gray-500 mt-2">Shoppy uses this number to send your token.</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Token Amount (USD)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Amount (USD)</label>
               <input
                 type="number"
                 step="0.01"
@@ -245,7 +245,7 @@ export default function ZesaPage() {
                   value={formData.customerMsisdn}
                   onChange={(e) => setFormData({ ...formData, customerMsisdn: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                  placeholder="26377xxxxxxx"
+                  placeholder="0773xxxxxxx"
                 />
                 <p className="text-xs text-gray-500 mt-2">Use international format without + (e.g. 26377...).</p>
               </div>

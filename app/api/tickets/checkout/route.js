@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import crypto from 'crypto'
 import { createPayment } from '@/lib/nowpayments'
 import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
+import { normalizeZwMsisdn } from '@/lib/msisdn'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { createTicketOrder } from '@/lib/tickets'
 
@@ -99,14 +100,15 @@ export async function POST(request) {
     let redirectUrl = null
 
     if (paymentMethod === 'ecocash') {
-      if (!customerMsisdn) {
+      const msisdn = normalizeZwMsisdn(customerMsisdn)
+      if (!msisdn) {
         return NextResponse.json({ error: 'EcoCash phone number is required' }, { status: 400 })
       }
 
       const sourceReference = crypto.randomUUID()
 
       await createEcoCashInstantC2BPayment({
-        customerMsisdn,
+        customerMsisdn: msisdn,
         amount: order.amount,
         currency: 'USD',
         reason: `${order.orderNumber} - Event Ticket: ${event.title} (${ticketType.name}) x${qty}`,
@@ -119,7 +121,7 @@ export async function POST(request) {
           paymentMethod: 'ecocash',
           paymentId: sourceReference,
           paymentStatus: 'ecocash_initiated',
-          ecocashMsisdn: customerMsisdn,
+          ecocashMsisdn: msisdn,
         },
       })
 
