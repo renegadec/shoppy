@@ -17,6 +17,35 @@ export default function ZesaPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const [lookupLoading, setLookupLoading] = useState(false)
+  const [lookupError, setLookupError] = useState('')
+  const [lookupData, setLookupData] = useState(null)
+
+  async function lookup() {
+    if (!formData.meterNumber) return
+
+    setLookupLoading(true)
+    setLookupError('')
+    setLookupData(null)
+
+    try {
+      const res = await fetch('/api/zesa/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ meterNumber: formData.meterNumber }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Lookup failed')
+
+      setLookupData(data?.data || null)
+    } catch (e) {
+      setLookupError(e?.message || 'Lookup failed')
+    } finally {
+      setLookupLoading(false)
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setLoading(true)
@@ -75,14 +104,39 @@ export default function ZesaPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Meter Number (11 digits)</label>
-              <input
-                type="text"
-                required
-                value={formData.meterNumber}
-                onChange={(e) => setFormData({ ...formData, meterNumber: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                placeholder="e.g. 12345678901"
-              />
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  required
+                  value={formData.meterNumber}
+                  onChange={(e) => {
+                    setFormData({ ...formData, meterNumber: e.target.value })
+                    setLookupData(null)
+                    setLookupError('')
+                  }}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  placeholder="e.g. 12345678901"
+                />
+                <button
+                  type="button"
+                  onClick={lookup}
+                  disabled={lookupLoading || !formData.meterNumber}
+                  className="shrink-0 inline-flex justify-center rounded-xl bg-gray-900 text-white px-4 py-3 text-sm font-semibold hover:bg-gray-800 disabled:opacity-50"
+                >
+                  {lookupLoading ? 'Checking…' : 'Check'}
+                </button>
+              </div>
+
+              {lookupData && (
+                <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left">
+                  <p className="text-sm font-semibold text-gray-900">Meter details found</p>
+                  <pre className="mt-2 text-xs text-gray-700 whitespace-pre-wrap break-words">{JSON.stringify(lookupData, null, 2)}</pre>
+                </div>
+              )}
+
+              {lookupError && (
+                <p className="mt-3 text-sm text-red-700">{lookupError}</p>
+              )}
             </div>
 
             <div>
