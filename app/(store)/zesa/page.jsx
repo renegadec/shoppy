@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { LockClosedIcon } from '@heroicons/react/24/solid'
 
@@ -21,8 +21,9 @@ export default function ZesaPage() {
   const [lookupError, setLookupError] = useState('')
   const [lookupData, setLookupData] = useState(null)
 
-  async function lookup() {
-    if (!formData.meterNumber) return
+  async function lookup(meterNumber) {
+    const m = String(meterNumber || '').trim()
+    if (!m) return
 
     setLookupLoading(true)
     setLookupError('')
@@ -32,7 +33,7 @@ export default function ZesaPage() {
       const res = await fetch('/api/zesa/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ meterNumber: formData.meterNumber }),
+        body: JSON.stringify({ meterNumber: m }),
       })
 
       const data = await res.json()
@@ -45,6 +46,25 @@ export default function ZesaPage() {
       setLookupLoading(false)
     }
   }
+
+  // Auto lookup when meter number looks complete (11 digits). Debounced.
+  useEffect(() => {
+    const meter = String(formData.meterNumber || '').trim()
+
+    // Only auto-check when it looks like a ZETDC meter
+    if (!/^[0-9]{11}$/.test(meter)) {
+      setLookupData(null)
+      setLookupError('')
+      return
+    }
+
+    const t = setTimeout(() => {
+      lookup(meter)
+    }, 600)
+
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.meterNumber])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -104,32 +124,24 @@ export default function ZesaPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Meter Number (11 digits)</label>
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  required
-                  value={formData.meterNumber}
-                  onChange={(e) => {
-                    setFormData({ ...formData, meterNumber: e.target.value })
-                    setLookupData(null)
-                    setLookupError('')
-                  }}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                  placeholder="e.g. 12345678901"
-                />
-                <button
-                  type="button"
-                  onClick={lookup}
-                  disabled={lookupLoading || !formData.meterNumber}
-                  className="shrink-0 inline-flex justify-center rounded-xl bg-gray-900 text-white px-4 py-3 text-sm font-semibold hover:bg-gray-800 disabled:opacity-50"
-                >
-                  {lookupLoading ? 'Checking…' : 'Check'}
-                </button>
-              </div>
+              <input
+                type="text"
+                required
+                value={formData.meterNumber}
+                onChange={(e) => {
+                  setFormData({ ...formData, meterNumber: e.target.value })
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                placeholder="e.g. 12345678901"
+              />
+
+              {lookupLoading && (
+                <p className="mt-2 text-xs text-gray-500">Checking meter…</p>
+              )}
 
               {lookupData && (
                 <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left">
-                  <p className="text-sm font-semibold text-gray-900">Meter details found</p>
+                  <p className="text-sm font-semibold text-gray-900">Meter details</p>
 
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="rounded-lg bg-white border border-emerald-100 p-3">
@@ -157,11 +169,6 @@ export default function ZesaPage() {
                       </p>
                     </div>
                   </div>
-
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-xs font-semibold text-gray-700">Show raw response</summary>
-                    <pre className="mt-2 text-xs text-gray-700 whitespace-pre-wrap break-words">{JSON.stringify(lookupData, null, 2)}</pre>
-                  </details>
                 </div>
               )}
 
