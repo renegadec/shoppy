@@ -4,53 +4,112 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 
 const DEFAULT_SERVICES = [
-  {
-    slug: 'electricity',
-    title: 'Electricity',
-    subtitle: 'ZESA Tokens',
-  },
+  // Live first
   {
     slug: 'airtime',
     title: 'Airtime',
-    subtitle: 'Econet, TelOne',
+    subtitle: 'Econet, NetOne, Telecel',
+    status: 'live',
   },
   {
-    slug: 'car-licenses',
-    title: 'Car Licenses',
-    subtitle: 'ZINARA Renewal',
-  },
-  {
-    slug: 'gift-cards',
-    title: 'Gift Cards',
-    subtitle: 'Digital Vouchers',
+    slug: 'electricity',
+    title: 'ZESA Tokens',
+    subtitle: 'Electricity recharge',
+    status: 'live',
   },
   {
     slug: 'event-tickets',
     title: 'Event Tickets',
-    subtitle: 'Local Events',
+    subtitle: 'QR tickets by email',
+    status: 'live',
+  },
+
+  // Not implemented yet (greyed out)
+  {
+    slug: 'car-licenses',
+    title: 'Car Licenses',
+    subtitle: 'ZINARA renewals',
+    status: 'coming_soon',
+  },
+  {
+    slug: 'gift-cards',
+    title: 'Gift Cards',
+    subtitle: 'Digital vouchers',
+    status: 'coming_soon',
   },
 ]
 
 function ServiceCard({ service }) {
-  const href = service.slug === 'event-tickets'
-    ? '/events'
-    : service.slug === 'airtime'
-      ? '/airtime'
-      : service.slug === 'electricity'
-        ? '/zesa'
-        : `/services/${service.slug}`
+  const [showHint, setShowHint] = useState(false)
+
+  const href =
+    service.slug === 'event-tickets'
+      ? '/events'
+      : service.slug === 'airtime'
+        ? '/airtime'
+        : service.slug === 'electricity'
+          ? '/zesa'
+          : `/services/${service.slug}`
+
+  const isLive = service.status !== 'coming_soon'
+
+  const CardInner = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className={`text-base font-semibold ${isLive ? 'text-gray-900' : 'text-gray-500'}`}>
+            {service.title}
+          </h3>
+          <p className={`text-sm mt-1 ${isLive ? 'text-gray-600' : 'text-gray-400'}`}>{service.subtitle}</p>
+        </div>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold border ${
+            isLive
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-gray-50 text-gray-500 border-gray-200'
+          }`}
+        >
+          {isLive ? 'LIVE' : 'SOON'}
+        </span>
+      </div>
+
+      <div className={`mt-4 text-sm font-semibold ${isLive ? 'text-emerald-700 group-hover:text-emerald-800' : 'text-gray-400'}`}>
+        {isLive ? 'Open →' : 'Notify me →'}
+      </div>
+
+      {!isLive && showHint && (
+        <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
+          <p className="font-semibold">Not live yet</p>
+          <p className="mt-1 text-gray-600">
+            We’re building this next. For now, try Airtime, ZESA Tokens, or Event Tickets.
+          </p>
+        </div>
+      )}
+    </>
+  )
+
+  if (isLive) {
+    return (
+      <Link
+        href={href}
+        className="group block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+      >
+        {CardInner}
+      </Link>
+    )
+  }
 
   return (
-    <Link
-      href={href}
-      className="group block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+    <button
+      type="button"
+      onClick={() => setShowHint((v) => !v)}
+      onMouseEnter={() => setShowHint(true)}
+      onMouseLeave={() => setShowHint(false)}
+      className="group block w-full text-left rounded-2xl border border-gray-200 bg-white/60 p-4 shadow-sm transition-all"
+      aria-label={`${service.title} (coming soon)`}
     >
-      <h3 className="text-base font-semibold text-gray-900">{service.title}</h3>
-      <p className="text-sm text-gray-600 mt-1">{service.subtitle}</p>
-      <div className="mt-3 text-sm font-semibold text-emerald-700 group-hover:text-emerald-800">
-        View →
-      </div>
-    </Link>
+      {CardInner}
+    </button>
   )
 }
 
@@ -71,7 +130,7 @@ export default function ServiceFinder({ services = DEFAULT_SERVICES }) {
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-gray-900">Which service are you looking for?</h2>
-          <p className="text-gray-600 text-sm mt-1">Search and pick a service. More services launching soon.</p>
+          <p className="text-gray-600 text-sm mt-1">Choose a service to get started.</p>
         </div>
         <div className="w-full md:max-w-md">
           <label className="sr-only" htmlFor="service-search">Search services</label>

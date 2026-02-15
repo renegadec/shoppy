@@ -25,23 +25,23 @@ export default async function Home() {
                 <LockClosedIcon className="h-4 w-4 text-gray-800" /> Secure checkout • Mobile-first
               </p>
               <h1 className="text-4xl md:text-6xl font-bold mt-4 leading-[1.05] tracking-tight text-gray-900">
-                Simple payments,
+                Pay for Zimbabwe services
                 <span className="block">
-                  <span className="relative inline-block">
+                  in a <span className="relative inline-block">
                     <span className="relative z-10">
                       <RotatingWord
-                        words={["premium", "trusted", "secure", "modern"]}
+                        words={["simple", "secure", "fast", "modern"]}
                         className="text-emerald-700"
                       />
                     </span>
                     <span className="absolute inset-x-0 -bottom-1 h-3 bg-emerald-100 rounded-md" aria-hidden="true" />
-                  </span>
-                  <span className="text-gray-900"> experience.</span>
+                  </span>{' '}
+                  <span className="text-gray-900">way.</span>
                 </span>
               </h1>
               <p className="text-gray-600 mt-5 text-lg max-w-xl">
-                Shoppy is building a premium, trusted place to buy subscriptions today — and soon pay for airtime,
-                electricity, car licenses, gift cards, and event tickets.
+                Buy airtime, ZESA tokens, and event tickets — plus digital products and subscriptions.
+                Pay with crypto or EcoCash, and get clear delivery updates.
               </p>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -70,8 +70,8 @@ export default async function Home() {
                 </div>
                 <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
                   <CreditCardIcon className="h-5 w-5 text-emerald-700" />
-                  <p className="mt-2 text-sm font-semibold text-gray-900">Crypto payments</p>
-                  <p className="text-xs text-gray-600 mt-1">USDT • BTC • ETH and more.</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-900">Pay your way</p>
+                  <p className="text-xs text-gray-600 mt-1">Crypto (USDT • BTC • ETH) or EcoCash.</p>
                 </div>
                 <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
                   <BoltIcon className="h-5 w-5 text-emerald-700" />
@@ -113,51 +113,76 @@ export default async function Home() {
             </div>
             <div className="rounded-2xl border border-gray-200 p-6">
               <TicketIcon className="h-6 w-6 text-emerald-700" />
-              <h3 className="font-semibold text-gray-900 mt-3">More services soon</h3>
+              <h3 className="font-semibold text-gray-900 mt-3">Built for Zimbabwe services</h3>
               <p className="text-sm text-gray-600 mt-1">
-                Airtime, electricity, car licenses, gift cards, and event tickets — launching in phases.
+                Airtime, ZESA tokens, and event tickets — with a clean, mobile-first checkout.
               </p>
             </div>
           </div>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-3xl bg-white border border-gray-200 p-6">
-            <div>
-              <p className="font-semibold text-gray-900">Looking for subscriptions & digital tools right now?</p>
-              <p className="text-sm text-gray-600 mt-1">Browse our available products (not shown on the homepage).</p>
+          <div className="mt-10 rounded-3xl bg-white border border-gray-200 p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <p className="font-semibold text-gray-900">Explore what’s available today</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Start with services (airtime, ZESA, tickets) or browse our digital products and subscriptions.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link
+                  href="/airtime"
+                  className="inline-flex justify-center rounded-2xl bg-gray-900 text-white px-5 py-3 font-semibold hover:bg-black transition-colors"
+                >
+                  Buy Airtime
+                </Link>
+                <Link
+                  href="/zesa"
+                  className="inline-flex justify-center rounded-2xl bg-white border border-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Buy ZESA Tokens
+                </Link>
+                <Link
+                  href="/shop"
+                  className="inline-flex justify-center rounded-2xl bg-emerald-700 text-white px-5 py-3 font-semibold hover:bg-emerald-800 transition-colors"
+                >
+                  Browse Digital Products
+                </Link>
+              </div>
             </div>
-            <Link
-              href="/shop"
-              className="inline-flex justify-center rounded-2xl bg-emerald-700 text-white px-6 py-3 font-semibold hover:bg-emerald-800 transition-colors"
-            >
-              Go to Shop
-            </Link>
           </div>
 
           {/* Upcoming events */}
           <HomeUpcomingEvents />
 
-          {/* How it works (tickets) */}
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-              <p className="text-xs font-semibold text-gray-600">STEP 1</p>
-              <p className="mt-2 text-lg font-semibold text-gray-900">Pick an event</p>
-              <p className="text-sm text-gray-600 mt-1">See date, venue, and starting price.</p>
-            </div>
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-              <p className="text-xs font-semibold text-gray-600">STEP 2</p>
-              <p className="mt-2 text-lg font-semibold text-gray-900">Pay securely</p>
-              <p className="text-sm text-gray-600 mt-1">Pay with crypto via NOWPayments.</p>
-            </div>
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-              <p className="text-xs font-semibold text-gray-600">STEP 3</p>
-              <p className="mt-2 text-lg font-semibold text-gray-900">Receive QR ticket</p>
-              <p className="text-sm text-gray-600 mt-1">Delivered to your email after confirmation.</p>
-            </div>
-          </div>
+          {/* How it works */}
+          <div className="mt-10">
+            <h3 className="text-xl font-bold text-gray-900">How it works</h3>
+            <p className="text-sm text-gray-600 mt-2">
+              A simple flow: choose a service, pay securely, get delivery updates.
+            </p>
 
-          <p className="mt-6 text-xs text-gray-500">
-            Refund policy: refundable up to 72 hours before the event (minus fees).
-          </p>
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                <p className="text-xs font-semibold text-gray-600">STEP 1</p>
+                <p className="mt-2 text-lg font-semibold text-gray-900">Choose a service</p>
+                <p className="text-sm text-gray-600 mt-1">Airtime, ZESA tokens, tickets, or digital products.</p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                <p className="text-xs font-semibold text-gray-600">STEP 2</p>
+                <p className="mt-2 text-lg font-semibold text-gray-900">Pay securely</p>
+                <p className="text-sm text-gray-600 mt-1">Crypto or EcoCash — quick checkout on mobile.</p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white p-6">
+                <p className="text-xs font-semibold text-gray-600">STEP 3</p>
+                <p className="mt-2 text-lg font-semibold text-gray-900">Receive delivery</p>
+                <p className="text-sm text-gray-600 mt-1">Instant where possible, or emailed once confirmed.</p>
+              </div>
+            </div>
+
+            <p className="mt-6 text-xs text-gray-500">
+              For event tickets: refundable up to 72 hours before the event (minus fees).
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -76,10 +76,23 @@ export default function StoreLayout({ children }) {
                 <span className="font-bold text-xl">shoppy<span className="text-emerald-400">.co.zw</span></span>
               </div>
               <p className="text-gray-400 text-sm">
-                Premium digital products today — and Zimbabwe services (airtime, electricity, tickets) launching soon.
+                Pay for airtime, ZESA tokens, and event tickets — plus digital products and subscriptions.
               </p>
             </div>
             
+            {/* Useful links */}
+            <div>
+              <h4 className="font-semibold mb-4 text-emerald-400">Useful Links</h4>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/airtime" className="text-gray-300 hover:text-white transition-colors">Buy Airtime</Link></li>
+                <li><Link href="/zesa" className="text-gray-300 hover:text-white transition-colors">Buy ZESA Tokens</Link></li>
+                <li><Link href="/events" className="text-gray-300 hover:text-white transition-colors">Events & Tickets</Link></li>
+                <li><Link href="/shop" className="text-gray-300 hover:text-white transition-colors">Digital Products</Link></li>
+                <li className="pt-2"><Link href="/terms" className="text-gray-400 hover:text-white transition-colors">Terms</Link></li>
+                <li><Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy</Link></li>
+              </ul>
+            </div>
+
             {/* Payment Methods */}
             <div>
               <h4 className="font-semibold mb-4 text-emerald-400">We Accept</h4>
@@ -118,10 +131,15 @@ export default function StoreLayout({ children }) {
             
             {/* Support */}
             <div>
-              <h4 className="font-semibold mb-4 text-emerald-400">Need Help?</h4>
+              <h4 className="font-semibold mb-4 text-emerald-400">Support</h4>
               <p className="text-gray-400 text-sm">
-                Reach out via Telegram or WhatsApp for instant support.
+                Telegram: <a className="text-white hover:underline" href="https://t.me/shoppy_zw" target="_blank" rel="noopener noreferrer">@shoppy_zw</a>
+                <br />
+                Email: <a className="text-white hover:underline" href="mailto:support@shoppy.co.zw">support@shoppy.co.zw</a>
               </p>
+              <div className="mt-3">
+                <Link href="/support" className="text-sm text-emerald-300 hover:text-white transition-colors">Help & FAQs →</Link>
+              </div>
             </div>
           </div>
           
