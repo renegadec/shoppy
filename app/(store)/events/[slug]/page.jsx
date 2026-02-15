@@ -3,6 +3,41 @@ import { notFound } from 'next/navigation'
 import { ArrowLeftIcon, TicketIcon, MapPinIcon, CalendarDaysIcon } from '@heroicons/react/24/solid'
 import { formatEventDate, getPublicEventBySlug } from '@/lib/eventsStore'
 
+function toGCalDate(dt) {
+  const d = dt instanceof Date ? dt : new Date(dt)
+  const pad = (n) => String(n).padStart(2, '0')
+  return (
+    d.getUTCFullYear() +
+    pad(d.getUTCMonth() + 1) +
+    pad(d.getUTCDate()) +
+    'T' +
+    pad(d.getUTCHours()) +
+    pad(d.getUTCMinutes()) +
+    pad(d.getUTCSeconds()) +
+    'Z'
+  )
+}
+
+function buildGoogleCalendarUrl({ title, details, location, startsAt, endsAt }) {
+  const start = startsAt ? toGCalDate(startsAt) : null
+  let end = endsAt ? toGCalDate(endsAt) : null
+
+  if (!end && startsAt) {
+    // Default duration: 2 hours
+    const d = startsAt instanceof Date ? new Date(startsAt) : new Date(startsAt)
+    d.setHours(d.getHours() + 2)
+    end = toGCalDate(d)
+  }
+
+  const url = new URL('https://calendar.google.com/calendar/render')
+  url.searchParams.set('action', 'TEMPLATE')
+  if (title) url.searchParams.set('text', title)
+  if (details) url.searchParams.set('details', details)
+  if (location) url.searchParams.set('location', location)
+  if (start && end) url.searchParams.set('dates', `${start}/${end}`)
+  return url.toString()
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function EventDetailsPage({ params }) {
@@ -38,9 +73,26 @@ export default async function EventDetailsPage({ params }) {
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
-              <div className="flex items-center gap-2 text-gray-900 font-semibold">
-                <CalendarDaysIcon className="h-5 w-5 text-emerald-700" />
-                Date & time
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-gray-900 font-semibold">
+                  <CalendarDaysIcon className="h-5 w-5 text-emerald-700" />
+                  Date & time
+                </div>
+                <a
+                  href={buildGoogleCalendarUrl({
+                    title: event.title,
+                    details: event.subtitle || event.description || '',
+                    location: [event.venue, event.city].filter(Boolean).join(' • ') || 'TBA',
+                    startsAt: event.startsAt,
+                    endsAt: event.endsAt,
+                  })}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                  title="Add to Google Calendar"
+                >
+                  Add to Google Calendar →
+                </a>
               </div>
               <p className="text-sm text-gray-600 mt-1">{formatEventDate(event.startsAt)}</p>
             </div>

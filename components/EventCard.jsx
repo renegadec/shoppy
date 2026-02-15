@@ -1,54 +1,8 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 
-function toGCalDate(dt) {
-  const d = dt instanceof Date ? dt : new Date(dt)
-  // YYYYMMDDTHHMMSSZ
-  const pad = (n) => String(n).padStart(2, '0')
-  return (
-    d.getUTCFullYear() +
-    pad(d.getUTCMonth() + 1) +
-    pad(d.getUTCDate()) +
-    'T' +
-    pad(d.getUTCHours()) +
-    pad(d.getUTCMinutes()) +
-    pad(d.getUTCSeconds()) +
-    'Z'
-  )
-}
-
-function buildGoogleCalendarUrl({ title, details, location, startsAt, endsAt }) {
-  const start = startsAt ? toGCalDate(startsAt) : null
-  let end = endsAt ? toGCalDate(endsAt) : null
-
-  if (!end && startsAt) {
-    // Default duration: 2 hours
-    const d = startsAt instanceof Date ? new Date(startsAt) : new Date(startsAt)
-    d.setHours(d.getHours() + 2)
-    end = toGCalDate(d)
-  }
-
-  const url = new URL('https://calendar.google.com/calendar/render')
-  url.searchParams.set('action', 'TEMPLATE')
-  if (title) url.searchParams.set('text', title)
-  if (details) url.searchParams.set('details', details)
-  if (location) url.searchParams.set('location', location)
-  if (start && end) url.searchParams.set('dates', `${start}/${end}`)
-  return url.toString()
-}
-
 export default function EventCard({ event, dateLabel, fromPriceLabel }) {
-  const location = [event.city, event.venue].filter(Boolean).join(' • ') || 'TBA'
-
-  const gcalUrl = buildGoogleCalendarUrl({
-    title: event.title,
-    details: event.subtitle || event.description || '',
-    location,
-    startsAt: event.startsAt,
-    endsAt: event.endsAt,
-  })
+  const location = [event.city, event.venue].filter(Boolean).join(' • ') || 'Zimbabwe'
 
   return (
     <Link
@@ -92,21 +46,7 @@ export default function EventCard({ event, dateLabel, fromPriceLabel }) {
 
           <div className="mt-3 flex items-center justify-between gap-4">
             <span className="text-xs text-gray-500 truncate">{location}</span>
-            <span className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  window.open(gcalUrl, '_blank', 'noopener,noreferrer')
-                }}
-                className="text-xs font-semibold text-gray-700 hover:text-gray-900 underline decoration-dotted underline-offset-4"
-                title="Add to Google Calendar"
-              >
-                Add to Calendar
-              </button>
-              <span className="text-sm font-semibold text-emerald-700 group-hover:text-emerald-800">View →</span>
-            </span>
+            <span className="text-sm font-semibold text-emerald-700 group-hover:text-emerald-800">View →</span>
           </div>
         </div>
       </div>
