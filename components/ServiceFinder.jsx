@@ -54,7 +54,7 @@ function ServiceCard({ service }) {
   const isLive = service.status !== 'coming_soon'
 
   const CardInner = (
-    <>
+    <div className="flex h-full flex-col">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className={`text-base font-semibold ${isLive ? 'text-gray-900' : 'text-gray-500'}`}>
@@ -68,23 +68,25 @@ function ServiceCard({ service }) {
         />
       </div>
 
-      <div className={`mt-4 text-sm font-semibold ${isLive ? 'text-emerald-700 group-hover:text-emerald-800' : 'text-gray-400'}`}>
-        {isLive ? 'Open →' : 'Coming soon'}
-      </div>
+      {isLive && (
+        <div className="mt-4 text-sm font-semibold text-emerald-700 group-hover:text-emerald-800">
+          Open →
+        </div>
+      )}
 
       {!isLive && showHint && (
-        <div className="mt-3 inline-flex rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-700">
+        <div className="mt-4 inline-flex w-fit rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-700">
           Coming soon
         </div>
       )}
-    </>
+    </div>
   )
 
   if (isLive) {
     return (
       <Link
         href={href}
-        className="group block rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+        className="group block h-full rounded-2xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
       >
         {CardInner}
       </Link>
@@ -97,7 +99,7 @@ function ServiceCard({ service }) {
       onClick={() => setShowHint((v) => !v)}
       onMouseEnter={() => setShowHint(true)}
       onMouseLeave={() => setShowHint(false)}
-      className="group block w-full text-left rounded-2xl border border-gray-200 bg-white/60 p-4 shadow-sm transition-all"
+      className="group block h-full w-full text-left rounded-2xl border border-gray-200 bg-white/60 p-4 shadow-sm transition-all"
       aria-label={`${service.title} (coming soon)`}
     >
       {CardInner}
@@ -130,7 +132,7 @@ export default function ServiceFinder({ services = DEFAULT_SERVICES }) {
             id="service-search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search service… (e.g. airtime, zesa, tickets)"
+            placeholder="e.g. airtime"
             className="w-full rounded-2xl bg-gray-50 text-gray-900 placeholder:text-gray-400 px-4 py-3 outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-emerald-600"
           />
         </div>
