@@ -16,8 +16,8 @@ export default async function EventsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex items-start justify-between gap-6">
             <div>
-              <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-700 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
-                <TicketIcon className="h-4 w-4 text-emerald-700" /> Event Tickets
+              <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-emerald-900 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                <TicketIcon className="h-4 w-4 text-emerald-800" /> Event Tickets
               </p>
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mt-4">Upcoming events</h1>
               <p className="text-gray-600 mt-2 max-w-2xl">

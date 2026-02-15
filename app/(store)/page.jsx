@@ -21,8 +21,8 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-8 sm:pt-12 sm:pb-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
-              <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-700 bg-gray-100 px-3 py-1.5 rounded-full border border-gray-200">
-                <LockClosedIcon className="h-4 w-4 text-gray-800" /> Secure checkout • Mobile-first
+              <p className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-emerald-900 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                <LockClosedIcon className="h-4 w-4 text-emerald-800" /> Secure checkout • Mobile-first
               </p>
               <h1 className="text-4xl md:text-6xl font-bold mt-4 leading-[1.05] tracking-tight text-gray-900">
                 Pay for essential services
