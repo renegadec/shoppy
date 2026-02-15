@@ -25,7 +25,7 @@ export default async function Home() {
                 <LockClosedIcon className="h-4 w-4 text-gray-800" /> Secure checkout • Mobile-first
               </p>
               <h1 className="text-4xl md:text-6xl font-bold mt-4 leading-[1.05] tracking-tight text-gray-900">
-                Pay for Zimbabwe services
+                Pay for essential services
                 <span className="block">
                   in a <span className="relative inline-block">
                     <span className="relative z-10">
@@ -46,19 +46,23 @@ export default async function Home() {
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Link
-                  href="/shop"
+                  href="/airtime"
                   className="inline-flex justify-center rounded-2xl bg-emerald-700 text-white px-6 py-3 font-bold shadow-sm hover:bg-emerald-800 transition-colors"
                 >
-                  Browse Digital Products
+                  Buy Airtime
                 </Link>
-                <a
-                  href="https://t.me/shoppy_zw"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  href="/zesa"
                   className="inline-flex justify-center rounded-2xl bg-white border border-gray-200 text-gray-900 px-6 py-3 font-semibold hover:bg-gray-50 transition-colors"
                 >
-                  Contact Support
-                </a>
+                  Buy ZESA Tokens
+                </Link>
+              </div>
+
+              <div className="mt-3">
+                <Link href="/shop" className="text-sm font-semibold text-emerald-700 hover:text-emerald-800">
+                  Browse digital products →
+                </Link>
               </div>
 
               {/* Trust row */}
@@ -113,7 +117,7 @@ export default async function Home() {
             </div>
             <div className="rounded-2xl border border-gray-200 p-6">
               <TicketIcon className="h-6 w-6 text-emerald-700" />
-              <h3 className="font-semibold text-gray-900 mt-3">Built for Zimbabwe services</h3>
+              <h3 className="font-semibold text-gray-900 mt-3">Built for everyday essentials</h3>
               <p className="text-sm text-gray-600 mt-1">
                 Airtime, ZESA tokens, and event tickets — with a clean, mobile-first checkout.
               </p>

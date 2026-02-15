@@ -63,26 +63,18 @@ function ServiceCard({ service }) {
           <p className={`text-sm mt-1 ${isLive ? 'text-gray-600' : 'text-gray-400'}`}>{service.subtitle}</p>
         </div>
         <span
-          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold border ${
-            isLive
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-gray-50 text-gray-500 border-gray-200'
-          }`}
-        >
-          {isLive ? 'LIVE' : 'SOON'}
-        </span>
+          className={`shrink-0 h-2.5 w-2.5 rounded-full ${isLive ? 'bg-emerald-600' : 'bg-red-500'}`}
+          aria-hidden="true"
+        />
       </div>
 
       <div className={`mt-4 text-sm font-semibold ${isLive ? 'text-emerald-700 group-hover:text-emerald-800' : 'text-gray-400'}`}>
-        {isLive ? 'Open →' : 'Notify me →'}
+        {isLive ? 'Open →' : 'Coming soon'}
       </div>
 
       {!isLive && showHint && (
-        <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
-          <p className="font-semibold">Not live yet</p>
-          <p className="mt-1 text-gray-600">
-            We’re building this next. For now, try Airtime, ZESA Tokens, or Event Tickets.
-          </p>
+        <div className="mt-3 inline-flex rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-semibold text-gray-700">
+          Coming soon
         </div>
       )}
     </>
