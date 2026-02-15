@@ -51,57 +51,93 @@ function extractOperationId(payload) {
     payload?.operationId ||
     payload?.invoice_id ||
     payload?.invoiceId ||
-    payload?.verify_hash ||
-    payload?.verifyHash ||
     null
   )
 }
 
 async function handlePlisioCallback(payload) {
-  // Plisio callback payload formats vary by integration.
   const operationId = extractOperationId(payload)
+  const verifyHash = payload?.verify_hash || payload?.verifyHash || null
 
-  if (!operationId) {
-    console.error('Plisio webhook: missing operation id', payload)
-    // Return 200 so Plisio doesn't keep retrying endlessly; we still log for debugging.
-    return NextResponse.json({ success: true, ignored: true, error: 'Missing operation id' })
-  }
-
-  // Best-effort verification: fetch canonical operation details from Plisio API.
-  const opResp = await getOperation(operationId)
-  const op = opResp?.data || opResp?.operation || opResp?.response || opResp?.result || null
-
-  const status = op?.status || opResp?.status || payload?.status
-  const orderNumber =
-    op?.operationParams?.orderNumber ||
+  // Start from payload (do not depend on Plisio API to update our DB)
+  let status = payload?.status || null
+  let orderNumber =
     payload?.order_number ||
     payload?.orderNumber ||
     payload?.order_id ||
-    payload?.orderId
+    payload?.orderId ||
+    null
+
+  let op = null
+
+  // Optional enrichment from Plisio API (best-effort)
+  if (operationId) {
+    try {
+      const opResp = await getOperation(operationId)
+      op = opResp?.data || opResp?.operation || opResp?.response || opResp?.result || null
+      status = status || op?.status || opResp?.status || null
+      orderNumber = orderNumber || op?.operationParams?.orderNumber || null
+    } catch (e) {
+      console.error('Plisio webhook: getOperation failed (continuing):', e?.message || e)
+    }
+  }
 
   if (!orderNumber) {
-    console.error('Plisio webhook: missing order number', { payload, opResp })
+    console.error('Plisio webhook: missing order number', payload)
     return NextResponse.json({ success: true, ignored: true, error: 'Missing order number' })
   }
 
-    // Detect order kind
-    let isTicketOrder = String(orderNumber).startsWith('EVT-')
-    let isAirtimeOrder = String(orderNumber).startsWith('AIR-')
-    let isZesaOrder = String(orderNumber).startsWith('ZESA-')
+  // Detect order kind
+  let isTicketOrder = String(orderNumber).startsWith('EVT-')
+  let isAirtimeOrder = String(orderNumber).startsWith('AIR-')
+  let isZesaOrder = String(orderNumber).startsWith('ZESA-')
 
-    if (!isTicketOrder && !isAirtimeOrder && !isZesaOrder) {
-      const [a, z, t] = await Promise.all([
-        prisma.airtimeOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
-        prisma.zesaOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
-        prisma.ticketOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
-      ])
-      if (t) isTicketOrder = true
-      if (a) isAirtimeOrder = true
-      if (z) isZesaOrder = true
+  if (!isTicketOrder && !isAirtimeOrder && !isZesaOrder) {
+    const [a, z, t] = await Promise.all([
+      prisma.airtimeOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
+      prisma.zesaOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
+      prisma.ticketOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
+    ])
+    if (t) isTicketOrder = true
+    if (a) isAirtimeOrder = true
+    if (z) isZesaOrder = true
+  }
+
+  // If verify_hash is present, validate against providerRef we stored when creating the invoice.
+  if (verifyHash) {
+    const existing = isTicketOrder
+      ? await prisma.ticketOrder.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
+      : isAirtimeOrder
+        ? await prisma.airtimeOrder.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
+        : isZesaOrder
+          ? await prisma.zesaOrder.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
+          : await prisma.order.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
+
+    if (existing?.providerRef && String(existing.providerRef) !== String(verifyHash)) {
+      console.error('Plisio webhook: verify_hash mismatch', { orderNumber, verifyHash })
+      return NextResponse.json({ success: true, ignored: true, error: 'verify_hash mismatch' })
     }
+  }
 
-    const paidAmount = Number(op?.actualSum || op?.sum || body.amount || body.paid_amount || 0) || null
-    const paidCurrency = op?.psysCid || op?.currency || body.currency || null
+  const paidAmount =
+    Number(
+      op?.actualSum ||
+        op?.sum ||
+        payload?.actually_paid ||
+        payload?.paid_amount ||
+        payload?.amount ||
+        payload?.actual_sum ||
+        payload?.sum ||
+        0
+    ) || null
+
+  const paidCurrency =
+    op?.psysCid ||
+    op?.currency ||
+    payload?.psyscid ||
+    payload?.pay_currency ||
+    payload?.currency ||
+    null
 
     const updatedOrder = isTicketOrder
       ? await updateTicketOrderFromWebhook({
