@@ -8,6 +8,7 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', icon: '📊' },
   { href: '/admin/orders', label: 'Orders', icon: '📦' },
   { href: '/admin/airtime-orders', label: 'Airtime Orders', icon: '📱' },
+  { href: '/admin/zesa-orders', label: 'ZESA Orders', icon: '⚡' },
   { href: '/admin/products', label: 'Products', icon: '🏷️' },
   { href: '/admin/events', label: 'Events', icon: '🎟️' },
   { href: '/admin/ticket-orders', label: 'Ticket Orders', icon: '🧾' },

@@ -1,13 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import DataTable from '@/components/admin/DataTable'
 import OrderStatusBadge from '@/components/admin/OrderStatusBadge'
 import Modal from '@/components/admin/Modal'
 
-export default function TicketOrdersPage() {
+export default function ZesaOrdersPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
@@ -16,8 +16,8 @@ export default function TicketOrdersPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
-  const [selected, setSelected] = useState(null)
-  const [resending, setResending] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [retrying, setRetrying] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/admin/login')
@@ -34,33 +34,41 @@ export default function TicketOrdersPage() {
       const params = new URLSearchParams({
         page: String(pagination.page),
         status: filter,
-        ...(search && { search }),
+        ...(search ? { search } : {}),
       })
-      const res = await fetch(`/api/admin/ticket-orders?${params}`)
+      const res = await fetch(`/api/admin/zesa-orders?${params}`)
       if (res.ok) {
         const data = await res.json()
         setOrders(data.orders)
         setPagination(data.pagination)
       }
     } catch (e) {
-      console.error('fetch ticket orders error', e)
+      console.error('Fetch zesa orders error:', e)
     } finally {
       setLoading(false)
     }
   }
 
-  async function resendEmail(orderId) {
-    setResending(true)
+  async function retryFulfillment(orderNumber) {
+    setRetrying(true)
     try {
-      const res = await fetch(`/api/admin/ticket-orders/${orderId}/resend`, { method: 'POST' })
+      const res = await fetch(`/api/admin/zesa-orders/${orderNumber}/retry`, { method: 'POST' })
       const data = await res.json().catch(() => null)
-      if (!res.ok) throw new Error(data?.error || 'Failed to resend')
-      alert('Ticket email sent')
+      if (!res.ok) throw new Error(data?.error || 'Failed')
+      if (!data?.ok) throw new Error(data?.message || 'Retry not allowed')
+
+      await fetchOrders()
+      setSelectedOrder(data.order)
     } catch (e) {
       alert(e.message)
     } finally {
-      setResending(false)
+      setRetrying(false)
     }
+  }
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    fetchOrders()
   }
 
   if (status === 'loading') return <div>Loading...</div>
@@ -72,20 +80,29 @@ export default function TicketOrdersPage() {
       render: (row) => <span className="font-mono text-sm text-emerald-600 font-medium">{row.orderNumber}</span>,
     },
     {
-      header: 'Event',
+      header: 'Customer',
       render: (row) => (
         <div>
-          <p className="font-medium text-gray-900">{row.event?.title}</p>
-          <p className="text-sm text-gray-500">{row.event?.slug}</p>
+          <p className="font-medium text-gray-900">{row.customer?.email}</p>
+          <p className="text-sm text-gray-500">{row.contactMethod}: {row.contactValue}</p>
         </div>
       ),
     },
     {
-      header: 'Customer',
-      render: (row) => <span className="text-gray-900">{row.customer?.email}</span>,
+      header: 'Meter',
+      render: (row) => (
+        <div>
+          <p className="font-medium text-gray-900">{row.meterNumber}</p>
+          <p className="text-sm text-gray-500">Notify: {row.notifyNumber}</p>
+        </div>
+      ),
     },
     {
-      header: 'Amount',
+      header: 'Token',
+      render: (row) => <span className="font-semibold">${row.tokenAmount}</span>,
+    },
+    {
+      header: 'Customer Pays',
       render: (row) => <span className="font-semibold">${row.amount}</span>,
     },
     {
@@ -110,22 +127,16 @@ export default function TicketOrdersPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Ticket Orders</h1>
-        <p className="text-gray-500 mt-1">Support: resend tickets, verify status, and view ticket codes</p>
+        <h1 className="text-3xl font-bold text-gray-900">ZESA Orders</h1>
+        <p className="text-gray-500 mt-1">Token delivery via Hot Recharge API</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              fetchOrders()
-            }}
-            className="flex-1"
-          >
+          <form onSubmit={handleSearch} className="flex-1">
             <input
               type="text"
-              placeholder="Search by order #, email, or event title..."
+              placeholder="Search by order #, email, meter, payment id..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
@@ -142,21 +153,19 @@ export default function TicketOrdersPage() {
           >
             <option value="all">All Status</option>
             <option value="PENDING">Pending</option>
-            <option value="PROCESSING">Processing</option>
             <option value="PAID">Paid</option>
             <option value="DELIVERED">Delivered</option>
             <option value="FAILED">Failed</option>
             <option value="EXPIRED">Expired</option>
-            <option value="REFUNDED">Refunded</option>
           </select>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading ticket orders...</div>
+        <div className="text-center py-12 text-gray-500">Loading ZESA orders...</div>
       ) : (
         <>
-          <DataTable columns={columns} data={orders} onRowClick={setSelected} emptyMessage="No ticket orders found" />
+          <DataTable columns={columns} data={orders} onRowClick={setSelectedOrder} emptyMessage="No ZESA orders found" />
 
           {pagination.pages > 1 && (
             <div className="flex justify-center gap-2 mt-6">
@@ -177,59 +186,69 @@ export default function TicketOrdersPage() {
       )}
 
       <Modal
-        isOpen={!!selected}
-        onClose={() => setSelected(null)}
-        title={`Ticket Order ${selected?.orderNumber || ''}`}
+        isOpen={!!selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        title={`ZESA Order ${selectedOrder?.orderNumber}`}
         size="lg"
       >
-        {selected && (
-          <div className="space-y-6">
+        {selectedOrder && (
+          <div className="space-y-4 text-sm">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500">Status</p>
-                <OrderStatusBadge status={selected.status} />
+                <p className="text-gray-500">Status</p>
+                <OrderStatusBadge status={selectedOrder.status} />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Amount</p>
-                <p className="font-semibold text-lg">${selected.amount}</p>
+                <p className="text-gray-500">Payment</p>
+                <p className="font-medium">{selectedOrder.paymentMethod} • {selectedOrder.paymentStatus || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Event</p>
-                <p className="font-medium">{selected.event?.title}</p>
+                <p className="text-gray-500">Meter</p>
+                <p className="font-medium">{selectedOrder.meterNumber}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Customer email</p>
-                <p className="font-medium">{selected.customer?.email}</p>
+                <p className="text-gray-500">Notify number</p>
+                <p className="font-medium">{selectedOrder.notifyNumber}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Token amount</p>
+                <p className="font-semibold">${selectedOrder.tokenAmount}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Customer pays</p>
+                <p className="font-semibold">${selectedOrder.amount}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">PaymentId</p>
+                <p className="font-mono text-xs break-all">{selectedOrder.paymentId || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">ProviderRef</p>
+                <p className="font-mono text-xs break-all">{selectedOrder.providerRef || 'N/A'}</p>
               </div>
             </div>
 
             <div className="border-t pt-4">
-              <h4 className="font-semibold mb-2">Tickets</h4>
-              <div className="space-y-2">
-                {(selected.items || []).map((it) => (
-                  <div key={it.id} className="flex items-center justify-between rounded-xl border border-gray-200 p-3">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-900">{it.ticketType?.name || 'Ticket'}</p>
-                      <p className="text-xs text-gray-500">Code: {it.ticketCode}</p>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${it.redeemed ? 'bg-gray-200 text-gray-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                      {it.redeemed ? 'Redeemed' : 'Valid'}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <p className="text-gray-500">Hot Recharge</p>
+              <p>ProductId: {selectedOrder.hotProductId ?? 'N/A'} • RechargeId: {selectedOrder.hotRechargeId ?? 'N/A'}</p>
+              {selectedOrder.hotMessage && <p className="text-gray-700 mt-2">Message: {selectedOrder.hotMessage}</p>}
+              {selectedOrder.deliveryNotes && <p className="text-gray-700 mt-2">Notes: {selectedOrder.deliveryNotes}</p>}
             </div>
 
-            <div className="border-t pt-4">
-              <button
-                onClick={() => resendEmail(selected.id)}
-                disabled={resending}
-                className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
-              >
-                {resending ? 'Sending…' : 'Resend ticket email'}
-              </button>
-              <p className="text-xs text-gray-500 mt-2 text-center">Sends QR tickets to the customer’s email.</p>
-            </div>
+            {selectedOrder.status === 'PAID' && !selectedOrder.delivered && (
+              <div className="border-t pt-4">
+                <button
+                  onClick={() => retryFulfillment(selectedOrder.orderNumber)}
+                  disabled={retrying}
+                  className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                >
+                  {retrying ? 'Retrying…' : '↻ Retry delivery'}
+                </button>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Only runs when payment is confirmed (PAID) and delivery is not done.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </Modal>

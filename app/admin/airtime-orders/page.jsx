@@ -84,6 +84,15 @@ export default function AirtimeOrdersPage() {
       render: (row) => <span className="font-semibold">${row.amount}</span>,
     },
     {
+      header: 'Payment',
+      render: (row) => (
+        <div>
+          <p className="text-sm font-medium text-gray-900">{row.paymentMethod}</p>
+          <p className="text-xs text-gray-500">{row.paymentStatus || 'N/A'}</p>
+        </div>
+      ),
+    },
+    {
       header: 'Status',
       render: (row) => <OrderStatusBadge status={row.status} />,
     },
@@ -177,6 +186,14 @@ export default function AirtimeOrdersPage() {
                 <p className="font-medium">{selectedOrder.paymentMethod} • {selectedOrder.paymentStatus || 'N/A'}</p>
               </div>
               <div>
+                <p className="text-gray-500">PaymentId</p>
+                <p className="font-mono text-xs break-all">{selectedOrder.paymentId || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">ProviderRef</p>
+                <p className="font-mono text-xs break-all">{selectedOrder.providerRef || 'N/A'}</p>
+              </div>
+              <div>
                 <p className="text-gray-500">Recipient</p>
                 <p className="font-medium">{selectedOrder.recipientMsisdn}</p>
               </div>
@@ -200,6 +217,32 @@ export default function AirtimeOrdersPage() {
               {selectedOrder.hotMessage && <p className="text-gray-700 mt-2">Message: {selectedOrder.hotMessage}</p>}
               {selectedOrder.deliveryNotes && <p className="text-gray-700 mt-2">Notes: {selectedOrder.deliveryNotes}</p>}
             </div>
+
+            {selectedOrder.status === 'PAID' && !selectedOrder.delivered && (
+              <div className="border-t pt-4">
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(`/api/admin/airtime-orders/${selectedOrder.orderNumber}/retry`, { method: 'POST' })
+                      const data = await res.json().catch(() => null)
+                      if (!res.ok) throw new Error(data?.error || 'Failed')
+                      if (!data?.ok) throw new Error(data?.message || 'Retry not allowed')
+                      setSelectedOrder(data.order)
+                      fetchOrders()
+                      alert('Retry started')
+                    } catch (e) {
+                      alert(e.message)
+                    }
+                  }}
+                  className="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
+                >
+                  ↻ Retry delivery
+                </button>
+                <p className="text-xs text-gray-500 mt-2 text-center">
+                  Only runs when payment is confirmed (PAID) and delivery is not done.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </Modal>

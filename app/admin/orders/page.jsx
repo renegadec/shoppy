@@ -102,6 +102,15 @@ export default function OrdersPage() {
       render: (row) => <span className="font-semibold">${row.amount}</span>
     },
     {
+      header: 'Payment',
+      render: (row) => (
+        <div>
+          <p className="text-sm font-medium text-gray-900">{row.paymentMethod}</p>
+          <p className="text-xs text-gray-500">{row.paymentStatus || 'N/A'}</p>
+        </div>
+      )
+    },
+    {
       header: 'Status',
       render: (row) => <OrderStatusBadge status={row.status} />
     },
