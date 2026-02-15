@@ -13,30 +13,76 @@ function isPaidStatus(status) {
   return ['completed', 'confirmed', 'finished', 'success', 'paid'].includes(s)
 }
 
-export async function POST(request) {
+async function parsePlisioBody(request) {
+  // Plisio callbacks may be JSON or form-encoded. Handle both.
+  const contentType = request.headers.get('content-type') || ''
+
+  if (contentType.includes('application/json')) {
+    return await request.json().catch(() => ({}))
+  }
+
+  const raw = await request.text().catch(() => '')
+  if (!raw) return {}
+
+  // Try form-encoded first
   try {
-    const body = await request.json().catch(() => ({}))
+    const params = new URLSearchParams(raw)
+    const obj = {}
+    for (const [k, v] of params.entries()) obj[k] = v
+    if (Object.keys(obj).length) return obj
+  } catch {
+    // ignore
+  }
 
-    // Plisio callback payload formats vary by integration.
-    // Commonly includes txn_id (operation id). We'll fall back to id/txnId.
-    const operationId = body.txn_id || body.txnId || body.id
+  // Fallback: try JSON parse
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return { raw }
+  }
+}
 
-    if (!operationId) {
-      console.error('Plisio webhook: missing operation id', body)
-      return NextResponse.json({ success: false, error: 'Missing operation id' }, { status: 400 })
-    }
+function extractOperationId(payload) {
+  return (
+    payload?.txn_id ||
+    payload?.txnId ||
+    payload?.id ||
+    payload?.operation_id ||
+    payload?.operationId ||
+    payload?.invoice_id ||
+    payload?.invoiceId ||
+    payload?.verify_hash ||
+    payload?.verifyHash ||
+    null
+  )
+}
 
-    // Best-effort verification: fetch canonical operation details from Plisio API.
-    const opResp = await getOperation(operationId)
-    const op = opResp?.data || opResp?.operation || opResp?.response || opResp?.result || opResp?.operation || opResp?.operation
+async function handlePlisioCallback(payload) {
+  // Plisio callback payload formats vary by integration.
+  const operationId = extractOperationId(payload)
 
-    const status = op?.status || opResp?.status || body.status
-    const orderNumber = op?.operationParams?.orderNumber || body.order_number || body.orderNumber
+  if (!operationId) {
+    console.error('Plisio webhook: missing operation id', payload)
+    // Return 200 so Plisio doesn't keep retrying endlessly; we still log for debugging.
+    return NextResponse.json({ success: true, ignored: true, error: 'Missing operation id' })
+  }
 
-    if (!orderNumber) {
-      console.error('Plisio webhook: missing order number', { body, opResp })
-      return NextResponse.json({ success: false, error: 'Missing order number' }, { status: 400 })
-    }
+  // Best-effort verification: fetch canonical operation details from Plisio API.
+  const opResp = await getOperation(operationId)
+  const op = opResp?.data || opResp?.operation || opResp?.response || opResp?.result || null
+
+  const status = op?.status || opResp?.status || payload?.status
+  const orderNumber =
+    op?.operationParams?.orderNumber ||
+    payload?.order_number ||
+    payload?.orderNumber ||
+    payload?.order_id ||
+    payload?.orderId
+
+  if (!orderNumber) {
+    console.error('Plisio webhook: missing order number', { payload, opResp })
+    return NextResponse.json({ success: true, ignored: true, error: 'Missing order number' })
+  }
 
     // Detect order kind
     let isTicketOrder = String(orderNumber).startsWith('EVT-')
@@ -147,13 +193,35 @@ export async function POST(request) {
       }
     }
 
-    return NextResponse.json({ success: true })
+  return NextResponse.json({ success: true })
+}
+
+export async function POST(request) {
+  try {
+    const payload = await parsePlisioBody(request)
+    console.log('Plisio webhook received:', JSON.stringify(payload))
+    return await handlePlisioCallback(payload)
   } catch (error) {
     console.error('Plisio webhook error:', error)
     return NextResponse.json({ success: true, error: error.message })
   }
 }
 
-export async function GET() {
-  return NextResponse.json({ status: 'Plisio webhook endpoint active' })
+export async function GET(request) {
+  try {
+    // Some gateways send callbacks via GET with query params.
+    const url = new URL(request.url)
+    const payload = {}
+    for (const [k, v] of url.searchParams.entries()) payload[k] = v
+
+    if (Object.keys(payload).length) {
+      console.log('Plisio webhook GET received:', JSON.stringify(payload))
+      return await handlePlisioCallback(payload)
+    }
+
+    return NextResponse.json({ status: 'Plisio webhook endpoint active' })
+  } catch (error) {
+    console.error('Plisio webhook GET error:', error)
+    return NextResponse.json({ status: 'error', error: error.message })
+  }
 }
