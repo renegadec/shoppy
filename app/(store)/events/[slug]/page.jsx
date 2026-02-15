@@ -73,11 +73,12 @@ export default async function EventDetailsPage({ params }) {
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-gray-900 font-semibold">
-                  <CalendarDaysIcon className="h-5 w-5 text-emerald-700" />
-                  Date & time
-                </div>
+              <div className="flex items-center gap-2 text-gray-900 font-semibold">
+                <CalendarDaysIcon className="h-5 w-5 text-emerald-700" />
+                Date & time
+              </div>
+              <p className="text-sm text-gray-600 mt-1">{formatEventDate(event.startsAt)}</p>
+              <div className="mt-3 pt-3 border-t border-gray-200">
                 <a
                   href={buildGoogleCalendarUrl({
                     title: event.title,
@@ -88,13 +89,12 @@ export default async function EventDetailsPage({ params }) {
                   })}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                  className="inline-flex text-xs font-semibold text-emerald-700 hover:text-emerald-800"
                   title="Add to Google Calendar"
                 >
                   Add to Google Calendar →
                 </a>
               </div>
-              <p className="text-sm text-gray-600 mt-1">{formatEventDate(event.startsAt)}</p>
             </div>
             <div className="rounded-2xl bg-gray-50 border border-gray-200 p-4">
               <div className="flex items-center gap-2 text-gray-900 font-semibold">
