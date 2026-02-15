@@ -109,18 +109,24 @@ export async function POST(request) {
     } else {
       // NOTE: Do NOT embed large payloads in NOWPayments order_id.
       // We rely on orderNumber + DB lookup in webhook.
-      const payment = await createPayment({
+      const payment = await createCryptoInvoice({
         priceAmount: amountToPay,
         priceCurrency: 'usd',
         orderId: orderNumber,
         orderDescription: `Airtime ${network} $${roundMoney(amt)} (+2%)`,
         successUrl: `${baseUrl}/airtime/success?order=${orderNumber}`,
         cancelUrl: `${baseUrl}/airtime`,
+        customerEmail: email,
       })
 
       await prisma.airtimeOrder.update({
         where: { id: airtimeOrder.id },
-        data: { paymentMethod: 'crypto', paymentId: payment.id?.toString(), paymentStatus: 'nowpayments_initiated' },
+        data: {
+          paymentMethod: 'crypto',
+          paymentId: payment.id?.toString?.() || payment.id || null,
+          providerRef: payment.verify_hash || null,
+          paymentStatus: `${payment.provider}_initiated`,
+        },
       })
 
       paymentUrl = payment.invoice_url

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import crypto from 'crypto'
-import { createPayment } from '@/lib/nowpayments'
+import { createCryptoInvoice } from '@/lib/cryptoGateway'
 import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { normalizeZwMsisdn } from '@/lib/msisdn'
 import { sendTelegramNotification } from '@/lib/telegram'
@@ -128,18 +128,24 @@ export async function POST(request) {
       redirectUrl = `${baseUrl}/tickets/success?order=${order.orderNumber}&pending=1&method=ecocash`
 
     } else {
-      const payment = await createPayment({
+      const payment = await createCryptoInvoice({
         priceAmount: order.amount,
         priceCurrency: 'usd',
         orderId: `${order.orderNumber}|${Buffer.from(JSON.stringify(orderData)).toString('base64')}`,
         orderDescription: `Event Ticket: ${event.title} (${ticketType.name}) x${qty}`,
         successUrl: `${baseUrl}/tickets/success?order=${order.orderNumber}`,
         cancelUrl: `${baseUrl}/events/${event.slug}`,
+        customerEmail: email,
       })
 
       await prisma.ticketOrder.update({
         where: { id: order.id },
-        data: { paymentMethod: 'crypto', paymentId: payment.id?.toString(), paymentStatus: 'nowpayments_initiated' },
+        data: {
+          paymentMethod: 'crypto',
+          paymentId: payment.id?.toString?.() || payment.id || null,
+          providerRef: payment.verify_hash || null,
+          paymentStatus: `${payment.provider}_initiated`,
+        },
       })
 
       paymentUrl = payment.invoice_url

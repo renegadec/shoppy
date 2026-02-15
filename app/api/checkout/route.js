@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { createPayment } from '@/lib/nowpayments'
+import { createCryptoInvoice } from '@/lib/cryptoGateway'
 import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { sendTelegramNotification, formatOrderNotification } from '@/lib/telegram'
 import { createOrder } from '@/lib/orders'
@@ -87,21 +87,23 @@ export async function POST(request) {
       orderData.ecocash = ecoCashResp
 
     } else {
-      const payment = await createPayment({
+      const payment = await createCryptoInvoice({
         priceAmount: product.price,
         priceCurrency: 'usd',
         orderId: `${order.orderNumber}|${Buffer.from(JSON.stringify(orderData)).toString('base64')}`,
         orderDescription: `${product.name}${product.period ? ` - ${product.period}` : ''}`,
         successUrl: `${baseUrl}/success?order=${order.orderNumber}`,
         cancelUrl: `${baseUrl}/product/${productId}`,
+        customerEmail: email,
       })
 
       await prisma.order.update({
         where: { id: order.id },
         data: {
           paymentMethod: 'crypto',
-          paymentId: payment.id?.toString(),
-          paymentStatus: 'nowpayments_initiated',
+          paymentId: payment.id?.toString?.() || payment.id || null,
+          providerRef: payment.verify_hash || null,
+          paymentStatus: `${payment.provider}_initiated`,
         },
       })
 

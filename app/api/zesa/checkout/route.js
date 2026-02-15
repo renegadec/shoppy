@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import prisma from '@/lib/prisma'
-import { createPayment } from '@/lib/nowpayments'
+import { createCryptoInvoice } from '@/lib/cryptoGateway'
 import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { computeMarkupAmount, generateZesaOrderNumber, roundMoney } from '@/lib/zesa'
@@ -103,18 +103,24 @@ export async function POST(request) {
     } else {
       // NOTE: Do NOT embed large payloads in NOWPayments order_id.
       // We rely on orderNumber + DB lookup in webhook.
-      const payment = await createPayment({
+      const payment = await createCryptoInvoice({
         priceAmount: amountToPay,
         priceCurrency: 'usd',
         orderId: orderNumber,
         orderDescription: `ZESA $${roundMoney(amt)} (+1%)`,
         successUrl: `${baseUrl}/zesa/success?order=${orderNumber}`,
         cancelUrl: `${baseUrl}/zesa`,
+        customerEmail: email,
       })
 
       await prisma.zesaOrder.update({
         where: { id: order.id },
-        data: { paymentMethod: 'crypto', paymentId: payment.id?.toString(), paymentStatus: 'nowpayments_initiated' },
+        data: {
+          paymentMethod: 'crypto',
+          paymentId: payment.id?.toString?.() || payment.id || null,
+          providerRef: payment.verify_hash || null,
+          paymentStatus: `${payment.provider}_initiated`,
+        },
       })
 
       paymentUrl = payment.invoice_url
