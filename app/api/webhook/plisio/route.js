@@ -14,17 +14,32 @@ function isPaidStatus(status) {
 }
 
 async function parsePlisioBody(request) {
-  // Plisio callbacks may be JSON or form-encoded. Handle both.
+  // Plisio callbacks may be JSON, form-encoded, or multipart/form-data.
   const contentType = request.headers.get('content-type') || ''
 
   if (contentType.includes('application/json')) {
     return await request.json().catch(() => ({}))
   }
 
+  if (contentType.includes('multipart/form-data')) {
+    try {
+      const fd = await request.formData()
+      const obj = {}
+      for (const [k, v] of fd.entries()) {
+        // v can be string or File
+        obj[k] = typeof v === 'string' ? v : (v?.name || 'file')
+      }
+      return obj
+    } catch (e) {
+      console.error('Failed to parse multipart form-data:', e?.message || e)
+      // fall through
+    }
+  }
+
   const raw = await request.text().catch(() => '')
   if (!raw) return {}
 
-  // Try form-encoded first
+  // Try x-www-form-urlencoded first
   try {
     const params = new URLSearchParams(raw)
     const obj = {}
