@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import prisma from '@/lib/prisma'
-import { createPayment } from '@/lib/nowpayments'
+import { createCryptoInvoice } from '@/lib/cryptoGateway'
 import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { computeMarkupAmount, hotProductIdForNetwork, generateAirtimeOrderNumber, roundMoney } from '@/lib/airtime'
