@@ -123,13 +123,16 @@ export default function ScanPage({ params }) {
 
   async function startScan() {
     setScanError('')
-    if (!videoRef.current) return
 
     try {
+      // Make sure the <video> is mounted before we try to use the ref.
+      setScanning(true)
+      await new Promise((r) => setTimeout(r, 0))
+      if (!videoRef.current) throw new Error('Camera element not ready. Please try again.')
+
       const mod = await import('@zxing/browser')
       const codeReader = new mod.BrowserMultiFormatReader()
       readerRef.current = codeReader
-      setScanning(true)
 
       await codeReader.decodeFromVideoDevice(
         undefined,
@@ -254,7 +257,13 @@ export default function ScanPage({ params }) {
 
             {scanning && (
               <div className="mt-4 rounded-2xl border border-gray-200 overflow-hidden bg-black">
-                <video ref={videoRef} className="w-full h-[340px] object-cover" playsInline />
+                <video
+                  ref={videoRef}
+                  className="w-full h-[340px] object-cover"
+                  playsInline
+                  autoPlay
+                  muted
+                />
               </div>
             )}
 
