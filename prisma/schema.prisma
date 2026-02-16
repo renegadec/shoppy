@@ -269,6 +269,28 @@ model TicketOrder {
   items TicketItem[]
 }
 
+model SupportRequest {
+  id        String   @id @default(cuid())
+  kind      String   // support | event_listing | general
+  name      String?
+  email     String
+  phone     String?
+  orderNumber String?
+
+  // Event listing fields
+  eventName  String?
+  eventDate  String?
+  eventCity  String?
+  eventVenue String?
+  ticketInfo String?
+  organiserContact String?
+
+  message   String
+  meta      Json?
+
+  createdAt DateTime @default(now())
+}
+
 model TicketItem {
   id           String          @id @default(cuid())
   orderId      String

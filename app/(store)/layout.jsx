@@ -88,6 +88,7 @@ export default function StoreLayout({ children }) {
                 <li><Link href="/zesa" className="text-gray-300 hover:text-white transition-colors">Buy ZESA Tokens</Link></li>
                 <li><Link href="/events" className="text-gray-300 hover:text-white transition-colors">Events & Tickets</Link></li>
                 <li><Link href="/shop" className="text-gray-300 hover:text-white transition-colors">Digital Products</Link></li>
+                <li><Link href="/contact" className="text-gray-300 hover:text-white transition-colors">Contact</Link></li>
                 <li className="pt-2"><Link href="/terms" className="text-gray-400 hover:text-white transition-colors">Terms</Link></li>
                 <li><Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy</Link></li>
               </ul>
