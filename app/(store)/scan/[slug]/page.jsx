@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 function cls(...s) {
   return s.filter(Boolean).join(' ')
@@ -21,6 +21,12 @@ export default function ScanPage({ params }) {
   const [redeeming, setRedeeming] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+
+  const videoRef = useRef(null)
+  const readerRef = useRef(null)
+  const [scanning, setScanning] = useState(false)
+  const [scanError, setScanError] = useState('')
+  const lastScanRef = useRef({ text: '', at: 0 })
 
   useEffect(() => {
     // Restore token for this event slug
@@ -71,8 +77,11 @@ export default function ScanPage({ params }) {
     }
   }
 
-  async function redeem(e) {
+  async function redeem(e, overrideCode) {
     e?.preventDefault?.()
+    const codeToUse = String(overrideCode || input || '').trim()
+    if (!codeToUse) return
+
     setRedeeming(true)
     setError('')
     setResult(null)
@@ -84,7 +93,7 @@ export default function ScanPage({ params }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ code: input }),
+        body: JSON.stringify({ code: codeToUse }),
       })
       const data = await res.json().catch(() => null)
 
@@ -93,10 +102,6 @@ export default function ScanPage({ params }) {
       }
 
       setResult(data)
-      if (!res.ok && data?.result === 'INVALID') {
-        // not found counts as a result; keep it in UI
-      }
-
       setInput('')
     } catch (err) {
       setError(err?.message || 'Failed')
@@ -105,7 +110,68 @@ export default function ScanPage({ params }) {
     }
   }
 
+  async function startScan() {
+    setScanError('')
+    if (!videoRef.current) return
+
+    try {
+      const mod = await import('@zxing/browser')
+      const codeReader = new mod.BrowserMultiFormatReader()
+      readerRef.current = codeReader
+      setScanning(true)
+
+      await codeReader.decodeFromVideoDevice(
+        undefined,
+        videoRef.current,
+        async (res, err) => {
+          if (res?.getText) {
+            const text = res.getText()
+            const now = Date.now()
+            const last = lastScanRef.current
+
+            // avoid repeated fast scans of the same QR
+            if (text && (text !== last.text || now - last.at > 2500)) {
+              lastScanRef.current = { text, at: now }
+              await redeem(null, text)
+            }
+          }
+          if (err) {
+            // ignore "NotFoundException" style errors (no QR in frame)
+            const name = String(err?.name || '')
+            if (name && name.toLowerCase().includes('notfound')) return
+          }
+        }
+      )
+    } catch (e) {
+      console.error('startScan error', e)
+      setScanError(e?.message || 'Failed to start camera')
+      setScanning(false)
+    }
+  }
+
+  function stopScan() {
+    try {
+      readerRef.current?.reset?.()
+    } catch {
+      // ignore
+    }
+    readerRef.current = null
+    setScanning(false)
+  }
+
   const loggedIn = Boolean(token)
+
+  useEffect(() => {
+    return () => {
+      // stop camera on unmount
+      try {
+        readerRef.current?.reset?.()
+      } catch {
+        // ignore
+      }
+      readerRef.current = null
+    }
+  }, [])
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -152,10 +218,34 @@ export default function ScanPage({ params }) {
       ) : (
         <div className="space-y-6">
           <div className="rounded-3xl border border-gray-200 bg-white p-6">
-            <h2 className="text-lg font-semibold text-gray-900">Verify ticket</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Scan the QR using any QR scanner app and paste the result here (or type the ticket code).
-            </p>
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Verify ticket</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Use camera scanning (recommended) or paste/type a ticket code.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => (scanning ? stopScan() : startScan())}
+                className={`inline-flex justify-center rounded-2xl px-5 py-3 font-semibold border transition-colors ${
+                  scanning
+                    ? 'bg-gray-900 text-white border-gray-900 hover:bg-black'
+                    : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                {scanning ? 'Stop camera' : 'Start camera scan'}
+              </button>
+            </div>
+
+            {scanError && <p className="text-sm text-red-700 mt-3">{scanError}</p>}
+
+            {scanning && (
+              <div className="mt-4 rounded-2xl border border-gray-200 overflow-hidden bg-black">
+                <video ref={videoRef} className="w-full h-[340px] object-cover" playsInline />
+              </div>
+            )}
 
             <form onSubmit={redeem} className="mt-4 flex flex-col sm:flex-row gap-3">
               <input
@@ -194,12 +284,13 @@ export default function ScanPage({ params }) {
 
           <div className="rounded-3xl border border-gray-200 bg-gray-50 p-6">
             <p className="text-sm text-gray-700">
-              Tip: if you want in-camera scanning inside the page, we can add it next. This version keeps it reliable across devices by accepting pasted QR output.
+              Tip: camera scanning requires HTTPS and permission to use the camera.
             </p>
             <button
               type="button"
               className="mt-3 text-sm font-semibold text-gray-900 hover:underline"
               onClick={() => {
+                stopScan()
                 localStorage.removeItem(`scan_token:${eventSlug}`)
                 localStorage.removeItem(`scan_event:${eventSlug}`)
                 localStorage.removeItem(`scan_scanner:${eventSlug}`)

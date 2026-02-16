@@ -21,6 +21,7 @@
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^5.22.0",
     "@supabase/supabase-js": "^2.94.0",
+    "@zxing/browser": "^0.1.5",
     "bcryptjs": "^3.0.3",
     "next": "^16.1.6",
     "next-auth": "^4.24.13",
