@@ -1,12 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
 export default function EventScannersPage({ params }) {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const pathname = usePathname()
+
+  const eventId = useMemo(() => {
+    const fromParams = params?.id
+    if (fromParams && fromParams !== 'undefined') return fromParams
+    const parts = String(pathname || '').split('/').filter(Boolean)
+    // /admin/events/:id/scanners
+    return parts[2] || ''
+  }, [params?.id, pathname])
 
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -22,7 +31,7 @@ export default function EventScannersPage({ params }) {
   async function fetchItems() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/events/${params.id}/scanners`)
+      const res = await fetch(`/api/admin/events/${eventId}/scanners`)
       const data = await res.json().catch(() => null)
       if (!res.ok) throw new Error(data?.error || 'Failed')
       setItems(data.items || [])
@@ -34,16 +43,20 @@ export default function EventScannersPage({ params }) {
   }
 
   useEffect(() => {
-    if (!session) return
+    if (!session || !eventId) return
     fetchItems()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session])
+  }, [session, eventId])
 
   async function createScanner() {
+    if (!eventId) {
+      alert('Missing event id. Please refresh and try again.')
+      return
+    }
     setCreating(true)
     setCreatedPin('')
     try {
-      const res = await fetch(`/api/admin/events/${params.id}/scanners`, {
+      const res = await fetch(`/api/admin/events/${eventId}/scanners`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username }),
@@ -61,7 +74,11 @@ export default function EventScannersPage({ params }) {
   }
 
   async function patch(scannerId, patch) {
-    const res = await fetch(`/api/admin/events/${params.id}/scanners/${scannerId}`, {
+    if (!eventId) {
+      alert('Missing event id. Please refresh and try again.')
+      return
+    }
+    const res = await fetch(`/api/admin/events/${eventId}/scanners/${scannerId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patch),
@@ -77,7 +94,7 @@ export default function EventScannersPage({ params }) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <button onClick={() => router.push(`/admin/events/${params.id}/report`)} className="text-gray-500 hover:text-gray-700 mb-3">
+      <button onClick={() => router.push(`/admin/events/${eventId}/report`)} className="text-gray-500 hover:text-gray-700 mb-3">
         ← Back to Report
       </button>
 
