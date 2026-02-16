@@ -28,6 +28,16 @@ export async function POST(request, { params }) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
+  const eventId = String(id || '').trim()
+  if (!eventId || eventId === 'undefined' || eventId.length < 8) {
+    return NextResponse.json({ error: 'Invalid event id' }, { status: 400 })
+  }
+
+  const event = await prisma.event.findUnique({ where: { id: eventId }, select: { id: true, slug: true, title: true } })
+  if (!event) {
+    return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+  }
+
   const body = await request.json().catch(() => ({}))
   const username = String(body.username || '').trim()
   const pin = String(body.pin || randPin(6)).trim()
@@ -39,7 +49,7 @@ export async function POST(request, { params }) {
 
   const created = await prisma.eventScanner.create({
     data: {
-      eventId: id,
+      eventId: eventId,
       username,
       pinHash,
       active: true,
