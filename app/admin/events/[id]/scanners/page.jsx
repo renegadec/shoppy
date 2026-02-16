@@ -19,6 +19,7 @@ export default function EventScannersPage({ params }) {
 
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [eventSlug, setEventSlug] = useState('')
 
   const [username, setUsername] = useState('')
   const [creating, setCreating] = useState(false)
@@ -31,9 +32,17 @@ export default function EventScannersPage({ params }) {
   async function fetchItems() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/events/${eventId}/scanners`)
+      const [res, evRes] = await Promise.all([
+        fetch(`/api/admin/events/${eventId}/scanners`),
+        fetch(`/api/admin/events/${eventId}`),
+      ])
+
       const data = await res.json().catch(() => null)
+      const ev = await evRes.json().catch(() => null)
+
       if (!res.ok) throw new Error(data?.error || 'Failed')
+      if (evRes.ok) setEventSlug(String(ev?.slug || ''))
+
       setItems(data.items || [])
     } catch (e) {
       alert(e?.message || 'Failed')
@@ -178,8 +187,35 @@ export default function EventScannersPage({ params }) {
       <div className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-6 text-sm text-gray-700">
         <p className="font-semibold text-gray-900">Scan link</p>
         <p className="mt-1">Share this link with organisers:</p>
-        <p className="mt-2 font-mono">{`${typeof window !== 'undefined' ? window.location.origin : ''}/scan/${'(event-slug)'}`}</p>
-        <p className="mt-2">Replace <span className="font-mono">(event-slug)</span> with your event slug.</p>
+        <p className="mt-2 font-mono">
+          {`${typeof window !== 'undefined' ? window.location.origin : ''}/scan/${eventSlug || '(loading...)'}`}
+        </p>
+        <div className="mt-3 flex flex-col sm:flex-row gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              const full = `${window.location.origin}/scan/${eventSlug}`
+              navigator.clipboard.writeText(full)
+            }}
+            disabled={!eventSlug}
+            className="inline-flex justify-center rounded-xl bg-white border border-gray-200 text-gray-900 px-4 py-2 font-semibold hover:bg-gray-50 disabled:opacity-50"
+          >
+            Copy link
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const creds = items.map((i) => `- ${i.username}`).join('\n')
+              const msg = `Scan link: ${window.location.origin}/scan/${eventSlug}\n\nUsernames:\n${creds || '(none yet)'}\n\nPINs are shown once when created in admin.`
+              navigator.clipboard.writeText(msg)
+            }}
+            disabled={!eventSlug}
+            className="inline-flex justify-center rounded-xl bg-white border border-gray-200 text-gray-900 px-4 py-2 font-semibold hover:bg-gray-50 disabled:opacity-50"
+          >
+            Copy message
+          </button>
+        </div>
+        {!eventSlug && <p className="mt-2 text-gray-600">Fetching event slug…</p>}
       </div>
     </div>
   )
