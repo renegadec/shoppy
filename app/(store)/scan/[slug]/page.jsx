@@ -34,6 +34,9 @@ export default function ScanPage({ params }) {
   const [toast, setToast] = useState('')
   const toastTimerRef = useRef(null)
   const cooldownRef = useRef({ until: 0 })
+  const [soundEnabled, setSoundEnabled] = useState(false)
+  const audioUnlockedRef = useRef(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
 
   const videoRef = useRef(null)
   const readerRef = useRef(null)
@@ -42,7 +45,7 @@ export default function ScanPage({ params }) {
   const lastScanRef = useRef({ text: '', at: 0 })
 
   useEffect(() => {
-    // Restore token for this event slug
+    // Restore token + preferences for this event slug
     try {
       const saved = localStorage.getItem(`scan_token:${eventSlug}`)
       if (saved) setToken(saved)
@@ -50,6 +53,8 @@ export default function ScanPage({ params }) {
       if (e) setEvent(JSON.parse(e))
       const s = localStorage.getItem(`scan_scanner:${eventSlug}`)
       if (s) setScanner(JSON.parse(s))
+      const se = localStorage.getItem('scan_sound_enabled')
+      if (se === '1') setSoundEnabled(true)
     } catch {
       // ignore
     }
@@ -63,12 +68,36 @@ export default function ScanPage({ params }) {
     return null
   }, [result])
 
+  async function unlockAudio() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext
+      if (!AudioCtx) return
+      const ctx = new AudioCtx()
+      // iOS needs a resume() + a tiny silent buffer to unlock
+      await ctx.resume().catch(() => {})
+      const o = ctx.createOscillator()
+      const g = ctx.createGain()
+      g.gain.value = 0.0001
+      o.connect(g)
+      g.connect(ctx.destination)
+      o.start()
+      o.stop(ctx.currentTime + 0.01)
+      setTimeout(() => ctx.close().catch(() => {}), 50)
+      audioUnlockedRef.current = true
+    } catch {
+      // ignore
+    }
+  }
+
   function playFeedback(kind) {
+    // Vibration: works on some devices (mostly Android). iOS often ignores it.
     try {
       if (navigator?.vibrate) navigator.vibrate(kind === 'VALID' ? [60] : kind === 'ALREADY_USED' ? [40, 40, 40] : [120, 60, 120])
     } catch {
       // ignore
     }
+
+    if (!soundEnabled || !audioUnlockedRef.current) return
 
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext
@@ -166,16 +195,9 @@ export default function ScanPage({ params }) {
         playFeedback(r)
         showToast(r === 'VALID' ? 'Valid ticket' : r === 'ALREADY_USED' ? 'Already used' : r === 'INVALID' ? 'Invalid ticket' : r)
 
-        // bring result into view on small screens
-        try {
-          setTimeout(() => resultRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 50)
-        } catch {
-          // ignore
-        }
-
-        // cooldown for next scan + auto-clear result highlight
-        cooldownRef.current.until = Date.now() + 1500
-        setTimeout(() => setResult(null), 1800)
+        // lock further scans until user taps Next ticket
+        cooldownRef.current.until = Date.now() + 60 * 60 * 1000
+        setSheetOpen(true)
       }
     } catch (err) {
       setError(err?.message || 'Failed')
@@ -305,17 +327,37 @@ export default function ScanPage({ params }) {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => (scanning ? stopScan() : startScan())}
-                className={`inline-flex justify-center rounded-2xl px-5 py-3 font-semibold border transition-colors ${
-                  scanning
-                    ? 'bg-gray-900 text-white border-gray-900 hover:bg-black'
-                    : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                {scanning ? 'Stop camera' : 'Start camera scan'}
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const next = !soundEnabled
+                    setSoundEnabled(next)
+                    localStorage.setItem('scan_sound_enabled', next ? '1' : '0')
+                    if (next) await unlockAudio()
+                    showToast(next ? 'Sound enabled' : 'Sound disabled')
+                  }}
+                  className={`inline-flex justify-center rounded-2xl px-4 py-3 font-semibold border transition-colors ${
+                    soundEnabled
+                      ? 'bg-emerald-700 text-white border-emerald-700 hover:bg-emerald-800'
+                      : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {soundEnabled ? 'Sound: ON' : 'Sound: OFF'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => (scanning ? stopScan() : startScan())}
+                  className={`inline-flex justify-center rounded-2xl px-5 py-3 font-semibold border transition-colors ${
+                    scanning
+                      ? 'bg-gray-900 text-white border-gray-900 hover:bg-black'
+                      : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {scanning ? 'Stop camera' : 'Start camera scan'}
+                </button>
+              </div>
             </div>
 
             {scanError && <p className="text-sm text-red-700 mt-3">{scanError}</p>}
@@ -357,16 +399,32 @@ export default function ScanPage({ params }) {
               </div>
             )}
 
-            {statusUi && (
-              <div ref={resultRef} className={cls('mt-5 rounded-2xl border p-4', statusUi.cls)}>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-bold">{statusUi.label}</p>
-                    {result?.ticketCode && <p className="text-sm mt-1">Ticket: <span className="font-mono">{result.ticketCode}</span></p>}
-                    {result?.ticketType && <p className="text-sm">Type: <span className="font-semibold">{result.ticketType}</span></p>}
-                    {result?.attendee && <p className="text-sm">Attendee: <span className="font-semibold">{result.attendee}</span></p>}
-                    {result?.redeemedAt && <p className="text-xs mt-2 opacity-80">Redeemed at: {new Date(result.redeemedAt).toLocaleString()}</p>}
-                    {result?.message && <p className="text-sm mt-2">{result.message}</p>}
+            {/* Bottom-sheet result overlay (no scrolling) */}
+            {sheetOpen && statusUi && (
+              <div className="fixed inset-x-0 bottom-0 z-50">
+                <div className="mx-auto max-w-2xl px-4 pb-4">
+                  <div className={cls('rounded-3xl border p-5 shadow-xl', statusUi.cls)}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-lg font-extrabold">{statusUi.label}</p>
+                        {result?.ticketCode && <p className="text-sm mt-1">Ticket: <span className="font-mono">{result.ticketCode}</span></p>}
+                        {result?.ticketType && <p className="text-sm">Type: <span className="font-semibold">{result.ticketType}</span></p>}
+                        {result?.attendee && <p className="text-sm">Attendee: <span className="font-semibold">{result.attendee}</span></p>}
+                        {result?.redeemedAt && <p className="text-xs mt-2 opacity-80">Redeemed at: {new Date(result.redeemedAt).toLocaleString()}</p>}
+                        {result?.message && <p className="text-sm mt-2">{result.message}</p>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSheetOpen(false)
+                          setResult(null)
+                          cooldownRef.current.until = 0
+                        }}
+                        className="shrink-0 inline-flex justify-center rounded-2xl bg-white/70 border border-white/40 text-gray-900 px-4 py-2 font-semibold hover:bg-white"
+                      >
+                        Next ticket
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
