@@ -9,7 +9,25 @@ export async function GET() {
 
   const events = await prisma.event.findMany({
     orderBy: { startsAt: 'desc' },
-    include: { ticketTypes: true },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      subtitle: true,
+      venue: true,
+      city: true,
+      startsAt: true,
+      endsAt: true,
+      organizerName: true,
+      organizerRef: true,
+      image: true,
+      category: true,
+      published: true,
+      active: true,
+      createdAt: true,
+      updatedAt: true,
+      ticketTypes: true,
+    },
   })
 
   return NextResponse.json(events)
