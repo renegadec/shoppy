@@ -13,6 +13,7 @@ const navItems = [
   { href: '/admin/events', label: 'Events', icon: '🎟️' },
   { href: '/admin/ticket-orders', label: 'Ticket Orders', icon: '🧾' },
   { href: '/admin/customers', label: 'Customers', icon: '👥' },
+  { href: '/admin/support-requests', label: 'Support Requests', icon: '📩' },
 ]
 
 export default function Sidebar() {
