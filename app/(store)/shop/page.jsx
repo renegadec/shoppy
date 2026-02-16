@@ -83,18 +83,18 @@ export default async function ShopPage() {
                 Premium software & subscriptions. Clean experience. Secure crypto payments.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <div className="flex items-center bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
-                <LockClosedIcon className="w-5 h-5 text-gray-900 mr-2" />
-                <span className="text-sm font-medium text-gray-900">Secure Payments</span>
+            <div className="flex gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap sm:gap-3">
+              <div className="flex shrink-0 items-center bg-gray-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-gray-200">
+                <LockClosedIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 mr-2" />
+                <span className="text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">Secure Payments</span>
               </div>
-              <div className="flex items-center bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
-                <ClockIcon className="w-5 h-5 text-gray-900 mr-2" />
-                <span className="text-sm font-medium text-gray-900">Fast Delivery</span>
+              <div className="flex shrink-0 items-center bg-gray-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-gray-200">
+                <ClockIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 mr-2" />
+                <span className="text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">Fast Delivery</span>
               </div>
-              <div className="flex items-center bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
-                <QuestionMarkCircleIcon className="w-5 h-5 text-gray-900 mr-2" />
-                <span className="text-sm font-medium text-gray-900">Support</span>
+              <div className="flex shrink-0 items-center bg-gray-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-gray-200">
+                <QuestionMarkCircleIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 mr-2" />
+                <span className="text-xs sm:text-sm font-medium text-gray-900 whitespace-nowrap">Support</span>
               </div>
             </div>
           </div>

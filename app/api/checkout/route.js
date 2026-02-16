@@ -15,6 +15,8 @@ export async function POST(request) {
       email,
       paymentMethod = 'ecocash',
       customerMsisdn,
+      contactMethod,
+      contactValue,
     } = body
 
     // Validate product from database
@@ -30,25 +32,37 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    // Contact is email-only now
-    const contactMethod = 'email'
-    const contactValue = email
+    // Contact preference (digital products only)
+    const preferredContactMethod = contactMethod || 'email'
+    const preferredContactValue = preferredContactMethod === 'email'
+      ? email
+      : (contactValue || '')
+
+    if (!preferredContactValue) {
+      return NextResponse.json({
+        error: preferredContactMethod === 'telegram'
+          ? 'Telegram username is required'
+          : preferredContactMethod === 'whatsapp'
+            ? 'WhatsApp number is required'
+            : 'Contact value is required',
+      }, { status: 400 })
+    }
 
     // Create order in database
     const order = await createOrder({
       email,
       productId: product.id,
       amount: product.price,
-      contactMethod,
-      contactValue,
+      contactMethod: preferredContactMethod,
+      contactValue: preferredContactValue,
     })
 
     const orderData = {
       productId,
       productName: product.name,
       email,
-      contactMethod,
-      contactValue,
+      contactMethod: preferredContactMethod,
+      contactValue: preferredContactValue,
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
@@ -116,8 +130,8 @@ export async function POST(request) {
         productName: product.name,
         amount: product.price,
         email,
-        contactMethod,
-        contactValue,
+        contactMethod: preferredContactMethod,
+        contactValue: preferredContactValue,
         paymentStatus: 'pending',
       })
     )

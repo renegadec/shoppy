@@ -137,11 +137,10 @@ export default async function ProductPage({ params }) {
           <div className="bg-white rounded-xl p-6 mb-8 border border-gray-200">
             <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
               <CreditCardIcon className="h-5 w-5 text-gray-900" aria-hidden="true" />
-              Payment Information
+              Payments
             </h3>
             <p className="text-gray-700 text-sm">
-              We accept cryptocurrency payments including USDT, BTC, ETH, and many more. 
-              After payment confirmation, we&apos;ll contact you via your preferred method to deliver your product.
+              Pay with EcoCash or crypto (USDT, BTC, ETH). Delivery details are shared by your chosen contact method.
             </p>
           </div>
 
@@ -156,7 +155,7 @@ export default async function ProductPage({ params }) {
           {/* Trust Note */}
           <p className="text-center text-gray-500 text-sm mt-4 flex items-center justify-center gap-2">
             <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
-            Secure payment via NOWPayments
+            Secure checkout
           </p>
         </div>
       </div>

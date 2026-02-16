@@ -13,6 +13,8 @@ export default function CheckoutPage() {
 
   const [formData, setFormData] = useState({
     email: '',
+    contactMethod: 'email',
+    contactValue: '',
     paymentMethod: 'ecocash',
     customerMsisdn: '',
   })
@@ -78,7 +80,11 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: product.id,
-          ...formData,
+          email: formData.email,
+          paymentMethod: formData.paymentMethod,
+          customerMsisdn: formData.customerMsisdn,
+          contactMethod: formData.contactMethod,
+          contactValue: formData.contactValue,
         }),
       })
 
@@ -145,6 +151,67 @@ export default function CheckoutPage() {
                 placeholder="your@email.com"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
               />
+              <p className="text-xs text-gray-500 mt-2">We’ll send delivery details and receipts to this email.</p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Preferred contact method</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { value: 'email', label: 'Email' },
+                  { value: 'telegram', label: 'Telegram' },
+                  { value: 'whatsapp', label: 'WhatsApp' },
+                ].map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, contactMethod: m.value })}
+                    className={`p-4 rounded-xl border-2 transition-all text-left ${
+                      formData.contactMethod === m.value
+                        ? 'border-emerald-600 bg-emerald-50 shadow-md'
+                        : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/50'
+                    }`}
+                  >
+                    <div className="text-sm font-semibold text-gray-900">{m.label}</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {m.value === 'email'
+                        ? 'We’ll email you updates'
+                        : m.value === 'telegram'
+                          ? 'Share your @username'
+                          : 'Share your WhatsApp number'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {formData.contactMethod === 'telegram' && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Telegram username</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.contactValue}
+                    onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
+                    placeholder="@yourusername"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
+                  />
+                </div>
+              )}
+
+              {formData.contactMethod === 'whatsapp' && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">WhatsApp number</label>
+                  <input
+                    type="tel"
+                    required
+                    value={formData.contactValue}
+                    onChange={(e) => setFormData({ ...formData, contactValue: e.target.value })}
+                    placeholder="26377xxxxxxx"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">Use international format without + (e.g. 26377...).</p>
+                </div>
+              )}
             </div>
 
             <div className="mb-6">
@@ -211,7 +278,7 @@ export default function CheckoutPage() {
             <div className="mt-6 text-center text-sm text-gray-500">
               <p className="flex items-center justify-center gap-2">
                 <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
-                {formData.paymentMethod === 'ecocash' ? 'Secure payment via EcoCash' : 'Secure payment'}
+                {formData.paymentMethod === 'ecocash' ? 'Secure payment via EcoCash' : 'Secure payment (crypto)'}
               </p>
               {formData.paymentMethod === 'ecocash' ? (
                 <p className="mt-1">We will send a payment prompt to your phone</p>
