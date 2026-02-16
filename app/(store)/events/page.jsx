@@ -56,7 +56,7 @@ export default async function EventsPage() {
           </p>
           <div className="mt-4">
             <a
-              href="https://t.me/shoppy_zw"
+              href="https://t.me/useshoppy"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex justify-center rounded-2xl bg-emerald-700 text-white px-5 py-3 font-semibold hover:bg-emerald-800 transition-colors"

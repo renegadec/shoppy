@@ -36,7 +36,7 @@ export default function StoreLayout({ children }) {
                 <span className="text-sm font-medium text-gray-800">USDT • BTC • ETH</span>
               </div>
               <a
-                href="https://t.me/shoppy_zw"
+                href="https://t.me/useshoppy"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden sm:flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors"
@@ -133,7 +133,7 @@ export default function StoreLayout({ children }) {
             <div>
               <h4 className="font-semibold mb-4 text-emerald-400">Support</h4>
               <p className="text-gray-400 text-sm">
-                Telegram: <a className="text-white hover:underline" href="https://t.me/shoppy_zw" target="_blank" rel="noopener noreferrer">@shoppy_zw</a>
+                Telegram: <a className="text-white hover:underline" href="https://t.me/useshoppy" target="_blank" rel="noopener noreferrer">@useshoppy</a>
                 <br />
                 Email: <a className="text-white hover:underline" href="mailto:support@shoppy.co.zw">support@shoppy.co.zw</a>
               </p>

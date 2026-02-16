@@ -69,7 +69,7 @@ export default async function ServiceComingSoonPage({ params }) {
                   Browse Events
                 </Link>
                 <a
-                  href="https://t.me/shoppy_zw"
+                  href="https://t.me/useshoppy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex justify-center rounded-xl bg-white border border-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-50 transition-colors"
