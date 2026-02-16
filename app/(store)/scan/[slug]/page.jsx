@@ -30,6 +30,10 @@ export default function ScanPage({ params }) {
   const [redeeming, setRedeeming] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const resultRef = useRef(null)
+  const [toast, setToast] = useState('')
+  const toastTimerRef = useRef(null)
+  const cooldownRef = useRef({ until: 0 })
 
   const videoRef = useRef(null)
   const readerRef = useRef(null)
@@ -58,6 +62,47 @@ export default function ScanPage({ params }) {
     if (r === 'INVALID') return { label: 'INVALID', cls: 'bg-red-100 text-red-800 border-red-200' }
     return null
   }, [result])
+
+  function playFeedback(kind) {
+    try {
+      if (navigator?.vibrate) navigator.vibrate(kind === 'VALID' ? [60] : kind === 'ALREADY_USED' ? [40, 40, 40] : [120, 60, 120])
+    } catch {
+      // ignore
+    }
+
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext
+      if (!AudioCtx) return
+      const ctx = new AudioCtx()
+      const o = ctx.createOscillator()
+      const g = ctx.createGain()
+      o.connect(g)
+      g.connect(ctx.destination)
+
+      const now = ctx.currentTime
+      const freq = kind === 'VALID' ? 880 : kind === 'ALREADY_USED' ? 660 : 220
+      const dur = kind === 'VALID' ? 0.12 : kind === 'ALREADY_USED' ? 0.14 : 0.18
+
+      o.type = 'sine'
+      o.frequency.setValueAtTime(freq, now)
+      g.gain.setValueAtTime(0.0001, now)
+      g.gain.exponentialRampToValueAtTime(0.2, now + 0.01)
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur)
+
+      o.start(now)
+      o.stop(now + dur)
+
+      setTimeout(() => ctx.close().catch(() => {}), 250)
+    } catch {
+      // ignore
+    }
+  }
+
+  function showToast(msg) {
+    setToast(msg)
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    toastTimerRef.current = setTimeout(() => setToast(''), 1500)
+  }
 
   async function login(e) {
     e?.preventDefault?.()
@@ -89,6 +134,7 @@ export default function ScanPage({ params }) {
   }
 
   async function redeem(e, overrideCode) {
+    if (Date.now() < cooldownRef.current.until) return
     e?.preventDefault?.()
     const codeToUse = String(overrideCode || input || '').trim()
     if (!codeToUse) return
@@ -114,6 +160,23 @@ export default function ScanPage({ params }) {
 
       setResult(data)
       setInput('')
+
+      const r = String(data?.result || '').toUpperCase()
+      if (r) {
+        playFeedback(r)
+        showToast(r === 'VALID' ? 'Valid ticket' : r === 'ALREADY_USED' ? 'Already used' : r === 'INVALID' ? 'Invalid ticket' : r)
+
+        // bring result into view on small screens
+        try {
+          setTimeout(() => resultRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }), 50)
+        } catch {
+          // ignore
+        }
+
+        // cooldown for next scan + auto-clear result highlight
+        cooldownRef.current.until = Date.now() + 1500
+        setTimeout(() => setResult(null), 1800)
+      }
     } catch (err) {
       setError(err?.message || 'Failed')
     } finally {
@@ -184,6 +247,8 @@ export default function ScanPage({ params }) {
         // ignore
       }
       readerRef.current = null
+
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     }
   }, [])
 
@@ -286,8 +351,14 @@ export default function ScanPage({ params }) {
 
             {error && <p className="text-sm text-red-700 mt-3">{error}</p>}
 
+            {toast && (
+              <div className="mt-4 rounded-2xl border border-gray-200 bg-gray-900 text-white px-4 py-3 text-sm font-semibold">
+                {toast}
+              </div>
+            )}
+
             {statusUi && (
-              <div className={cls('mt-5 rounded-2xl border p-4', statusUi.cls)}>
+              <div ref={resultRef} className={cls('mt-5 rounded-2xl border p-4', statusUi.cls)}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-bold">{statusUi.label}</p>
