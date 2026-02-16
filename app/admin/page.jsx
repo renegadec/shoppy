@@ -57,6 +57,14 @@ export default function AdminDashboard() {
   
   const orderColumns = [
     {
+      header: 'Service',
+      render: (row) => (
+        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+          {row.type}
+        </span>
+      ),
+    },
+    {
       header: 'Order',
       render: (row) => (
         <span className="font-mono text-sm text-emerald-600">{row.orderNumber}</span>
@@ -66,18 +74,18 @@ export default function AdminDashboard() {
       header: 'Customer',
       render: (row) => (
         <div>
-          <p className="font-medium text-gray-900">{row.customer?.email}</p>
-          {row.customer?.name && <p className="text-sm text-gray-500">{row.customer.name}</p>}
+          <p className="font-medium text-gray-900">{row.customerEmail || '—'}</p>
+          {row.customerName && <p className="text-sm text-gray-500">{row.customerName}</p>}
         </div>
       )
     },
     {
-      header: 'Product',
-      render: (row) => row.product?.name
+      header: 'Details',
+      render: (row) => <span className="text-sm text-gray-700">{row.label || '—'}</span>,
     },
     {
       header: 'Amount',
-      render: (row) => `$${row.amount}`
+      render: (row) => `$${Number(row.amount || 0).toFixed(2)}`
     },
     {
       header: 'Status',
@@ -85,7 +93,7 @@ export default function AdminDashboard() {
     },
     {
       header: 'Date',
-      render: (row) => new Date(row.createdAt).toLocaleDateString()
+      render: (row) => new Date(row.createdAt).toLocaleString()
     }
   ]
   
@@ -133,9 +141,14 @@ export default function AdminDashboard() {
         </div>
         <DataTable
           columns={orderColumns}
-          data={stats?.recentOrders || []}
-          onRowClick={(row) => router.push(`/admin/orders?id=${row.id}`)}
-          emptyMessage="No orders yet"
+          data={stats?.recentTransactions || []}
+          onRowClick={(row) => {
+            if (row.type === 'product') return router.push(`/admin/orders?id=${row.id}`)
+            if (row.type === 'airtime') return router.push(`/admin/airtime-orders?orderNumber=${encodeURIComponent(row.orderNumber)}`)
+            if (row.type === 'zesa') return router.push(`/admin/zesa-orders?orderNumber=${encodeURIComponent(row.orderNumber)}`)
+            if (row.type === 'ticket') return router.push(`/admin/ticket-orders?orderNumber=${encodeURIComponent(row.orderNumber)}`)
+          }}
+          emptyMessage="No sales yet"
         />
       </div>
     </div>

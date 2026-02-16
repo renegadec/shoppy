@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { getDashboardStats } from '@/lib/orders'
+import { getDashboardStatsAll } from '@/lib/adminStats'
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -11,7 +11,7 @@ export async function GET() {
   }
   
   try {
-    const stats = await getDashboardStats()
+    const stats = await getDashboardStatsAll()
     return NextResponse.json(stats)
   } catch (error) {
     console.error('Error fetching stats:', error)

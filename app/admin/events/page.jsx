@@ -176,9 +176,20 @@ export default function AdminEventsPage() {
             <button
               onClick={(e) => {
                 e.stopPropagation()
+                window.open(`/admin/events/${row.id}/report`, '_blank')
+              }}
+              className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
+              title="Sales report"
+            >
+              📊
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
                 openEdit(row)
               }}
               className="p-2 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
+              title="Edit"
             >
               ✏️
             </button>
@@ -188,6 +199,7 @@ export default function AdminEventsPage() {
                 del(row)
               }}
               className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg"
+              title="Deactivate"
             >
               🗑️
             </button>

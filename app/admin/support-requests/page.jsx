@@ -77,6 +77,21 @@ export default function SupportRequestsAdminPage() {
         ),
       },
       {
+        header: 'Status',
+        render: (row) => {
+          const s = String(row.status || 'OPEN').toUpperCase()
+          const cls =
+            s === 'RESOLVED'
+              ? 'bg-emerald-100 text-emerald-700'
+              : s === 'PENDING'
+                ? 'bg-amber-100 text-amber-800'
+                : 'bg-gray-100 text-gray-700'
+          return (
+            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${cls}`}>{s}</span>
+          )
+        },
+      },
+      {
         header: 'From',
         render: (row) => (
           <div>
@@ -195,6 +210,48 @@ export default function SupportRequestsAdminPage() {
       >
         {selected && (
           <div className="space-y-5 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">Status</span>
+                <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                  {String(selected.status || 'OPEN').toUpperCase()}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {['OPEN', 'PENDING', 'RESOLVED'].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/admin/support-requests/${selected.id}/status`, {
+                          method: 'PATCH',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ status: s }),
+                        })
+                        const data = await res.json().catch(() => null)
+                        if (!res.ok) throw new Error(data?.error || 'Failed to update')
+
+                        setSelected(data?.item)
+                        // refresh list
+                        fetchItems()
+                      } catch (e) {
+                        alert(e?.message || 'Failed')
+                      }
+                    }}
+                    className={`px-3 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+                      String(selected.status || 'OPEN').toUpperCase() === s
+                        ? 'bg-emerald-700 text-white border-emerald-700'
+                        : 'bg-white text-gray-900 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    Mark {s.toLowerCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-500">Email</p>
