@@ -35,14 +35,12 @@ export default function StoreLayout({ children }) {
                 <CreditCardIcon className="h-5 w-5 text-gray-800" aria-hidden="true" />
                 <span className="text-sm font-medium text-gray-800">USDT • BTC • ETH</span>
               </div>
-              <a
-                href="https://t.me/useshoppy"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                href="/contact"
                 className="hidden sm:flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-gray-200 text-gray-800 hover:bg-gray-50 transition-colors"
               >
                 <span className="text-sm font-medium">Contact</span>
-              </a>
+              </Link>
               <Link
                 href="/shop"
                 className="bg-emerald-700 text-white px-5 py-2 rounded-full font-semibold hover:bg-emerald-800 transition-colors shadow-sm"

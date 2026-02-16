@@ -80,7 +80,7 @@ export default function ContactPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-gray-900">Contact</h1>
+      <h1 className="text-3xl font-bold text-gray-900">Contact Us</h1>
       <p className="mt-3 text-gray-600">Get help, report issues, or submit an event to be listed.</p>
 
       <form onSubmit={submit} className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 space-y-6">
