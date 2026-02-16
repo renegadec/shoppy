@@ -7,6 +7,30 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
   const [error, setError] = useState('')
   const [checking, setChecking] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  const [resending, setResending] = useState(false)
+
+  async function resendPrompt() {
+    if (!orderNumber) return
+    setResending(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/ecocash/resend-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind, orderNumber }),
+      })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) throw new Error(data?.error || 'Failed to resend prompt')
+
+      // immediately refresh status after requesting a new prompt
+      await checkOnce()
+    } catch (e) {
+      setError(e?.message || 'Failed to resend prompt')
+    } finally {
+      setResending(false)
+    }
+  }
 
   async function checkOnce() {
     if (!orderNumber) return
@@ -110,6 +134,14 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
               <li>If nothing happens after a few minutes, contact support with your <strong>order number</strong>.</li>
             </ul>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                type="button"
+                onClick={resendPrompt}
+                disabled={resending}
+                className="inline-flex justify-center rounded-xl bg-emerald-700 text-white px-4 py-2 font-semibold hover:bg-emerald-800 disabled:opacity-50"
+              >
+                {resending ? 'Sending…' : 'Send prompt again'}
+              </button>
               <a
                 href="/support"
                 className="inline-flex justify-center rounded-xl bg-white border border-emerald-200 text-emerald-900 px-4 py-2 font-semibold hover:bg-emerald-50"
@@ -118,11 +150,14 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
               </a>
               <a
                 href="/contact"
-                className="inline-flex justify-center rounded-xl bg-emerald-700 text-white px-4 py-2 font-semibold hover:bg-emerald-800"
+                className="inline-flex justify-center rounded-xl bg-white border border-emerald-200 text-emerald-900 px-4 py-2 font-semibold hover:bg-emerald-50"
               >
                 Contact us
               </a>
             </div>
+            <p className="text-xs text-gray-600 mt-2">
+              Only request a new prompt if you haven’t approved a payment already.
+            </p>
           </div>
         )}
       </div>
