@@ -1,13 +1,22 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 function cls(...s) {
   return s.filter(Boolean).join(' ')
 }
 
 export default function ScanPage({ params }) {
-  const eventSlug = params.slug
+  const pathname = usePathname()
+
+  const eventSlug = useMemo(() => {
+    const fromParams = params?.slug
+    if (fromParams && fromParams !== 'undefined') return fromParams
+    const parts = String(pathname || '').split('/').filter(Boolean)
+    // /scan/:slug
+    return parts[1] || ''
+  }, [params?.slug, pathname])
   const [token, setToken] = useState('')
   const [event, setEvent] = useState(null)
   const [scanner, setScanner] = useState(null)
@@ -55,6 +64,8 @@ export default function ScanPage({ params }) {
     setLoggingIn(true)
     setLoginError('')
     try {
+      if (!eventSlug) throw new Error('Missing event link slug. Please refresh and open the scan link again.')
+
       const res = await fetch('/api/scan/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
