@@ -17,7 +17,8 @@ const order = {
     venue: '7 Arts Theatre',
     city: 'Harare',
     organizerName: 'Shoppy',
-    image: '',
+    // Random placeholder banner for layout preview
+    image: 'https://picsum.photos/1200/420',
   },
   items: [
     {
