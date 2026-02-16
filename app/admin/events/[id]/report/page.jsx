@@ -1,14 +1,23 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export default function EventReportPage({ params }) {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const pathname = usePathname()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  const eventId = useMemo(() => {
+    const fromParams = params?.id
+    if (fromParams && fromParams !== 'undefined') return fromParams
+    const parts = String(pathname || '').split('/').filter(Boolean)
+    // /admin/events/:id/report
+    return parts[2] || ''
+  }, [params?.id, pathname])
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/admin/login')
@@ -18,7 +27,7 @@ export default function EventReportPage({ params }) {
     if (!session) return
     ;(async () => {
       try {
-        const res = await fetch(`/api/admin/events/${params.id}/report`)
+        const res = await fetch(`/api/admin/events/${eventId}/report`)
         const d = await res.json()
         setData(d)
       } catch (e) {
@@ -27,7 +36,7 @@ export default function EventReportPage({ params }) {
         setLoading(false)
       }
     })()
-  }, [session, params.id])
+  }, [session, eventId])
 
   if (status === 'loading' || loading) return <div className="text-gray-500">Loading report…</div>
   if (!session) return null
@@ -49,11 +58,11 @@ export default function EventReportPage({ params }) {
 
         <div className="flex gap-3">
           <a
-            href={params?.id ? `/admin/events/${params.id}/scanners` : '#'}
+            href={eventId ? `/admin/events/${eventId}/scanners` : '#'}
             onClick={(e) => {
-              if (!params?.id) {
+              if (!eventId) {
                 e.preventDefault()
-                alert('Missing event id. Go back to Events and open the report again.')
+                alert('Missing event id. Please refresh and try again.')
               }
             }}
             className="inline-flex justify-center rounded-xl bg-white border border-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-50"
@@ -61,7 +70,7 @@ export default function EventReportPage({ params }) {
             Scanner users
           </a>
           <a
-            href={`/api/admin/events/${params.id}/report?format=csv`}
+            href={`/api/admin/events/${eventId}/report?format=csv`}
             className="inline-flex justify-center rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold hover:bg-emerald-800"
           >
             Export CSV
