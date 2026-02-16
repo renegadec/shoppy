@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Product {
@@ -214,6 +215,8 @@ model Event {
 
   ticketTypes  EventTicketType[]
   ticketOrders TicketOrder[]
+  scanners     EventScanner[]
+  scanLogs     TicketScanLog[]
 }
 
 model EventTicketType {
@@ -309,4 +312,47 @@ model TicketItem {
   redeemedAt DateTime?
 
   createdAt DateTime @default(now())
+
+  scanLogs TicketScanLog[]
+}
+
+model EventScanner {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+
+  username  String
+  pinHash   String
+  active    Boolean  @default(true)
+  lastUsedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  scanLogs TicketScanLog[]
+
+  @@unique([eventId, username])
+}
+
+model TicketScanLog {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id])
+
+  scannerId   String?
+  scanner     EventScanner? @relation(fields: [scannerId], references: [id])
+
+  ticketItemId String?
+  ticketItem   TicketItem? @relation(fields: [ticketItemId], references: [id])
+
+  ticketCode  String?
+  result      String // VALID | ALREADY_USED | INVALID | ERROR
+  note        String?
+  meta        Json?
+
+  createdAt   DateTime @default(now())
+
+  @@index([eventId, createdAt])
+  @@index([scannerId, createdAt])
+  @@index([ticketCode])
 }

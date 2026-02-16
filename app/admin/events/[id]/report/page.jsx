@@ -47,12 +47,20 @@ export default function EventReportPage({ params }) {
           <p className="text-gray-500 mt-1">{totals?.eventTitle}</p>
         </div>
 
-        <a
-          href={`/api/admin/events/${params.id}/report?format=csv`}
-          className="inline-flex justify-center rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold hover:bg-emerald-800"
-        >
-          Export CSV
-        </a>
+        <div className="flex gap-3">
+          <a
+            href={`/admin/events/${params.id}/scanners`}
+            className="inline-flex justify-center rounded-xl bg-white border border-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-50"
+          >
+            Scanner users
+          </a>
+          <a
+            href={`/api/admin/events/${params.id}/report?format=csv`}
+            className="inline-flex justify-center rounded-xl bg-emerald-700 text-white px-5 py-3 font-semibold hover:bg-emerald-800"
+          >
+            Export CSV
+          </a>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
