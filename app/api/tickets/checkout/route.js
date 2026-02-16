@@ -57,7 +57,7 @@ export async function POST(request) {
       eventTitle: event.title,
     }
 
-    // Free tickets: skip NOWPayments and mark paid immediately
+    // Free tickets: skip crypto checkout and mark paid immediately
     if (order.amount <= 0) {
       const updated = await prisma.ticketOrder.update({
         where: { id: order.id },

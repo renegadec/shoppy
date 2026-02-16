@@ -49,7 +49,7 @@ model Order {
 
   // Payment details
   paymentMethod String    @default("crypto") // ecocash | card | crypto
-  paymentId     String? // Provider payment identifier (NOWPayments payment ID or EcoCash sourceReference UUID)
+  paymentId     String? // Provider payment identifier (crypto gateway payment/invoice id or EcoCash sourceReference UUID)
   providerRef   String? // Provider reference (e.g., EcoCash ecocashReference)
   paymentStatus String? // Raw status from payment provider
   paidAmount    Float?

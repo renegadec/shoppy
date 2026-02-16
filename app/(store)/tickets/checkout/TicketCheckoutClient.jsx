@@ -196,7 +196,7 @@ export default function TicketCheckoutClient() {
           {!isFree && (
             <p className="mt-4 text-xs text-gray-500 flex items-center justify-center gap-2">
               <LockClosedIcon className="h-4 w-4" />{' '}
-              {paymentMethod === 'ecocash' ? 'Secure payment via EcoCash' : 'Secure payment via NOWPayments'}
+              {paymentMethod === 'ecocash' ? 'Secure payment via EcoCash' : 'Secure crypto checkout'}
             </p>
           )}
 

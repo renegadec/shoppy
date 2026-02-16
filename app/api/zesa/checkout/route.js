@@ -101,7 +101,7 @@ export async function POST(request) {
       paymentUrl = `${baseUrl}/zesa/success?order=${orderNumber}&pending=1&method=ecocash`
 
     } else {
-      // NOTE: Do NOT embed large payloads in NOWPayments order_id.
+      // NOTE: Do NOT embed large payloads in the crypto gateway order id.
       // We rely on orderNumber + DB lookup in webhook.
       const payment = await createCryptoInvoice({
         priceAmount: amountToPay,

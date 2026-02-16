@@ -1,6 +1,6 @@
 # Shoppy - Digital Products Store
 
-A digital products store accepting crypto payments via NOWPayments, with a full admin dashboard.
+A digital products store accepting crypto payments, with a full admin dashboard.
 
 ## Tech Stack
 
@@ -9,7 +9,7 @@ A digital products store accepting crypto payments via NOWPayments, with a full 
 - **ORM**: Prisma
 - **Auth**: NextAuth.js
 - **Styling**: Tailwind CSS
-- **Payments**: NOWPayments (crypto)
+- **Payments**: Plisio (crypto)
 
 ## Features
 
@@ -49,7 +49,7 @@ Required variables:
 - `DATABASE_URL` - Supabase PostgreSQL connection string
 - `NEXTAUTH_SECRET` - Random 32+ char string (run `openssl rand -base64 32`)
 - `NEXTAUTH_URL` - Your app URL (http://localhost:3000 for dev)
-- `NOWPAYMENTS_API_KEY` - From NOWPayments dashboard
+- `PLISIO_API_KEY` - From Plisio dashboard
 - `TELEGRAM_BOT_TOKEN` & `TELEGRAM_CHAT_ID` - For order notifications
 
 ### 4. Initialize database
@@ -97,7 +97,7 @@ Access at `/admin` after logging in:
 ## API Routes
 
 - `POST /api/checkout` - Create payment
-- `POST /api/webhook` - NOWPayments webhook
+- `POST /api/webhook/plisio` - Crypto payments webhook (Plisio)
 - `GET /api/products` - List products
 - `GET /api/products/[id]` - Get product
 
