@@ -176,7 +176,12 @@ export default function AdminEventsPage() {
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                window.open(`/admin/events/${row.id}/report`, '_blank')
+                const eid = row?.id || row?.eventId || row?.event?.id
+                if (!eid) {
+                  alert('Missing event id. Please refresh the page.')
+                  return
+                }
+                window.open(`/admin/events/${eid}/report`, '_blank')
               }}
               className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-lg"
               title="Sales report"

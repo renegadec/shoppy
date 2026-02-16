@@ -49,7 +49,13 @@ export default function EventReportPage({ params }) {
 
         <div className="flex gap-3">
           <a
-            href={`/admin/events/${params.id}/scanners`}
+            href={params?.id ? `/admin/events/${params.id}/scanners` : '#'}
+            onClick={(e) => {
+              if (!params?.id) {
+                e.preventDefault()
+                alert('Missing event id. Go back to Events and open the report again.')
+              }
+            }}
             className="inline-flex justify-center rounded-xl bg-white border border-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-50"
           >
             Scanner users
