@@ -26,8 +26,7 @@ export const metadata = {
       'Buy digital products and Zimbabwe services (airtime, ZESA, event tickets). Pay with crypto or EcoCash.',
     images: [
       {
-        // Generated via /opengraph-image
-        url: '/opengraph-image',
+        url: '/og.png',
         width: 1200,
         height: 630,
         alt: siteName,
@@ -39,7 +38,7 @@ export const metadata = {
     title: `${siteName} | Digital products, Airtime & ZESA`,
     description:
       'Buy digital products and Zimbabwe services (airtime, ZESA, event tickets). Pay with crypto or EcoCash.',
-    images: ['/twitter-image'],
+    images: ['/og.png'],
   },
 
   // Favicons/app icons (served by Next from /app/icon.png and /app/apple-icon.png)
