@@ -31,41 +31,107 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: 'startsAt is required' }, { status: 400 })
   }
 
-  // Simplest approach: replace ticket types (deleteMany + createMany)
-  // Later: diff/update in-place.
-  await prisma.eventTicketType.deleteMany({ where: { eventId: id } })
+  // NOTE: We cannot blindly delete+recreate ticket types on edit because ticket types
+  // may already be referenced by TicketItem rows (FK constraint). Instead we:
+  // - update existing types by id
+  // - create new types
+  // - for removed types: delete if unused, otherwise deactivate
 
-  const event = await prisma.event.update({
-    where: { id },
-    data: {
-      slug: data.slug,
-      title: data.title,
-      subtitle: data.subtitle || null,
-      description: data.description || null,
-      venue: data.venue || null,
-      city: data.city || null,
-      startsAt,
-      endsAt: data.endsAt ? new Date(data.endsAt) : null,
-      organizerName: data.organizerName || null,
-      organizerRef: data.organizerRef || null,
-      image: data.image || null,
-      category: data.category || null,
-      published: Boolean(data.published),
-      active: data.active !== false,
-      ticketTypes: {
-        create: (data.ticketTypes || [])
-          .filter((t) => t?.name && t?.price !== '' && t?.price != null)
-          .map((t, idx) => ({
-            name: t.name,
-            price: Number(t.price),
-            currency: t.currency || 'USD',
-            capacity: t.capacity ? Number(t.capacity) : null,
-            active: t.active !== false,
-            sortOrder: t.sortOrder != null ? Number(t.sortOrder) : idx,
-          })),
+  const incoming = (data.ticketTypes || [])
+    .filter((t) => t?.name && t?.price !== '' && t?.price != null)
+    .map((t, idx) => ({
+      id: t.id || null,
+      name: t.name,
+      price: Number(t.price),
+      currency: t.currency || 'USD',
+      capacity: t.capacity ? Number(t.capacity) : null,
+      active: t.active !== false,
+      sortOrder: t.sortOrder != null ? Number(t.sortOrder) : idx,
+    }))
+
+  const endsAt = data.endsAt ? new Date(data.endsAt) : null
+  const safeEndsAt = endsAt && !Number.isNaN(endsAt.getTime()) ? endsAt : null
+
+  const event = await prisma.$transaction(async (tx) => {
+    const existing = await tx.eventTicketType.findMany({
+      where: { eventId: id },
+      select: {
+        id: true,
+        _count: { select: { ticketItems: true } },
       },
-    },
-    include: { ticketTypes: { orderBy: { sortOrder: 'asc' } } },
+    })
+
+    const existingIds = new Set(existing.map((t) => t.id))
+    const incomingIds = new Set(incoming.map((t) => t.id).filter(Boolean))
+
+    const toRemove = existing.filter((t) => !incomingIds.has(t.id))
+    const toUpdate = incoming.filter((t) => t.id && existingIds.has(t.id))
+    const toCreate = incoming.filter((t) => !t.id)
+
+    // Update the event itself
+    await tx.event.update({
+      where: { id },
+      data: {
+        slug: data.slug,
+        title: data.title,
+        subtitle: data.subtitle || null,
+        description: data.description || null,
+        venue: data.venue || null,
+        city: data.city || null,
+        startsAt,
+        endsAt: safeEndsAt,
+        organizerName: data.organizerName || null,
+        organizerRef: data.organizerRef || null,
+        image: data.image || null,
+        category: data.category || null,
+        published: Boolean(data.published),
+        active: data.active !== false,
+      },
+    })
+
+    // Apply ticket type changes
+    await Promise.all(
+      toUpdate.map((t) =>
+        tx.eventTicketType.update({
+          where: { id: t.id },
+          data: {
+            name: t.name,
+            price: t.price,
+            currency: t.currency,
+            capacity: t.capacity,
+            active: t.active,
+            sortOrder: t.sortOrder,
+          },
+        })
+      )
+    )
+
+    if (toCreate.length) {
+      await tx.eventTicketType.createMany({
+        data: toCreate.map((t) => ({
+          eventId: id,
+          name: t.name,
+          price: t.price,
+          currency: t.currency,
+          capacity: t.capacity,
+          active: t.active,
+          sortOrder: t.sortOrder,
+        })),
+      })
+    }
+
+    await Promise.all(
+      toRemove.map((t) =>
+        t._count.ticketItems > 0
+          ? tx.eventTicketType.update({ where: { id: t.id }, data: { active: false } })
+          : tx.eventTicketType.delete({ where: { id: t.id } })
+      )
+    )
+
+    return tx.event.findUnique({
+      where: { id },
+      include: { ticketTypes: { orderBy: { sortOrder: 'asc' } } },
+    })
   })
 
   return NextResponse.json(event)

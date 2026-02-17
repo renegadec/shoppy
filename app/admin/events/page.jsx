@@ -21,7 +21,7 @@ const emptyEvent = {
   category: 'Concert',
   published: false,
   active: true,
-  ticketTypes: [{ name: 'General', price: '', currency: 'USD', capacity: '', active: true, sortOrder: 0 }],
+  ticketTypes: [{ id: null, name: 'General', price: '', currency: 'USD', capacity: '', active: true, sortOrder: 0 }],
 }
 
 export default function AdminEventsPage() {
@@ -79,6 +79,7 @@ export default function AdminEventsPage() {
       published: Boolean(ev.published),
       active: ev.active !== false,
       ticketTypes: (ev.ticketTypes?.length ? ev.ticketTypes : emptyEvent.ticketTypes).map((t, idx) => ({
+        id: t.id || null,
         name: t.name || '',
         price: t.price?.toString?.() ?? String(t.price ?? ''),
         currency: t.currency || 'USD',
@@ -93,7 +94,7 @@ export default function AdminEventsPage() {
   function addTicketType() {
     setFormData((f) => ({
       ...f,
-      ticketTypes: [...f.ticketTypes, { name: '', price: '', currency: 'USD', capacity: '', active: true, sortOrder: f.ticketTypes.length }],
+      ticketTypes: [...f.ticketTypes, { id: null, name: '', price: '', currency: 'USD', capacity: '', active: true, sortOrder: f.ticketTypes.length }],
     }))
   }
 
