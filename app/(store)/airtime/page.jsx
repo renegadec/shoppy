@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { LockClosedIcon } from '@heroicons/react/24/solid'
@@ -26,7 +26,17 @@ export default function AirtimePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const { methods: paymentMethods, setSelected } = usePaymentMethods({ initialSelected: formData.paymentMethod })
+  const { methods: paymentMethods, selected: selectedPaymentMethod, setSelected } = usePaymentMethods({
+    initialSelected: formData.paymentMethod,
+  })
+
+  useEffect(() => {
+    if (!selectedPaymentMethod) return
+    if (formData.paymentMethod !== selectedPaymentMethod) {
+      setFormData((f) => ({ ...f, paymentMethod: selectedPaymentMethod }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPaymentMethod])
 
   async function handleSubmit(e) {
     e.preventDefault()
