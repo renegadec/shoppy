@@ -6,6 +6,7 @@ import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { computeMarkupAmount, generateZesaOrderNumber, roundMoney } from '@/lib/zesa'
 import { normalizeZwMsisdn } from '@/lib/msisdn'
+import { assertPaymentMethodEnabled } from '@/lib/paymentMethods'
 
 export async function POST(request) {
   try {
@@ -67,6 +68,11 @@ export async function POST(request) {
       notifyNumber: String(notifyNumber),
       tokenAmount: roundMoney(amt),
       markupRate,
+    }
+
+    const gate = await assertPaymentMethodEnabled(paymentMethod)
+    if (!gate.ok) {
+      return NextResponse.json({ error: gate.note || 'Payment method unavailable' }, { status: 400 })
     }
 
     let paymentUrl = null

@@ -14,6 +14,7 @@ const navItems = [
   { href: '/admin/ticket-orders', label: 'Ticket Orders', icon: '🧾' },
   { href: '/admin/customers', label: 'Customers', icon: '👥' },
   { href: '/admin/support-requests', label: 'Support Requests', icon: '📩' },
+  { href: '/admin/payment-methods', label: 'Payment Methods', icon: '💳' },
 ]
 
 export default function Sidebar() {

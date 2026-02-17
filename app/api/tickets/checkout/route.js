@@ -6,6 +6,7 @@ import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
 import { normalizeZwMsisdn } from '@/lib/msisdn'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { createTicketOrder } from '@/lib/tickets'
+import { assertPaymentMethodEnabled } from '@/lib/paymentMethods'
 
 export async function POST(request) {
   try {
@@ -94,6 +95,11 @@ export async function POST(request) {
         redirectUrl: `${baseUrl}/tickets/success?order=${updated.orderNumber}`,
         free: true,
       })
+    }
+
+    const gate = await assertPaymentMethodEnabled(paymentMethod)
+    if (!gate.ok) {
+      return NextResponse.json({ error: gate.note || 'Payment method unavailable' }, { status: 400 })
     }
 
     let paymentUrl = null

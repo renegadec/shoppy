@@ -6,6 +6,7 @@ import { sendTelegramNotification, formatOrderNotification } from '@/lib/telegra
 import { createOrder } from '@/lib/orders'
 import prisma from '@/lib/prisma'
 import { normalizeZwMsisdn } from '@/lib/msisdn'
+import { assertPaymentMethodEnabled } from '@/lib/paymentMethods'
 
 export async function POST(request) {
   try {
@@ -66,6 +67,12 @@ export async function POST(request) {
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+
+    // Enforce enabled payment methods (server-side)
+    const gate = await assertPaymentMethodEnabled(paymentMethod)
+    if (!gate.ok) {
+      return NextResponse.json({ error: gate.note || 'Payment method unavailable' }, { status: 400 })
+    }
 
     let paymentUrl = null
 

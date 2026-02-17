@@ -135,6 +135,22 @@ async function main() {
     console.log('✅ Admin user already exists')
   }
   
+  // Ensure payment method defaults
+  const paymentDefaults = [
+    { key: 'ecocash', enabled: true, note: null, sortOrder: 1 },
+    { key: 'crypto', enabled: true, note: null, sortOrder: 2 },
+    { key: 'card', enabled: false, note: 'Coming soon', sortOrder: 3 },
+  ]
+
+  for (const m of paymentDefaults) {
+    await prisma.paymentMethodSetting.upsert({
+      where: { key: m.key },
+      create: m,
+      update: {},
+    })
+  }
+  console.log('✅ Payment method settings ensured')
+
   // Migrate products
   for (const product of existingProducts) {
     const existing = await prisma.product.findFirst({

@@ -17,6 +17,10 @@ export default function TicketCheckoutClient() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('ecocash')
+  const [paymentMethods, setPaymentMethods] = useState({
+    ecocash: { enabled: true, note: null },
+    crypto: { enabled: true, note: null },
+  })
   const [customerMsisdn, setCustomerMsisdn] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -31,6 +35,36 @@ export default function TicketCheckoutClient() {
   useEffect(() => {
     setQty(Math.max(1, initialQty))
   }, [initialQty])
+
+  useEffect(() => {
+    async function fetchPaymentMethods() {
+      try {
+        const res = await fetch('/api/payment-methods')
+        const data = await res.json().catch(() => null)
+        if (!res.ok) return
+
+        const map = {}
+        for (const m of data?.methods || []) {
+          map[m.key] = { enabled: Boolean(m.enabled), note: m.note || null }
+        }
+
+        if (Object.keys(map).length) {
+          setPaymentMethods((prev) => ({ ...prev, ...map }))
+
+          const current = map[paymentMethod]
+          if (current && !current.enabled) {
+            const firstEnabled = ['ecocash', 'crypto'].find((k) => map[k]?.enabled)
+            if (firstEnabled) setPaymentMethod(firstEnabled)
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    fetchPaymentMethods()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function submit(e) {
     e.preventDefault()
@@ -93,28 +127,38 @@ export default function TicketCheckoutClient() {
               <div className="mt-2 grid grid-cols-2 gap-3">
                 <button
                   type="button"
+                  disabled={!paymentMethods.crypto?.enabled}
                   onClick={() => setPaymentMethod('crypto')}
                   className={`rounded-2xl border px-4 py-3 text-left transition-colors ${
                     paymentMethod === 'crypto'
                       ? 'border-emerald-600 bg-emerald-50'
                       : 'border-gray-200 bg-white hover:bg-gray-50'
-                  }`}
+                  } ${!paymentMethods.crypto?.enabled ? 'opacity-50 cursor-not-allowed hover:bg-white' : ''}`}
                 >
                   <div className="font-semibold text-gray-900">Crypto</div>
-                  <div className="text-xs text-gray-500 mt-1">Pay with USDT, BTC, ETH, and more</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {!paymentMethods.crypto?.enabled
+                      ? (paymentMethods.crypto?.note || 'Temporarily unavailable')
+                      : 'Pay with USDT, BTC, ETH, and more'}
+                  </div>
                 </button>
 
                 <button
                   type="button"
+                  disabled={!paymentMethods.ecocash?.enabled}
                   onClick={() => setPaymentMethod('ecocash')}
                   className={`rounded-2xl border px-4 py-3 text-left transition-colors ${
                     paymentMethod === 'ecocash'
                       ? 'border-emerald-600 bg-emerald-50'
                       : 'border-gray-200 bg-white hover:bg-gray-50'
-                  }`}
+                  } ${!paymentMethods.ecocash?.enabled ? 'opacity-50 cursor-not-allowed hover:bg-white' : ''}`}
                 >
                   <div className="font-semibold text-gray-900">EcoCash</div>
-                  <div className="text-xs text-gray-500 mt-1">Pay using your EcoCash wallet</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {!paymentMethods.ecocash?.enabled
+                      ? (paymentMethods.ecocash?.note || 'Temporarily unavailable')
+                      : 'Pay using your EcoCash wallet'}
+                  </div>
                 </button>
               </div>
 
