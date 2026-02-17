@@ -23,7 +23,17 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const { methods: paymentMethods, setSelected } = usePaymentMethods({ initialSelected: formData.paymentMethod })
+  const { methods: paymentMethods, selected: selectedPaymentMethod, setSelected } = usePaymentMethods({
+    initialSelected: formData.paymentMethod,
+  })
+
+  useEffect(() => {
+    if (!selectedPaymentMethod) return
+    if (formData.paymentMethod !== selectedPaymentMethod) {
+      setFormData((f) => ({ ...f, paymentMethod: selectedPaymentMethod }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPaymentMethod])
 
   const productId = Array.isArray(params?.id) ? params.id[0] : params?.id
 

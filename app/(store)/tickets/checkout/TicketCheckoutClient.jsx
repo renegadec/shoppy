@@ -19,7 +19,12 @@ export default function TicketCheckoutClient() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('ecocash')
-  const { methods: allPaymentMethods } = usePaymentMethods({ initialSelected: paymentMethod })
+  const { methods: allPaymentMethods, selected: selectedPaymentMethod } = usePaymentMethods({ initialSelected: paymentMethod })
+
+  useEffect(() => {
+    if (!selectedPaymentMethod) return
+    if (paymentMethod !== selectedPaymentMethod) setPaymentMethod(selectedPaymentMethod)
+  }, [selectedPaymentMethod, paymentMethod])
   const paymentMethods = useMemo(
     () => allPaymentMethods.filter((m) => m.key === 'ecocash' || m.key === 'crypto'),
     [allPaymentMethods]
