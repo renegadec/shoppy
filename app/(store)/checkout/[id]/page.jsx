@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import PaymentMethodPicker from '@/components/PaymentMethodPicker'
+import { usePaymentMethods } from '@/lib/usePaymentMethods'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
@@ -21,11 +23,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const [paymentMethods, setPaymentMethods] = useState([
-    { key: 'ecocash', label: 'EcoCash', enabled: true, note: null },
-    { key: 'crypto', label: 'Crypto', enabled: true, note: null },
-    { key: 'card', label: 'Card', enabled: false, note: 'Coming soon' },
-  ])
+  const { methods: paymentMethods, setSelected } = usePaymentMethods({ initialSelected: formData.paymentMethod })
 
   const productId = Array.isArray(params?.id) ? params.id[0] : params?.id
 
@@ -55,48 +53,8 @@ export default function CheckoutPage() {
     fetchProduct()
   }, [productId])
 
-  useEffect(() => {
-    async function fetchPaymentMethods() {
-      try {
-        const res = await fetch('/api/payment-methods')
-        const data = await res.json().catch(() => null)
-        if (!res.ok) return
-
-        const labels = { ecocash: 'EcoCash', crypto: 'Crypto', card: 'Card' }
-        const methods = (data?.methods || [])
-          .map((m) => ({
-            key: m.key,
-            label: labels[m.key] || m.key,
-            enabled: Boolean(m.enabled),
-            note: m.note || null,
-            sortOrder: Number(m.sortOrder ?? 0),
-          }))
-          // Enabled methods first, then admin-defined sortOrder
-          .sort((a, b) => {
-            const ae = a.enabled ? 0 : 1
-            const be = b.enabled ? 0 : 1
-            if (ae !== be) return ae - be
-            if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder
-            return String(a.key).localeCompare(String(b.key))
-          })
-
-        if (methods.length) {
-          setPaymentMethods(methods)
-          // If currently selected method is disabled, move to first enabled
-          const current = methods.find((x) => x.key === formData.paymentMethod)
-          if (current && !current.enabled) {
-            const firstEnabled = methods.find((x) => x.enabled)
-            if (firstEnabled) setFormData((f) => ({ ...f, paymentMethod: firstEnabled.key }))
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    fetchPaymentMethods()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // payment methods loaded via usePaymentMethods()
+  // (moved to usePaymentMethods)
 
   if (loadingProduct) {
     return (
@@ -275,51 +233,34 @@ export default function CheckoutPage() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {paymentMethods.map((m) => {
-                  const disabled = !m.enabled
-                  return (
-                    <button
-                      key={m.key}
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => setFormData({ ...formData, paymentMethod: m.key })}
-                      className={`p-4 rounded-xl border-2 transition-all text-left ${
-                        formData.paymentMethod === m.key
-                          ? 'border-emerald-600 bg-emerald-50 shadow-md'
-                          : 'border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/50'
-                      } ${disabled ? 'opacity-50 cursor-not-allowed hover:bg-white hover:border-gray-200' : ''}`}
-                    >
-                      <div className="text-sm font-semibold text-gray-900">{m.label}</div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {disabled
-                          ? (m.note || 'Temporarily unavailable')
-                          : m.key === 'ecocash'
-                            ? 'Pay using your EcoCash wallet'
-                            : m.key === 'crypto'
-                              ? 'Pay with USDT, BTC, ETH, and more'
-                              : 'Pay with card'}
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
+              <PaymentMethodPicker
+                methods={paymentMethods}
+                value={formData.paymentMethod}
+                onChange={(key) => {
+                  setSelected(key)
+                  setFormData({ ...formData, paymentMethod: key })
+                }}
+                descriptions={{
+                  ecocash: 'Pay using your EcoCash wallet',
+                  crypto: 'Pay with USDT, BTC, USDC',
+                  card: 'Pay with card',
+                }}
+              />
             </div>
 
             {formData.paymentMethod === 'ecocash' && (
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">EcoCash Phone Number (MSISDN)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">EcoCash Phone Number</label>
                 <input
                   type="tel"
                   required
                   value={formData.customerMsisdn}
                   onChange={(e) => setFormData({ ...formData, customerMsisdn: e.target.value })}
-                  placeholder="0773xxxxxxx"
+                  placeholder="0772012345"
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  Use international format without + (e.g. 26377...). You will receive a prompt on your phone.
+                  You will receive a prompt on your phone.
                 </p>
               </div>
             )}
@@ -344,7 +285,7 @@ export default function CheckoutPage() {
               {formData.paymentMethod === 'ecocash' ? (
                 <p className="mt-1">We will send a payment prompt to your phone</p>
               ) : (
-                <p className="mt-1">Pay with USDT, BTC, ETH, or other crypto</p>
+                <p className="mt-1">Pay with USDT, BTC & USDC</p>
               )}
             </div>
           </form>

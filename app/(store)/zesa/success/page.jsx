@@ -1,7 +1,6 @@
-import Link from 'next/link'
 import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
 import CryptoPendingPoll from '@/components/CryptoPendingPoll'
-import { CheckCircleIcon, InboxArrowDownIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
+import SuccessShell from '@/components/SuccessShell'
 
 export const metadata = {
   title: 'ZESA Payment | Shoppy',
@@ -13,52 +12,31 @@ export default async function ZesaSuccessPage({ searchParams }) {
   const method = params?.method || ''
   const orderNumber = params?.order || ''
 
+  const description = pending
+    ? (method === 'ecocash'
+        ? "We've sent a payment prompt to your phone. Please confirm the EcoCash payment to complete your ZESA order."
+        : 'Your payment is being processed. Please wait for confirmation.')
+    : 'Thanks! Once payment is confirmed, your ZESA token will be processed automatically.'
+
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden text-center p-12">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircleIcon className="h-12 w-12 text-green-600" aria-hidden="true" />
-        </div>
+    <SuccessShell
+      pending={pending}
+      description={description}
+      backHref="/zesa"
+      backLabel="Back to ZESA"
+      steps={[
+        'We verify your payment',
+        'We automatically process the ZESA token purchase',
+        'ZETDC sends token notifications to the notify number',
+      ]}
+    >
+      {pending && method === 'ecocash' && orderNumber && (
+        <EcoCashPendingPoll kind="zesa" orderNumber={orderNumber} />
+      )}
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{pending ? 'Payment Pending' : 'Payment Received!'}</h1>
-
-        <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          {pending ? (
-            method === 'ecocash' ? (
-              <>We&apos;ve sent a payment prompt to your phone. Please confirm the EcoCash payment to complete your ZESA order.</>
-            ) : (
-              <>Your payment is being processed. Please wait for confirmation.</>
-            )
-          ) : (
-            <>Thanks! Once payment is confirmed, your ZESA token will be processed automatically.</>
-          )}
-        </p>
-
-        {pending && method === 'ecocash' && orderNumber && (
-          <EcoCashPendingPoll kind="zesa" orderNumber={orderNumber} />
-        )}
-
-        {pending && method === 'crypto' && orderNumber && (
-          <CryptoPendingPoll label="Crypto payment" orderNumber={orderNumber} />
-        )}
-
-        <div className="bg-orange-50 rounded-xl p-6 mb-8 text-left">
-          <h2 className="font-semibold text-brand-red mb-3 flex items-center gap-2">
-            <InboxArrowDownIcon className="h-5 w-5 text-brand-red" aria-hidden="true" />
-            What happens next?
-          </h2>
-          <ul className="space-y-2 text-gray-700">
-            <li className="flex items-start"><span className="text-brand-orange mr-2">1.</span><span>We verify your payment</span></li>
-            <li className="flex items-start"><span className="text-brand-orange mr-2">2.</span><span>We automatically process the ZESA token purchase</span></li>
-            <li className="flex items-start"><span className="text-brand-orange mr-2">3.</span><span>ZETDC sends token notifications to the notify number</span></li>
-          </ul>
-        </div>
-
-        <Link href="/zesa" className="inline-flex items-center gap-2 text-brand-orange hover:text-brand-red font-medium">
-          <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
-          Back to ZESA
-        </Link>
-      </div>
-    </div>
+      {pending && method === 'crypto' && orderNumber && (
+        <CryptoPendingPoll label="Crypto payment" orderNumber={orderNumber} />
+      )}
+    </SuccessShell>
   )
 }

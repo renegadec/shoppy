@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import PaymentMethodPicker from '@/components/PaymentMethodPicker'
+import { usePaymentMethods } from '@/lib/usePaymentMethods'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { LockClosedIcon } from '@heroicons/react/24/solid'
@@ -17,10 +19,11 @@ export default function TicketCheckoutClient() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('ecocash')
-  const [paymentMethods, setPaymentMethods] = useState({
-    ecocash: { enabled: true, note: null },
-    crypto: { enabled: true, note: null },
-  })
+  const { methods: allPaymentMethods } = usePaymentMethods({ initialSelected: paymentMethod })
+  const paymentMethods = useMemo(
+    () => allPaymentMethods.filter((m) => m.key === 'ecocash' || m.key === 'crypto'),
+    [allPaymentMethods]
+  )
   const [customerMsisdn, setCustomerMsisdn] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -36,49 +39,7 @@ export default function TicketCheckoutClient() {
     setQty(Math.max(1, initialQty))
   }, [initialQty])
 
-  useEffect(() => {
-    async function fetchPaymentMethods() {
-      try {
-        const res = await fetch('/api/payment-methods')
-        const data = await res.json().catch(() => null)
-        if (!res.ok) return
-
-        const map = {}
-        for (const m of data?.methods || []) {
-          map[m.key] = {
-            enabled: Boolean(m.enabled),
-            note: m.note || null,
-            sortOrder: Number(m.sortOrder ?? 0),
-          }
-        }
-
-        if (Object.keys(map).length) {
-          setPaymentMethods((prev) => ({ ...prev, ...map }))
-
-          const current = map[paymentMethod]
-          if (current && !current.enabled) {
-            const ordered = ['ecocash', 'crypto']
-              .map((k) => ({ key: k, ...(map[k] || {}) }))
-              .sort((a, b) => {
-                const ae = a.enabled ? 0 : 1
-                const be = b.enabled ? 0 : 1
-                if (ae !== be) return ae - be
-                if ((a.sortOrder ?? 0) !== (b.sortOrder ?? 0)) return (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
-                return String(a.key).localeCompare(String(b.key))
-              })
-
-            const firstEnabled = ordered.find((x) => x.enabled)?.key
-            if (firstEnabled) setPaymentMethod(firstEnabled)
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    fetchPaymentMethods()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // Payment methods loaded via usePaymentMethods()
 
   async function submit(e) {
     e.preventDefault()
@@ -147,43 +108,18 @@ export default function TicketCheckoutClient() {
         <form onSubmit={submit} className="mt-8">
           {!isFree && (
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700">Payment method</label>
-              <div className="mt-2 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  disabled={!paymentMethods.crypto?.enabled}
-                  onClick={() => setPaymentMethod('crypto')}
-                  className={`rounded-2xl border px-4 py-3 text-left transition-colors ${
-                    paymentMethod === 'crypto'
-                      ? 'border-emerald-600 bg-emerald-50'
-                      : 'border-gray-200 bg-white hover:bg-gray-50'
-                  } ${!paymentMethods.crypto?.enabled ? 'opacity-50 cursor-not-allowed hover:bg-white' : ''}`}
-                >
-                  <div className="font-semibold text-gray-900">Crypto</div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {!paymentMethods.crypto?.enabled
-                      ? (paymentMethods.crypto?.note || 'Temporarily unavailable')
-                      : 'Pay with USDT, BTC, ETH, and more'}
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={!paymentMethods.ecocash?.enabled}
-                  onClick={() => setPaymentMethod('ecocash')}
-                  className={`rounded-2xl border px-4 py-3 text-left transition-colors ${
-                    paymentMethod === 'ecocash'
-                      ? 'border-emerald-600 bg-emerald-50'
-                      : 'border-gray-200 bg-white hover:bg-gray-50'
-                  } ${!paymentMethods.ecocash?.enabled ? 'opacity-50 cursor-not-allowed hover:bg-white' : ''}`}
-                >
-                  <div className="font-semibold text-gray-900">EcoCash</div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    {!paymentMethods.ecocash?.enabled
-                      ? (paymentMethods.ecocash?.note || 'Temporarily unavailable')
-                      : 'Pay using your EcoCash wallet'}
-                  </div>
-                </button>
+              <div className="mt-2">
+                <PaymentMethodPicker
+                  label="Payment method"
+                  methods={paymentMethods}
+                  value={paymentMethod}
+                  onChange={(key) => setPaymentMethod(key)}
+                  gridClassName="grid grid-cols-2 gap-3"
+                  descriptions={{
+                    crypto: 'Pay with USDT, BTC, ETH, and more',
+                    ecocash: 'Pay using your EcoCash wallet',
+                  }}
+                />
               </div>
 
               {paymentMethod === 'ecocash' && (
