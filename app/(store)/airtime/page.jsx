@@ -56,16 +56,7 @@ export default function AirtimePage() {
       }
 
       if (data?.paymentUrl) {
-        if (formData.paymentMethod === 'crypto') {
-          try {
-            window.open(data.paymentUrl, '_blank')
-          } catch {
-            // ignore
-          }
-          window.location.href = `/airtime/success?order=${encodeURIComponent(data.orderNumber)}&pending=1&method=crypto`
-          return
-        }
-
+        // For Plisio crypto, we send the customer directly to the hosted payment page.
         window.location.href = data.paymentUrl
         return
       }

@@ -6,7 +6,7 @@ import AnimatedTick from '@/components/AnimatedTick'
 export const dynamic = 'force-dynamic'
 
 import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
-import CryptoPendingPoll from '@/components/CryptoPendingPoll'
+// CryptoPendingPoll removed (Plisio return handled on hosted page)
 
 export default async function TicketSuccessPage({ searchParams }) {
   const sp = await searchParams
@@ -25,7 +25,6 @@ export default async function TicketSuccessPage({ searchParams }) {
 
   const paid = order.status === 'PAID'
   const showEcoCashPending = pending && method === 'ecocash' && !paid
-  const showCryptoPending = pending && method === 'crypto' && !paid
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -39,7 +38,7 @@ export default async function TicketSuccessPage({ searchParams }) {
 
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {paid ? 'Payment confirmed' : (showEcoCashPending || showCryptoPending) ? 'Payment pending' : 'Payment received'}
+              {paid ? 'Payment confirmed' : showEcoCashPending ? 'Payment pending' : 'Payment received'}
             </h1>
             <p className="text-gray-600 mt-2">
               Order: <span className="font-semibold text-gray-900">{order.orderNumber}</span>
@@ -54,9 +53,7 @@ export default async function TicketSuccessPage({ searchParams }) {
           <EcoCashPendingPoll kind="ticket" orderNumber={order.orderNumber} />
         )}
 
-        {showCryptoPending && (
-          <CryptoPendingPoll label="Crypto payment" orderNumber={order.orderNumber} />
-        )}
+        {/* Crypto payments complete on Plisio and return via the "Return to merchant" button. */}
 
         <div className="mt-6 rounded-2xl bg-gray-50 border border-gray-200 p-5">
           <p className="font-semibold text-gray-900">Next step</p>
