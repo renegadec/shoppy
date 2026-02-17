@@ -2,8 +2,8 @@ import './globals.css'
 import Providers from '@/components/Providers'
 
 const siteName = 'Shoppy'
-// Use non-www canonical; WhatsApp/Telegram scrapers can be picky if www redirects.
-const siteUrl = 'https://shoppy.co.zw'
+// Use www because the apex domain currently redirects (307) and some link preview scrapers can fail on redirects.
+const siteUrl = 'https://www.shoppy.co.zw'
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
