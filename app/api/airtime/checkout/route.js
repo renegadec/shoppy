@@ -20,7 +20,6 @@ export async function POST(request) {
       airtimeAmount,
     } = body
 
-    if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     if (!network) return NextResponse.json({ error: 'Network is required' }, { status: 400 })
     if (!recipientMsisdn) return NextResponse.json({ error: 'Recipient phone number is required' }, { status: 400 })
 
@@ -32,16 +31,26 @@ export async function POST(request) {
     const markupRate = 0.02
     const amountToPay = computeMarkupAmount({ airtimeAmount: amt, markupRate })
 
-    const contactMethod = 'email'
-    const contactValue = email
+    const orderNumber = await generateAirtimeOrderNumber()
+
+    // Email is optional for airtime. We still require a Customer row, so if email is missing
+    // we generate a unique placeholder address.
+    const normalizedEmail = email ? String(email).trim() : ''
+    const customerEmail = normalizedEmail || `guest+${orderNumber}@shoppy.local`
+
+    const contactMethod = normalizedEmail ? 'email' : null
+    const contactValue = normalizedEmail || null
 
     // Find or create customer
-    let customer = await prisma.customer.findUnique({ where: { email } })
+    let customer = await prisma.customer.findUnique({ where: { email: customerEmail } })
     if (!customer) {
-      customer = await prisma.customer.create({ data: { email } })
+      customer = await prisma.customer.create({
+        data: {
+          email: customerEmail,
+          phone: customerMsisdn ? String(customerMsisdn) : null,
+        },
+      })
     }
-
-    const orderNumber = await generateAirtimeOrderNumber()
 
     const hotProductId = hotProductIdForNetwork(network)
 
@@ -57,7 +66,7 @@ export async function POST(request) {
         hotProductId: hotProductId ?? undefined,
         customerId: customer.id,
         contactMethod,
-        contactValue: contactMethod === 'email' ? email : contactValue,
+        contactValue: contactMethod === 'email' ? customerEmail : contactValue,
         paymentMethod,
       },
     })
@@ -67,9 +76,9 @@ export async function POST(request) {
     const orderData = {
       kind: 'airtime',
       orderNumber,
-      email,
+      email: normalizedEmail || null,
       contactMethod,
-      contactValue: contactMethod === 'email' ? email : contactValue,
+      contactValue,
       network: String(network).toLowerCase(),
       recipientMsisdn: String(recipientMsisdn),
       airtimeAmount: roundMoney(amt),
@@ -122,7 +131,7 @@ export async function POST(request) {
         orderDescription: `Airtime ${network} $${roundMoney(amt)} (+2%)`,
         successUrl: `${baseUrl}/airtime/success?order=${orderNumber}`,
         cancelUrl: `${baseUrl}/airtime`,
-        customerEmail: email,
+        customerEmail: normalizedEmail || undefined,
       })
 
       await prisma.airtimeOrder.update({
@@ -139,7 +148,7 @@ export async function POST(request) {
     }
 
     await sendTelegramNotification(
-      `🟦 <b>NEW AIRTIME ORDER</b>\n\nOrder: ${orderNumber}\nNetwork: ${String(network).toUpperCase()}\nRecipient: ${recipientMsisdn}\nAirtime: $${roundMoney(amt)}\nCustomer pays: $${amountToPay}\nPayment: ${paymentMethod}`
+      `🟦 <b>NEW AIRTIME ORDER</b>\n\nOrder: ${orderNumber}\nNetwork: ${String(network).toUpperCase()}\nRecipient: ${recipientMsisdn}\nEmail: ${normalizedEmail || 'N/A'}\nAirtime: $${roundMoney(amt)}\nCustomer pays: $${amountToPay}\nPayment: ${paymentMethod}`
     )
 
     return NextResponse.json({

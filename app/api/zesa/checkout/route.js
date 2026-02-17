@@ -20,7 +20,6 @@ export async function POST(request) {
       tokenAmount,
     } = body
 
-    if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     if (!meterNumber) return NextResponse.json({ error: 'Meter number is required' }, { status: 400 })
     if (!notifyNumber) return NextResponse.json({ error: 'Notify number is required' }, { status: 400 })
 
@@ -32,14 +31,26 @@ export async function POST(request) {
     const markupRate = 0.01
     const amountToPay = computeMarkupAmount({ tokenAmount: amt, markupRate })
 
-    // Find or create customer
-    let customer = await prisma.customer.findUnique({ where: { email } })
-    if (!customer) customer = await prisma.customer.create({ data: { email } })
-
     const orderNumber = await generateZesaOrderNumber()
 
-    const contactMethod = 'email'
-    const contactValue = email
+    // Email is optional for ZESA. We still require a Customer row, so if email is missing
+    // we generate a unique placeholder address.
+    const normalizedEmail = email ? String(email).trim() : ''
+    const customerEmail = normalizedEmail || `guest+${orderNumber}@shoppy.local`
+
+    // Find or create customer
+    let customer = await prisma.customer.findUnique({ where: { email: customerEmail } })
+    if (!customer) {
+      customer = await prisma.customer.create({
+        data: {
+          email: customerEmail,
+          phone: customerMsisdn ? String(customerMsisdn) : null,
+        },
+      })
+    }
+
+    const contactMethod = normalizedEmail ? 'email' : null
+    const contactValue = normalizedEmail || null
 
     const order = await prisma.zesaOrder.create({
       data: {
@@ -63,7 +74,7 @@ export async function POST(request) {
     const orderData = {
       kind: 'zesa',
       orderNumber,
-      email,
+      email: normalizedEmail || null,
       meterNumber: String(meterNumber),
       notifyNumber: String(notifyNumber),
       tokenAmount: roundMoney(amt),
@@ -116,7 +127,7 @@ export async function POST(request) {
         orderDescription: `ZESA $${roundMoney(amt)} (+1%)`,
         successUrl: `${baseUrl}/zesa/success?order=${orderNumber}`,
         cancelUrl: `${baseUrl}/zesa`,
-        customerEmail: email,
+        customerEmail: normalizedEmail || undefined,
       })
 
       await prisma.zesaOrder.update({
@@ -133,7 +144,7 @@ export async function POST(request) {
     }
 
     await sendTelegramNotification(
-      `🟨 <b>NEW ZESA ORDER</b>\n\nOrder: ${orderNumber}\nMeter: ${meterNumber}\nNotify: ${notifyNumber}\nToken: $${roundMoney(amt)}\nCustomer pays: $${amountToPay}\nPayment: ${paymentMethod}`
+      `🟨 <b>NEW ZESA ORDER</b>\n\nOrder: ${orderNumber}\nMeter: ${meterNumber}\nNotify: ${notifyNumber}\nEmail: ${normalizedEmail || 'N/A'}\nToken: $${roundMoney(amt)}\nCustomer pays: $${amountToPay}\nPayment: ${paymentMethod}`
     )
 
     return NextResponse.json({ success: true, orderNumber, paymentUrl, paymentMethod, amountToPay })
