@@ -131,7 +131,9 @@ export async function POST(request) {
         orderDescription: `Airtime ${network} $${roundMoney(amt)} (+2%)`,
         successUrl: `${baseUrl}/airtime/success?order=${orderNumber}`,
         cancelUrl: `${baseUrl}/airtime`,
-        customerEmail: normalizedEmail || undefined,
+        // Always send an email to Plisio so it doesn't prompt the customer for one.
+        // If the customer didn't provide an email, use our placeholder.
+        customerEmail,
       })
 
       await prisma.airtimeOrder.update({
