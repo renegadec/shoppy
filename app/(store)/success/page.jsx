@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
+import CryptoPendingPoll from '@/components/CryptoPendingPoll'
 import { CheckCircleIcon, InboxArrowDownIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
 
 export const metadata = {
@@ -38,6 +39,10 @@ export default async function SuccessPage({ searchParams }) {
 
         {pending && method === 'ecocash' && orderNumber && (
           <EcoCashPendingPoll kind="product" orderNumber={orderNumber} />
+        )}
+
+        {pending && method === 'crypto' && orderNumber && (
+          <CryptoPendingPoll label="Crypto payment" orderNumber={orderNumber} />
         )}
 
         {/* What's Next */}

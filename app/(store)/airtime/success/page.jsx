@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
+import CryptoPendingPoll from '@/components/CryptoPendingPoll'
 import { CheckCircleIcon, InboxArrowDownIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
 
 export const metadata = {
@@ -37,6 +38,10 @@ export default async function AirtimeSuccessPage({ searchParams }) {
 
         {pending && method === 'ecocash' && orderNumber && (
           <EcoCashPendingPoll kind="airtime" orderNumber={orderNumber} />
+        )}
+
+        {pending && method === 'crypto' && orderNumber && (
+          <CryptoPendingPoll label="Crypto payment" orderNumber={orderNumber} />
         )}
 
         <div className="bg-orange-50 rounded-xl p-6 mb-8 text-left">

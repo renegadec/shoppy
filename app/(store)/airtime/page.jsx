@@ -99,6 +99,16 @@ export default function AirtimePage() {
       }
 
       if (data?.paymentUrl) {
+        if (formData.paymentMethod === 'crypto') {
+          try {
+            window.open(data.paymentUrl, '_blank')
+          } catch {
+            // ignore
+          }
+          window.location.href = `/airtime/success?order=${encodeURIComponent(data.orderNumber)}&pending=1&method=crypto`
+          return
+        }
+
         window.location.href = data.paymentUrl
         return
       }
