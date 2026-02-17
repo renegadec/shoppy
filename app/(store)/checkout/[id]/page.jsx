@@ -100,17 +100,7 @@ export default function CheckoutPage() {
       if (!response.ok) throw new Error(data.error || 'Something went wrong')
 
       if (data.paymentUrl) {
-        if (formData.paymentMethod === 'crypto') {
-          // Try to open Plisio in a new tab/window so this page can stay open and auto-update.
-          try {
-            window.open(data.paymentUrl, '_blank')
-          } catch {
-            // ignore
-          }
-          window.location.href = `/success?order=${encodeURIComponent(data.orderId)}&pending=1&method=crypto`
-          return
-        }
-
+        // For Plisio crypto, we send the customer directly to the hosted payment page.
         window.location.href = data.paymentUrl
       } else {
         throw new Error('No payment URL received')

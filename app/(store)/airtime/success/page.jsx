@@ -1,5 +1,4 @@
 import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
-import CryptoPendingPoll from '@/components/CryptoPendingPoll'
 import SuccessShell from '@/components/SuccessShell'
 
 export const metadata = {
@@ -34,9 +33,7 @@ export default async function AirtimeSuccessPage({ searchParams }) {
         <EcoCashPendingPoll kind="airtime" orderNumber={orderNumber} />
       )}
 
-      {pending && method === 'crypto' && orderNumber && (
-        <CryptoPendingPoll label="Crypto payment" orderNumber={orderNumber} />
-      )}
+      {/* Crypto payments complete on Plisio and return via the "Return to merchant" button. */}
     </SuccessShell>
   )
 }
