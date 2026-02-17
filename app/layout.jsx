@@ -2,7 +2,8 @@ import './globals.css'
 import Providers from '@/components/Providers'
 
 const siteName = 'Shoppy'
-const siteUrl = 'https://www.shoppy.co.zw'
+// Use non-www canonical; WhatsApp/Telegram scrapers can be picky if www redirects.
+const siteUrl = 'https://shoppy.co.zw'
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
@@ -25,7 +26,8 @@ export const metadata = {
       'Buy digital products and Zimbabwe services (airtime, ZESA, event tickets). Pay with crypto or EcoCash.',
     images: [
       {
-        url: '/og.png',
+        // Generated via /opengraph-image
+        url: '/opengraph-image',
         width: 1200,
         height: 630,
         alt: siteName,
@@ -37,7 +39,7 @@ export const metadata = {
     title: `${siteName} | Digital products, Airtime & ZESA`,
     description:
       'Buy digital products and Zimbabwe services (airtime, ZESA, event tickets). Pay with crypto or EcoCash.',
-    images: ['/og.png'],
+    images: ['/twitter-image'],
   },
 
   // Favicons/app icons (served by Next from /app/icon.png and /app/apple-icon.png)
