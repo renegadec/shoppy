@@ -63,12 +63,22 @@ export default function CheckoutPage() {
         if (!res.ok) return
 
         const labels = { ecocash: 'EcoCash', crypto: 'Crypto', card: 'Card' }
-        const methods = (data?.methods || []).map((m) => ({
-          key: m.key,
-          label: labels[m.key] || m.key,
-          enabled: Boolean(m.enabled),
-          note: m.note || null,
-        }))
+        const methods = (data?.methods || [])
+          .map((m) => ({
+            key: m.key,
+            label: labels[m.key] || m.key,
+            enabled: Boolean(m.enabled),
+            note: m.note || null,
+            sortOrder: Number(m.sortOrder ?? 0),
+          }))
+          // Enabled methods first, then admin-defined sortOrder
+          .sort((a, b) => {
+            const ae = a.enabled ? 0 : 1
+            const be = b.enabled ? 0 : 1
+            if (ae !== be) return ae - be
+            if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder
+            return String(a.key).localeCompare(String(b.key))
+          })
 
         if (methods.length) {
           setPaymentMethods(methods)

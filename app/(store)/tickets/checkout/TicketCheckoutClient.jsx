@@ -45,7 +45,11 @@ export default function TicketCheckoutClient() {
 
         const map = {}
         for (const m of data?.methods || []) {
-          map[m.key] = { enabled: Boolean(m.enabled), note: m.note || null }
+          map[m.key] = {
+            enabled: Boolean(m.enabled),
+            note: m.note || null,
+            sortOrder: Number(m.sortOrder ?? 0),
+          }
         }
 
         if (Object.keys(map).length) {
@@ -53,7 +57,17 @@ export default function TicketCheckoutClient() {
 
           const current = map[paymentMethod]
           if (current && !current.enabled) {
-            const firstEnabled = ['ecocash', 'crypto'].find((k) => map[k]?.enabled)
+            const ordered = ['ecocash', 'crypto']
+              .map((k) => ({ key: k, ...(map[k] || {}) }))
+              .sort((a, b) => {
+                const ae = a.enabled ? 0 : 1
+                const be = b.enabled ? 0 : 1
+                if (ae !== be) return ae - be
+                if ((a.sortOrder ?? 0) !== (b.sortOrder ?? 0)) return (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+                return String(a.key).localeCompare(String(b.key))
+              })
+
+            const firstEnabled = ordered.find((x) => x.enabled)?.key
             if (firstEnabled) setPaymentMethod(firstEnabled)
           }
         }
