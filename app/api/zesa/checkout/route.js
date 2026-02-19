@@ -115,7 +115,7 @@ export async function POST(request) {
         },
       })
 
-      paymentUrl = `${baseUrl}/zesa/success?order=${orderNumber}&pending=1&method=ecocash`
+      paymentUrl = `${baseUrl}/zesa/pending?order=${orderNumber}&method=ecocash`
 
     } else {
       // NOTE: Do NOT embed large payloads in the crypto gateway order id.

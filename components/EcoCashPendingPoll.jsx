@@ -1,6 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+
+const successHrefForKind = {
+  product: '/success',
+  airtime: '/airtime/success',
+  zesa: '/zesa/success',
+  ticket: '/tickets/success',
+}
 
 export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
   const [status, setStatus] = useState(null)
@@ -23,8 +30,8 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
       const data = await res.json().catch(() => null)
       if (!res.ok) throw new Error(data?.error || 'Failed to resend prompt')
 
-      // immediately refresh status after requesting a new prompt
-      await checkOnce()
+      // Optional: after requesting a new prompt, allow the user to refresh status.
+      setStatus(null)
     } catch (e) {
       setError(e?.message || 'Failed to resend prompt')
     } finally {
@@ -45,6 +52,7 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
           : kind === 'zesa'
             ? '/api/ecocash/zesa-status'
             : '/api/ecocash/status'
+
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,10 +65,9 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
 
       const s = String(data?.status?.status || '').toUpperCase()
       if (s === 'SUCCESS') {
-        // reload the page without pending to show the confirmed UI
-        const next = new URL(window.location.href)
-        next.searchParams.delete('pending')
-        next.searchParams.delete('method')
+        const base = successHrefForKind[kind] || '/success'
+        const next = new URL(base, window.location.origin)
+        next.searchParams.set('order', String(orderNumber))
         window.location.href = next.toString()
       }
     } catch (e) {
@@ -70,31 +77,16 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
     }
   }
 
-  useEffect(() => {
-    // Poll a few times automatically
-    let tries = 0
-    const maxTries = 12 // ~1 min if 5s interval
-
-    const t = setInterval(() => {
-      tries += 1
-      checkOnce()
-      if (tries >= maxTries) clearInterval(t)
-    }, 5000)
-
-    // initial check
-    checkOnce()
-
-    return () => clearInterval(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderNumber, kind])
+  const shortStatus = String(status?.status || '').toUpperCase()
+  const showOk = shortStatus && shortStatus !== 'SUCCESS'
 
   return (
-    <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-left">
+    <div className="mt-6 mb-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-left">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="font-semibold text-gray-900">Checking EcoCash payment…</p>
+          <p className="font-semibold text-gray-900">EcoCash payment pending</p>
           <p className="text-sm text-gray-700 mt-1">
-            If you already entered your PIN, this page should update automatically.
+            After you approve the payment on your phone, tap <strong>Refresh status</strong>.
           </p>
         </div>
         <button
@@ -107,9 +99,9 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
         </button>
       </div>
 
-      {status?.status && (
+      {showOk && (
         <p className="text-xs text-gray-600 mt-3">
-          Latest status: <span className="font-semibold">{String(status.status)}</span>
+          Status: <span className="font-semibold">{shortStatus}</span>
           {status?.ecocashReference ? ` • Ref: ${status.ecocashReference}` : ''}
         </p>
       )}
@@ -130,7 +122,7 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
             <ul className="list-disc pl-5 space-y-1">
               <li>Confirm the phone number you entered is correct and on EcoCash.</li>
               <li>Wait 30–60 seconds (prompts can be delayed during peak times).</li>
-              <li>Tap <strong>Refresh status</strong> above — sometimes payment completes even if the prompt is missed.</li>
+              <li>If you already approved payment, tap <strong>Refresh status</strong> above.</li>
               <li>If nothing happens after a few minutes, contact support with your <strong>order number</strong>.</li>
             </ul>
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -155,9 +147,7 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
                 Contact us
               </a>
             </div>
-            <p className="text-xs text-gray-600 mt-2">
-              Only request a new prompt if you haven’t approved a payment already.
-            </p>
+            <p className="text-xs text-gray-600 mt-2">Only request a new prompt if you haven’t approved a payment already.</p>
           </div>
         )}
       </div>

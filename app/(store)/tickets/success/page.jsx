@@ -1,11 +1,10 @@
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import AnimatedTick from '@/components/AnimatedTick'
 
 export const dynamic = 'force-dynamic'
 
-import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
 // CryptoPendingPoll removed (Plisio return handled on hosted page)
 
 export default async function TicketSuccessPage({ searchParams }) {
@@ -24,7 +23,13 @@ export default async function TicketSuccessPage({ searchParams }) {
   if (!order) notFound()
 
   const paid = order.status === 'PAID'
-  const showEcoCashPending = pending && method === 'ecocash' && !paid
+
+  // Backwards-compat: pending used to live on /tickets/success.
+  if (pending && method === 'ecocash' && !paid) {
+    redirect(`/tickets/pending?order=${encodeURIComponent(order.orderNumber)}&method=ecocash`)
+  }
+
+  const showEcoCashPending = false
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -48,10 +53,6 @@ export default async function TicketSuccessPage({ searchParams }) {
             </p>
           </div>
         </div>
-
-        {showEcoCashPending && (
-          <EcoCashPendingPoll kind="ticket" orderNumber={order.orderNumber} />
-        )}
 
         {/* Crypto payments complete on Plisio and return via the "Return to merchant" button. */}
 

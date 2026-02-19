@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { CheckCircleIcon, InboxArrowDownIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
+import { CheckCircleIcon, ClockIcon, InboxArrowDownIcon, ArrowLeftIcon } from '@heroicons/react/24/solid'
 
 export default function SuccessShell({
   title,
@@ -15,9 +15,15 @@ export default function SuccessShell({
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden text-center p-12">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircleIcon className="h-12 w-12 text-green-600" aria-hidden="true" />
-        </div>
+        {pending ? (
+          <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <ClockIcon className="h-12 w-12 text-amber-600" aria-hidden="true" />
+          </div>
+        ) : (
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircleIcon className="h-12 w-12 text-green-600" aria-hidden="true" />
+          </div>
+        )}
 
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
           {title || (pending ? pendingTitle : successTitle)}
@@ -48,8 +54,13 @@ export default function SuccessShell({
 
         <div className="bg-gray-50 rounded-xl p-6 mb-8">
           <p className="text-gray-600">
-            <strong>Need help?</strong> If you don&apos;t hear from us within 24 hours, please reach out and we&apos;ll sort it out right away.
+            <strong>Contact us.</strong> If you need help, reach out and we&apos;ll sort it out.
           </p>
+          <div className="mt-3">
+            <Link href="/contact" className="text-brand-orange hover:text-brand-red font-medium">
+              Go to contact page
+            </Link>
+          </div>
         </div>
 
         <Link href={backHref} className="inline-flex items-center gap-2 text-brand-orange hover:text-brand-red font-medium">

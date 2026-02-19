@@ -1,4 +1,4 @@
-import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
+import { redirect } from 'next/navigation'
 import SuccessShell from '@/components/SuccessShell'
 
 export const metadata = {
@@ -11,29 +11,24 @@ export default async function SuccessPage({ searchParams }) {
   const method = params?.method || ''
   const orderNumber = params?.order || ''
 
-  const description = pending
-    ? (method === 'ecocash'
-        ? "We've sent a payment prompt to your phone. Please confirm the EcoCash payment to complete your order."
-        : 'Your payment is being processed. Please wait for confirmation.')
-    : "Thank you for your purchase! We've received your payment and will contact you shortly to deliver your product and help with setup."
+  // Backwards-compat: if someone hits the old pending-on-success URL, send them to the dedicated pending page.
+  if (pending) {
+    redirect(`/pending?order=${encodeURIComponent(orderNumber)}&method=${encodeURIComponent(method)}`)
+  }
+
+  const description = "Payment received. We’ll contact you shortly to deliver your product and help with setup."
 
   return (
     <SuccessShell
-      pending={pending}
+      pending={false}
       description={description}
       backHref="/"
       backLabel="Back to Shop"
       steps={[
-        `We’ll verify your payment${pending ? ' (this can take a moment after you confirm on your phone)' : ' (usually within a few minutes)'}`,
-        'We’ll contact you via your preferred method (Telegram/WhatsApp/Email)',
-        "We’ll deliver your product and help you set it up",
+        'We verify payment and confirm your order',
+        'We contact you via your preferred method (Telegram/WhatsApp/Email)',
+        'We deliver your product and help you set it up',
       ]}
-    >
-      {pending && method === 'ecocash' && orderNumber && (
-        <EcoCashPendingPoll kind="product" orderNumber={orderNumber} />
-      )}
-
-      {/* Crypto payments complete on Plisio and return via the "Return to merchant" button. */}
-    </SuccessShell>
+    />
   )
 }

@@ -1,4 +1,4 @@
-import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
+import { redirect } from 'next/navigation'
 import SuccessShell from '@/components/SuccessShell'
 
 export const metadata = {
@@ -11,29 +11,24 @@ export default async function AirtimeSuccessPage({ searchParams }) {
   const method = params?.method || ''
   const orderNumber = params?.order || ''
 
-  const description = pending
-    ? (method === 'ecocash'
-        ? "We've sent a payment prompt to your phone. Please confirm the EcoCash payment to complete your airtime order."
-        : 'Your payment is being processed. Please wait for confirmation.')
-    : 'Thanks! Once payment is confirmed, your airtime will be delivered automatically.'
+  // Backwards-compat: if someone hits the old pending-on-success URL, send them to the dedicated pending page.
+  if (pending) {
+    redirect(`/airtime/pending?order=${encodeURIComponent(orderNumber)}&method=${encodeURIComponent(method)}`)
+  }
+
+  const description = 'Payment received. We’re processing your airtime top up now.'
 
   return (
     <SuccessShell
-      pending={pending}
+      pending={false}
       description={description}
       backHref="/airtime"
       backLabel="Back to Airtime"
       steps={[
-        'We verify your payment',
+        'We verify payment and confirm your order',
         'We automatically deliver airtime to the recipient number',
         'We send you confirmation via your chosen contact method',
       ]}
-    >
-      {pending && method === 'ecocash' && orderNumber && (
-        <EcoCashPendingPoll kind="airtime" orderNumber={orderNumber} />
-      )}
-
-      {/* Crypto payments complete on Plisio and return via the "Return to merchant" button. */}
-    </SuccessShell>
+    />
   )
 }

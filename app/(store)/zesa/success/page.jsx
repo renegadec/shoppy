@@ -1,4 +1,4 @@
-import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
+import { redirect } from 'next/navigation'
 import SuccessShell from '@/components/SuccessShell'
 
 export const metadata = {
@@ -11,29 +11,24 @@ export default async function ZesaSuccessPage({ searchParams }) {
   const method = params?.method || ''
   const orderNumber = params?.order || ''
 
-  const description = pending
-    ? (method === 'ecocash'
-        ? "We've sent a payment prompt to your phone. Please confirm the EcoCash payment to complete your ZESA order."
-        : 'Your payment is being processed. Please wait for confirmation.')
-    : 'Thanks! Once payment is confirmed, your ZESA token will be processed automatically.'
+  // Backwards-compat: if someone hits the old pending-on-success URL, send them to the dedicated pending page.
+  if (pending) {
+    redirect(`/zesa/pending?order=${encodeURIComponent(orderNumber)}&method=${encodeURIComponent(method)}`)
+  }
+
+  const description = 'Payment received. We’re processing your ZESA token now.'
 
   return (
     <SuccessShell
-      pending={pending}
+      pending={false}
       description={description}
       backHref="/zesa"
       backLabel="Back to ZESA"
       steps={[
-        'We verify your payment',
+        'We verify payment and confirm your order',
         'We automatically process the ZESA token purchase',
         'ZETDC sends token notifications to the notify number',
       ]}
-    >
-      {pending && method === 'ecocash' && orderNumber && (
-        <EcoCashPendingPoll kind="zesa" orderNumber={orderNumber} />
-      )}
-
-      {/* Crypto payments complete on Plisio and return via the "Return to merchant" button. */}
-    </SuccessShell>
+    />
   )
 }
