@@ -102,7 +102,7 @@ export async function POST(request) {
         },
       })
 
-      paymentUrl = `${baseUrl}/success?order=${order.orderNumber}&pending=1&method=ecocash`
+      paymentUrl = `${baseUrl}/pending?order=${order.orderNumber}&method=ecocash`
 
       orderData.paymentMethod = 'ecocash'
       orderData.ecocash = ecoCashResp

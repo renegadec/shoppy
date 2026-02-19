@@ -131,7 +131,7 @@ export async function POST(request) {
         },
       })
 
-      redirectUrl = `${baseUrl}/tickets/success?order=${order.orderNumber}&pending=1&method=ecocash`
+      redirectUrl = `${baseUrl}/tickets/pending?order=${order.orderNumber}&method=ecocash`
 
     } else {
       const payment = await createCryptoInvoice({
