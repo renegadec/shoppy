@@ -120,13 +120,13 @@ export default function TicketCheckoutClient() {
 
               {paymentMethod === 'ecocash' && (
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">EcoCash number (MSISDN)</label>
+                  <label className="block text-sm font-medium text-gray-700">EcoCash Number</label>
                   <input
                     type="tel"
                     required
                     value={customerMsisdn}
                     onChange={(e) => setCustomerMsisdn(e.target.value)}
-                    placeholder="0773xxxxxxx"
+                    placeholder="0773000001"
                     className="mt-2 w-full rounded-2xl bg-gray-50 text-gray-900 px-4 py-3 outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-emerald-600"
                   />
                   <p className="text-xs text-gray-500 mt-2">Use international format without + (e.g. 26377...).</p>
