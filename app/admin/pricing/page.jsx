@@ -87,37 +87,33 @@ export default function AdminPricingPage() {
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="divide-y divide-gray-100">
-            {settings.map((s) => (
-              <div key={s.key} className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div>
-                  <p className="font-semibold text-gray-900">{s.key}</p>
-                  <p className="text-sm text-gray-500 mt-1">{s.note || ''}</p>
-                </div>
+            {settings.map((s) => {
+              const label =
+                s.key === 'airtime_markup_rate'
+                  ? 'Airtime markup'
+                  : s.key
 
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600">Value</label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={s.value}
-                    onChange={(e) => patch(s.key, { value: e.target.value })}
-                    className="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none"
-                    placeholder="0.02"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Example: 0.02 = 2%</p>
-                </div>
+              return (
+                <div key={s.key} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                  <div>
+                    <p className="font-semibold text-gray-900">{label}</p>
+                    <p className="text-sm text-gray-500 mt-1">Example: 0.02 = 2%</p>
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600">Admin note (optional)</label>
-                  <input
-                    value={s.note || ''}
-                    onChange={(e) => patch(s.key, { note: e.target.value })}
-                    className="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none"
-                    placeholder="Explain what this setting does"
-                  />
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600">Value</label>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={s.value}
+                      onChange={(e) => patch(s.key, { value: e.target.value })}
+                      className="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none"
+                      placeholder="0.02"
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
 
             {!settings.length && (
               <div className="p-6 text-gray-500">No settings found.</div>
