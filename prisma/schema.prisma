@@ -203,6 +203,14 @@ model PaymentMethodSetting {
   updatedAt DateTime @updatedAt
 }
 
+model PricingSetting {
+  key       String   @id // airtime_markup_rate, zesa_markup_rate, etc.
+  value     Float
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Event {
   id            String    @id @default(cuid())
   slug          String    @unique
