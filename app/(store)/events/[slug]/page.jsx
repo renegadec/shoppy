@@ -38,6 +38,14 @@ function buildGoogleCalendarUrl({ title, details, location, startsAt, endsAt }) 
   return url.toString()
 }
 
+function buildGoogleMapsUrl(query) {
+  if (!query) return null
+  const url = new URL('https://www.google.com/maps/search/')
+  url.searchParams.set('api', '1')
+  url.searchParams.set('query', query)
+  return url.toString()
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function EventDetailsPage({ params }) {
@@ -102,6 +110,20 @@ export default async function EventDetailsPage({ params }) {
                 Venue
               </div>
               <p className="text-sm text-gray-600 mt-1">{[event.venue, event.city].filter(Boolean).join(' • ') || 'TBA'}</p>
+
+              {Boolean(event.venue || event.city) && (
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <a
+                    href={buildGoogleMapsUrl([event.venue, event.city].filter(Boolean).join(', '))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                    title="Open in Google Maps"
+                  >
+                    Open in Maps →
+                  </a>
+                </div>
+              )}
             </div>
           </div>
 
