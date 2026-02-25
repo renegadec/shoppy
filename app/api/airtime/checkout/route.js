@@ -28,7 +28,9 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid airtime amount' }, { status: 400 })
     }
 
-    const markupRate = 0.02
+    // NOTE: markupRate is admin-configurable (Pricing settings). Fallback to 2%.
+    const { getPricingSettingFloat } = await import('@/lib/pricingSettings')
+    const markupRate = await getPricingSettingFloat('airtime_markup_rate', 0.02)
     const amountToPay = computeMarkupAmount({ airtimeAmount: amt, markupRate })
 
     const orderNumber = await generateAirtimeOrderNumber()

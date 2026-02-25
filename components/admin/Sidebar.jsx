@@ -15,6 +15,7 @@ const navItems = [
   { href: '/admin/customers', label: 'Customers', icon: '👥' },
   { href: '/admin/support-requests', label: 'Support Requests', icon: '📩' },
   { href: '/admin/payment-methods', label: 'Payment Methods', icon: '💳' },
+  { href: '/admin/pricing', label: 'Pricing', icon: '🏦' },
 ]
 
 export default function Sidebar() {
