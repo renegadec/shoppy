@@ -3,6 +3,7 @@ import crypto from 'crypto'
 import prisma from '@/lib/prisma'
 import { createCryptoInvoice } from '@/lib/cryptoGateway'
 import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
+import { createOmariPaymentAuth } from '@/lib/omari'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { computeMarkupAmount, generateZesaOrderNumber, roundMoney } from '@/lib/zesa'
 import { normalizeZwMsisdn } from '@/lib/msisdn'
@@ -116,6 +117,34 @@ export async function POST(request) {
       })
 
       paymentUrl = `${baseUrl}/zesa/pending?order=${orderNumber}&method=ecocash`
+
+    } else if (paymentMethod === 'omari') {
+      const msisdn = normalizeZwMsisdn(customerMsisdn)
+      if (!msisdn) {
+        return NextResponse.json({ error: 'Omari phone number is required' }, { status: 400 })
+      }
+
+      const reference = crypto.randomUUID()
+      const auth = await createOmariPaymentAuth({
+        msisdn,
+        reference,
+        amount: amountToPay,
+        currency: 'USD',
+        channel: 'WEB',
+      })
+
+      await prisma.zesaOrder.update({
+        where: { id: order.id },
+        data: {
+          paymentMethod: 'omari',
+          paymentId: reference,
+          paymentStatus: 'omari_auth_initiated',
+          ecocashMsisdn: msisdn,
+          deliveryNotes: JSON.stringify({ omariAuth: auth }),
+        },
+      })
+
+      paymentUrl = `${baseUrl}/zesa/pending?order=${orderNumber}&method=omari`
 
     } else {
       // NOTE: Do NOT embed large payloads in the crypto gateway order id.

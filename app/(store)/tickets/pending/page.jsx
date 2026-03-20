@@ -2,6 +2,7 @@ import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import EcoCashPendingPoll from '@/components/EcoCashPendingPoll'
+import OmariPendingPoll from '@/components/OmariPendingPoll'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,7 +49,9 @@ export default async function TicketPendingPage({ searchParams }) {
           Event: <span className="font-semibold text-gray-900">{order.event.title}</span>
         </p>
 
-        {method === 'ecocash' ? (
+        {method === 'omari' ? (
+          <OmariPendingPoll kind="ticket" orderNumber={order.orderNumber} />
+        ) : method === 'ecocash' ? (
           <EcoCashPendingPoll kind="ticket" orderNumber={order.orderNumber} />
         ) : null}
 
