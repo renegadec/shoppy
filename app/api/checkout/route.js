@@ -66,6 +66,14 @@ export async function POST(request) {
       return NextResponse.json({ error: gate.note || 'Payment method unavailable' }, { status: 400 })
     }
 
+    console.log('[checkout] payment selection', {
+      productId,
+      orderNumber: order.orderNumber,
+      paymentMethod,
+      customerMsisdn: customerMsisdn ? normalizeZwMsisdn(customerMsisdn) : null,
+      baseUrl,
+    })
+
     let paymentUrl = null
 
     if (paymentMethod === 'ecocash') {
@@ -97,6 +105,7 @@ export async function POST(request) {
       paymentUrl = `${baseUrl}/pending?order=${order.orderNumber}&method=ecocash`
       orderData.paymentMethod = 'ecocash'
       orderData.ecocash = ecoCashResp
+      console.log('[checkout] ecocash branch selected', { orderNumber: order.orderNumber, paymentUrl })
     } else if (paymentMethod === 'omari') {
       const msisdn = normalizeZwMsisdn(customerMsisdn)
       if (!msisdn) {
@@ -126,6 +135,7 @@ export async function POST(request) {
       paymentUrl = `${baseUrl}/pending?order=${order.orderNumber}&method=omari`
       orderData.paymentMethod = 'omari'
       orderData.omariAuth = auth
+      console.log('[checkout] omari branch selected', { orderNumber: order.orderNumber, paymentUrl, responseCode: auth?.responseCode, message: auth?.message })
     } else {
       const payment = await createCryptoInvoice({
         priceAmount: product.price,
@@ -148,6 +158,7 @@ export async function POST(request) {
       })
 
       paymentUrl = payment.invoice_url
+      console.log('[checkout] crypto/plisio branch selected', { orderNumber: order.orderNumber, paymentUrl, provider: payment?.provider })
     }
 
     await sendTelegramNotification(
