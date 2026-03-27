@@ -242,15 +242,18 @@ export default function CheckoutPage() {
                 }}
                 descriptions={{
                   ecocash: 'Pay using your EcoCash wallet',
+                  omari: 'Pay using your Omari wallet (OTP required)',
                   crypto: 'Pay with USDT, BTC, USDC',
                   card: 'Pay with card',
                 }}
               />
             </div>
 
-            {formData.paymentMethod === 'ecocash' && (
+            {(formData.paymentMethod === 'ecocash' || formData.paymentMethod === 'omari') && (
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">EcoCash Phone Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {formData.paymentMethod === 'omari' ? 'Omari Phone Number' : 'EcoCash Phone Number'}
+                </label>
                 <input
                   type="tel"
                   required
@@ -260,7 +263,9 @@ export default function CheckoutPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-shadow"
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  You will receive a prompt on your phone.
+                  {formData.paymentMethod === 'omari'
+                    ? 'We’ll request your Omari OTP on the next step.'
+                    : 'You will receive a prompt on your phone.'}
                 </p>
               </div>
             )}
@@ -274,16 +279,28 @@ export default function CheckoutPage() {
               disabled={loading}
               className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl text-lg transition-all shadow-lg hover:shadow-emerald-500/25"
             >
-              {loading ? 'Processing…' : formData.paymentMethod === 'ecocash' ? `Pay $${product.price} with EcoCash` : `Pay $${product.price} with Crypto`}
+              {loading
+                ? 'Processing…'
+                : formData.paymentMethod === 'ecocash'
+                  ? `Pay $${product.price} with EcoCash`
+                  : formData.paymentMethod === 'omari'
+                    ? `Pay $${product.price} with Omari`
+                    : `Pay $${product.price} with Crypto`}
             </button>
 
             <div className="mt-6 text-center text-sm text-gray-500">
               <p className="flex items-center justify-center gap-2">
                 <LockClosedIcon className="h-4 w-4" aria-hidden="true" />
-                {formData.paymentMethod === 'ecocash' ? 'Secure payment via EcoCash' : 'Secure payment (crypto)'}
+                {formData.paymentMethod === 'ecocash'
+                  ? 'Secure payment via EcoCash'
+                  : formData.paymentMethod === 'omari'
+                    ? 'Secure payment via Omari'
+                    : 'Secure payment (crypto)'}
               </p>
               {formData.paymentMethod === 'ecocash' ? (
                 <p className="mt-1">We will send a payment prompt to your phone</p>
+              ) : formData.paymentMethod === 'omari' ? (
+                <p className="mt-1">You’ll enter your Omari OTP on the next step</p>
               ) : (
                 <p className="mt-1">Pay with USDT, BTC & USDC</p>
               )}

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createCryptoInvoice } from '@/lib/cryptoGateway'
 import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
+import { createOmariPaymentAuth } from '@/lib/omari'
 import { sendTelegramNotification, formatOrderNotification } from '@/lib/telegram'
 import { createOrder } from '@/lib/orders'
 import prisma from '@/lib/prisma'
@@ -20,11 +21,7 @@ export async function POST(request) {
       contactValue,
     } = body
 
-    // Validate product from database
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
-    })
-
+    const product = await prisma.product.findUnique({ where: { id: productId } })
     if (!product || !product.active) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 })
     }
@@ -33,11 +30,8 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    // Contact preference (digital products only)
     const preferredContactMethod = contactMethod || 'email'
-    const preferredContactValue = preferredContactMethod === 'email'
-      ? email
-      : (contactValue || '')
+    const preferredContactValue = preferredContactMethod === 'email' ? email : (contactValue || '')
 
     if (!preferredContactValue) {
       return NextResponse.json({
@@ -49,7 +43,6 @@ export async function POST(request) {
       }, { status: 400 })
     }
 
-    // Create order in database
     const order = await createOrder({
       email,
       productId: product.id,
@@ -68,11 +61,18 @@ export async function POST(request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 
-    // Enforce enabled payment methods (server-side)
     const gate = await assertPaymentMethodEnabled(paymentMethod)
     if (!gate.ok) {
       return NextResponse.json({ error: gate.note || 'Payment method unavailable' }, { status: 400 })
     }
+
+    console.log('[checkout] payment selection', {
+      productId,
+      orderNumber: order.orderNumber,
+      paymentMethod,
+      customerMsisdn: customerMsisdn ? normalizeZwMsisdn(customerMsisdn) : null,
+      baseUrl,
+    })
 
     let paymentUrl = null
 
@@ -83,7 +83,6 @@ export async function POST(request) {
       }
 
       const sourceReference = crypto.randomUUID()
-
       const ecoCashResp = await createEcoCashInstantC2BPayment({
         customerMsisdn: msisdn,
         amount: product.price,
@@ -97,16 +96,46 @@ export async function POST(request) {
         data: {
           paymentMethod: 'ecocash',
           paymentId: sourceReference,
-          paymentStatus: `ecocash_initiated`,
+          paymentStatus: 'ecocash_initiated',
           ecocashMsisdn: msisdn,
+          deliveryNotes: JSON.stringify({ ecocash: ecoCashResp }),
         },
       })
 
       paymentUrl = `${baseUrl}/pending?order=${order.orderNumber}&method=ecocash`
-
       orderData.paymentMethod = 'ecocash'
       orderData.ecocash = ecoCashResp
+      console.log('[checkout] ecocash branch selected', { orderNumber: order.orderNumber, paymentUrl })
+    } else if (paymentMethod === 'omari') {
+      const msisdn = normalizeZwMsisdn(customerMsisdn)
+      if (!msisdn) {
+        return NextResponse.json({ error: 'Omari phone number is required' }, { status: 400 })
+      }
 
+      const reference = crypto.randomUUID()
+      const auth = await createOmariPaymentAuth({
+        msisdn,
+        reference,
+        amount: product.price,
+        currency: 'USD',
+        channel: 'WEB',
+      })
+
+      await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          paymentMethod: 'omari',
+          paymentId: reference,
+          paymentStatus: 'omari_auth_initiated',
+          ecocashMsisdn: msisdn,
+          deliveryNotes: JSON.stringify({ omariAuth: auth }),
+        },
+      })
+
+      paymentUrl = `${baseUrl}/pending?order=${order.orderNumber}&method=omari`
+      orderData.paymentMethod = 'omari'
+      orderData.omariAuth = auth
+      console.log('[checkout] omari branch selected', { orderNumber: order.orderNumber, paymentUrl, responseCode: auth?.responseCode, message: auth?.message })
     } else {
       const payment = await createCryptoInvoice({
         priceAmount: product.price,
@@ -129,6 +158,7 @@ export async function POST(request) {
       })
 
       paymentUrl = payment.invoice_url
+      console.log('[checkout] crypto/plisio branch selected', { orderNumber: order.orderNumber, paymentUrl, provider: payment?.provider })
     }
 
     await sendTelegramNotification(

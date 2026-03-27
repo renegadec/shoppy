@@ -11,8 +11,9 @@ export async function GET() {
     return NextResponse.json({
       methods: [
         { key: 'ecocash', enabled: true, note: null, sortOrder: 1 },
-        { key: 'crypto', enabled: true, note: null, sortOrder: 2 },
-        { key: 'card', enabled: false, note: 'Coming soon', sortOrder: 3 },
+        { key: 'omari', enabled: true, note: null, sortOrder: 2 },
+        { key: 'crypto', enabled: true, note: null, sortOrder: 3 },
+        { key: 'card', enabled: false, note: 'Coming soon', sortOrder: 4 },
       ],
     })
   }

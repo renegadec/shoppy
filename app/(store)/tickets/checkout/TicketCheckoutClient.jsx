@@ -26,7 +26,7 @@ export default function TicketCheckoutClient() {
     if (paymentMethod !== selectedPaymentMethod) setPaymentMethod(selectedPaymentMethod)
   }, [selectedPaymentMethod, paymentMethod])
   const paymentMethods = useMemo(
-    () => allPaymentMethods.filter((m) => m.key === 'ecocash' || m.key === 'crypto'),
+    () => allPaymentMethods.filter((m) => m.key === 'ecocash' || m.key === 'omari' || m.key === 'crypto'),
     [allPaymentMethods]
   )
   const [customerMsisdn, setCustomerMsisdn] = useState('')
@@ -36,7 +36,7 @@ export default function TicketCheckoutClient() {
   const canSubmit = useMemo(() => {
     if (!(eventId && ticketTypeId && name && email && qty >= 1)) return false
     if (isFree) return true
-    if (paymentMethod === 'ecocash') return Boolean(customerMsisdn)
+    if (paymentMethod === 'ecocash' || paymentMethod === 'omari') return Boolean(customerMsisdn)
     return true
   }, [eventId, ticketTypeId, name, email, qty, isFree, paymentMethod, customerMsisdn])
 
@@ -64,7 +64,7 @@ export default function TicketCheckoutClient() {
           ticketTypeId,
           quantity: qty,
           paymentMethod,
-          customerMsisdn: paymentMethod === 'ecocash' ? customerMsisdn : undefined,
+          customerMsisdn: paymentMethod === 'ecocash' || paymentMethod === 'omari' ? customerMsisdn : undefined,
         }),
       })
 
@@ -114,13 +114,16 @@ export default function TicketCheckoutClient() {
                   descriptions={{
                     crypto: 'Pay with USDT, BTC, ETH, and more',
                     ecocash: 'Pay using your EcoCash wallet',
+                    omari: 'Pay using your Omari wallet (OTP required)',
                   }}
                 />
               </div>
 
-              {paymentMethod === 'ecocash' && (
+              {(paymentMethod === 'ecocash' || paymentMethod === 'omari') && (
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">EcoCash Number</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    {paymentMethod === 'omari' ? 'Omari Number' : 'EcoCash Number'}
+                  </label>
                   <input
                     type="tel"
                     required
@@ -129,7 +132,11 @@ export default function TicketCheckoutClient() {
                     placeholder="0773000001"
                     className="mt-2 w-full rounded-2xl bg-gray-50 text-gray-900 px-4 py-3 outline-none ring-1 ring-gray-200 focus:ring-2 focus:ring-emerald-600"
                   />
-                  <p className="text-xs text-gray-500 mt-2">Use international format without + (e.g. 26377...).</p>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {paymentMethod === 'omari'
+                      ? 'Use a valid Omari number. You’ll enter the OTP on the next step.'
+                      : 'Use international format without + (e.g. 26377...).'}
+                  </p>
                 </div>
               )}
             </div>
@@ -190,13 +197,25 @@ export default function TicketCheckoutClient() {
             disabled={!canSubmit || loading}
             className="mt-8 w-full inline-flex justify-center rounded-2xl bg-emerald-700 text-white px-6 py-3 font-bold shadow-sm hover:bg-emerald-800 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Processing…' : isFree ? 'Get free ticket' : paymentMethod === 'ecocash' ? 'Pay with EcoCash' : 'Pay with Crypto'}
+            {loading
+              ? 'Processing…'
+              : isFree
+                ? 'Get free ticket'
+                : paymentMethod === 'ecocash'
+                  ? 'Pay with EcoCash'
+                  : paymentMethod === 'omari'
+                    ? 'Pay with Omari'
+                    : 'Pay with Crypto'}
           </button>
 
           {!isFree && (
             <p className="mt-4 text-xs text-gray-500 flex items-center justify-center gap-2">
               <LockClosedIcon className="h-4 w-4" />{' '}
-              {paymentMethod === 'ecocash' ? 'Secure payment via EcoCash' : 'Secure crypto checkout'}
+              {paymentMethod === 'ecocash'
+                ? 'Secure payment via EcoCash'
+                : paymentMethod === 'omari'
+                  ? 'Secure payment via Omari'
+                  : 'Secure crypto checkout'}
             </p>
           )}
 

@@ -244,14 +244,17 @@ export default function ZesaPage() {
               }}
               descriptions={{
                 ecocash: 'Pay using your EcoCash wallet',
+                omari: 'Pay using your Omari wallet (OTP required)',
                 crypto: 'Pay with USDT, BTC, ETH, and more',
                 card: 'Pay with card',
               }}
             />
 
-            {formData.paymentMethod === 'ecocash' && (
+            {(formData.paymentMethod === 'ecocash' || formData.paymentMethod === 'omari') && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">EcoCash Phone Number</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {formData.paymentMethod === 'omari' ? 'Omari Phone Number' : 'EcoCash Phone Number'}
+                </label>
                 <input
                   type="tel"
                   required
@@ -260,7 +263,11 @@ export default function ZesaPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                   placeholder="0773000001"
                 />
-                <p className="text-xs text-gray-500 mt-2">The amount will be deducted from this ecocash.</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  {formData.paymentMethod === 'omari'
+                    ? 'We’ll request your Omari OTP on the next step.'
+                    : 'The amount will be deducted from this EcoCash wallet.'}
+                </p>
               </div>
             )}
 
