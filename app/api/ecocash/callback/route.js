@@ -19,14 +19,17 @@ export async function POST(request) {
 
     // Attempt common reference keys
     const reference =
+      body?.clientCorrelator ||
+      body?.referenceCode ||
       body?.sourceReference ||
       body?.source_reference ||
       body?.clientReference ||
       body?.reference ||
       body?.merchantReference ||
+      body?.serverReferenceCode ||
       body?.orderNumber
 
-    const statusRaw = body?.status || body?.paymentStatus || body?.transactionStatus
+    const statusRaw = body?.transactionOperationStatus || body?.status || body?.paymentStatus || body?.transactionStatus
 
     if (!reference) {
       await sendTelegramNotification(
@@ -53,11 +56,15 @@ export async function POST(request) {
     // Map status when we learn the exact values from EcoCash.
     // Safe default: store raw status only.
     const updateData = {
-      paymentStatus: `ecocash_${String(statusRaw || 'callback').toLowerCase()}`,
+      paymentStatus: `ecocash_${String(statusRaw || 'callback').toLowerCase().replace(/\s+/g, '_')}`,
+    }
+
+    if (body?.ecocashReference || body?.serverReferenceCode) {
+      updateData.providerRef = body.ecocashReference || body.serverReferenceCode
     }
 
     // Heuristic: treat these as paid
-    const paidWords = ['paid', 'success', 'successful', 'complete', 'completed', 'confirmed']
+    const paidWords = ['paid', 'success', 'successful', 'complete', 'completed', 'confirmed', 'charged']
     if (statusRaw && paidWords.some((w) => String(statusRaw).toLowerCase().includes(w))) {
       updateData.status = 'PAID'
       updateData.paidAt = new Date()
