@@ -63,8 +63,13 @@ export async function POST(request) {
         },
       })
 
-      // Trigger fulfillment
-      await fulfillAirtimeOrderIfPaid({ orderNumber })
+      // Trigger fulfillment, but don't fail payment confirmation if the
+      // downstream airtime provider has an issue. Admin can retry fulfillment.
+      try {
+        await fulfillAirtimeOrderIfPaid({ orderNumber })
+      } catch (fulfillmentError) {
+        console.error('EcoCash airtime fulfillment failed after payment confirmation:', fulfillmentError)
+      }
 
     } else {
       await prisma.airtimeOrder.update({

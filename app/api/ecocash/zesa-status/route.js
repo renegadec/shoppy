@@ -58,7 +58,13 @@ export async function POST(request) {
         },
       })
 
-      await fulfillZesaOrderIfPaid({ orderNumber })
+      // Trigger fulfillment, but don't fail payment confirmation if the
+      // downstream ZESA provider has an issue. Admin can retry fulfillment.
+      try {
+        await fulfillZesaOrderIfPaid({ orderNumber })
+      } catch (fulfillmentError) {
+        console.error('EcoCash ZESA fulfillment failed after payment confirmation:', fulfillmentError)
+      }
 
     } else {
       await prisma.zesaOrder.update({
