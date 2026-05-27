@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { getEcoCashC2BTransactionStatus } from '@/lib/ecocashStatus'
+import {
+  getEcoCashC2BTransactionStatus,
+  getEcoCashPaidAmount,
+  getEcoCashPaidCurrency,
+  getEcoCashPaymentStatusSlug,
+  getEcoCashProviderRef,
+  isEcoCashPaidStatus,
+} from '@/lib/ecocashStatus'
 import { fulfillAirtimeOrderIfPaid } from '@/lib/airtimeFulfillment'
 
 export async function POST(request) {
@@ -20,6 +27,14 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
+    if (order.status === 'PAID' || order.paymentStatus === 'ecocash_success') {
+      return NextResponse.json({
+        success: true,
+        status: { transactionOperationStatus: 'COMPLETED', ecocashReference: order.providerRef },
+        order,
+      })
+    }
+
     const sourceReference = order.paymentId
     const sourceMobileNumber = order.ecocashMsisdn
 
@@ -35,17 +50,16 @@ export async function POST(request) {
       sourceReference,
     })
 
-    const s = String(status?.status || '').toUpperCase()
-
-    if (s === 'SUCCESS') {
+    if (isEcoCashPaidStatus(status)) {
       await prisma.airtimeOrder.update({
         where: { id: order.id },
         data: {
           status: 'PAID',
           paymentStatus: 'ecocash_success',
           paidAt: new Date(),
-          paidAmount: status?.amount?.amount ?? order.amount,
-          paidCurrency: status?.amount?.currency ?? order.currency,
+          paidAmount: getEcoCashPaidAmount(status, order.amount),
+          paidCurrency: getEcoCashPaidCurrency(status, order.currency),
+          providerRef: getEcoCashProviderRef(status, order.providerRef),
         },
       })
 
@@ -56,7 +70,8 @@ export async function POST(request) {
       await prisma.airtimeOrder.update({
         where: { id: order.id },
         data: {
-          paymentStatus: `ecocash_${String(status?.status || 'unknown').toLowerCase()}`,
+          paymentStatus: `ecocash_${getEcoCashPaymentStatusSlug(status)}`,
+          providerRef: getEcoCashProviderRef(status, order.providerRef),
         },
       })
     }
