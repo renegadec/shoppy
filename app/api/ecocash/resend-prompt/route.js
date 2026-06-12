@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import prisma from '@/lib/prisma'
-import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
+import { createEcoCashInstantC2BPayment, generateEcoCashRef } from '@/lib/ecocash'
 
 function nowMinusMs(d) {
   try {
@@ -52,7 +52,7 @@ export async function POST(request) {
     const msisdn = order.ecocashMsisdn
     if (!msisdn) return NextResponse.json({ error: 'Missing EcoCash MSISDN for this order' }, { status: 400 })
 
-    const sourceReference = crypto.randomUUID()
+    const sourceReference = generateEcoCashRef()
 
     await createEcoCashInstantC2BPayment({
       customerMsisdn: msisdn,
