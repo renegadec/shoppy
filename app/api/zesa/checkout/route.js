@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import prisma from '@/lib/prisma'
 import { createCryptoInvoice } from '@/lib/cryptoGateway'
-import { createEcoCashInstantC2BPayment } from '@/lib/ecocash'
+import { createEcoCashInstantC2BPayment, generateEcoCashRef } from '@/lib/ecocash'
 import { createOmariPaymentAuth } from '@/lib/omari'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { computeMarkupAmount, generateZesaOrderNumber, roundMoney } from '@/lib/zesa'
@@ -70,7 +70,8 @@ export async function POST(request) {
       },
     })
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const origin = request.headers.get('origin') || request.headers.get('x-forwarded-host') || ''
+    const baseUrl = origin || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
 
     const orderData = {
       kind: 'zesa',
@@ -95,7 +96,7 @@ export async function POST(request) {
         return NextResponse.json({ error: 'EcoCash phone number is required' }, { status: 400 })
       }
 
-      const sourceReference = crypto.randomUUID()
+      const sourceReference = generateEcoCashRef()
 
       const ecoCashResp = await createEcoCashInstantC2BPayment({
         customerMsisdn: msisdn,

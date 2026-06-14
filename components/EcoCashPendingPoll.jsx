@@ -63,8 +63,13 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
 
       setStatus(data?.status || null)
 
-      const s = String(data?.status?.status || '').toUpperCase()
-      if (s === 'SUCCESS') {
+      const s = String(
+        data?.status?.transactionOperationStatus ||
+          data?.status?.status ||
+          data?.order?.paymentStatus ||
+          ''
+      ).toUpperCase()
+      if (['COMPLETED', 'SUCCESS', 'SUCCESSFUL', 'PAID', 'CONFIRMED', 'ECOCASH_SUCCESS'].includes(s)) {
         const base = successHrefForKind[kind] || '/success'
         const next = new URL(base, window.location.origin)
         next.searchParams.set('order', String(orderNumber))
@@ -77,8 +82,8 @@ export default function EcoCashPendingPoll({ kind = 'product', orderNumber }) {
     }
   }
 
-  const shortStatus = String(status?.status || '').toUpperCase()
-  const showOk = shortStatus && shortStatus !== 'SUCCESS'
+  const shortStatus = String(status?.transactionOperationStatus || status?.status || '').toUpperCase()
+  const showOk = shortStatus && !['COMPLETED', 'SUCCESS', 'SUCCESSFUL', 'PAID', 'CONFIRMED'].includes(shortStatus)
 
   return (
     <div className="mt-6 mb-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-left">

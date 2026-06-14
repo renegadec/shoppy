@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { getEcoCashC2BTransactionStatus } from '@/lib/ecocashStatus'
+import {
+  getEcoCashC2BTransactionStatus,
+  getEcoCashPaidAmount,
+  getEcoCashPaidCurrency,
+  getEcoCashPaymentStatusSlug,
+  getEcoCashProviderRef,
+  isEcoCashPaidStatus,
+} from '@/lib/ecocashStatus'
 import { sendTelegramNotification } from '@/lib/telegram'
 import { sendTicketEmail } from '@/lib/email'
 
@@ -21,6 +28,14 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
+    if (order.status === 'PAID' || order.paymentStatus === 'ecocash_success') {
+      return NextResponse.json({
+        success: true,
+        status: { transactionOperationStatus: 'COMPLETED', ecocashReference: order.providerRef },
+        order,
+      })
+    }
+
     const sourceReference = order.paymentId
     const sourceMobileNumber = order.ecocashMsisdn
 
@@ -36,17 +51,16 @@ export async function POST(request) {
       sourceReference,
     })
 
-    const s = String(status?.status || '').toUpperCase()
-    if (s === 'SUCCESS') {
+    if (isEcoCashPaidStatus(status)) {
       const updated = await prisma.ticketOrder.update({
         where: { id: order.id },
         data: {
           status: 'PAID',
           paymentStatus: 'ecocash_success',
           paidAt: new Date(),
-          paidAmount: status?.amount?.amount ?? order.amount,
-          paidCurrency: status?.amount?.currency ?? order.currency,
-          providerRef: status?.ecocashReference || order.providerRef,
+          paidAmount: getEcoCashPaidAmount(status, order.amount),
+          paidCurrency: getEcoCashPaidCurrency(status, order.currency),
+          providerRef: getEcoCashProviderRef(status, order.providerRef),
         },
         include: { customer: true, event: true, items: { include: { ticketType: true } } },
       })
@@ -77,13 +91,14 @@ export async function POST(request) {
       await prisma.ticketOrder.update({
         where: { id: order.id },
         data: {
-          paymentStatus: `ecocash_${String(status?.status || 'unknown').toLowerCase()}`,
-          providerRef: status?.ecocashReference || order.providerRef,
+          paymentStatus: `ecocash_${getEcoCashPaymentStatusSlug(status)}`,
+          providerRef: getEcoCashProviderRef(status, order.providerRef),
         },
       })
     }
 
-    return NextResponse.json({ success: true, status })
+    const latest = await prisma.ticketOrder.findUnique({ where: { orderNumber } })
+    return NextResponse.json({ success: true, status, order: latest })
   } catch (error) {
     console.error('EcoCash ticket status route error:', error)
     return NextResponse.json({ error: error.message || 'Failed' }, { status: 500 })
