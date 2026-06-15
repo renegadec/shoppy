@@ -15,7 +15,6 @@ const NETWORKS = [
 
 export default function AirtimePage() {
   const [formData, setFormData] = useState({
-    email: '',
     paymentMethod: 'ecocash',
     customerMsisdn: '',
     network: 'econet',
@@ -114,18 +113,6 @@ export default function AirtimePage() {
 
         <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email (optional)</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                placeholder="your@email.com"
-              />
-              <p className="text-xs text-gray-500 mt-2">Optional — we can still process your airtime without email.</p>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Network</label>
               <select
