@@ -26,7 +26,6 @@ export default async function TicketPendingPage({ searchParams }) {
 
   const paid = order.status === 'PAID'
   if (paid) {
-    // If already paid, jump to the confirmed page.
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
@@ -58,7 +57,8 @@ export default async function TicketPendingPage({ searchParams }) {
         <div className="mt-6 rounded-2xl bg-gray-50 border border-gray-200 p-5">
           <p className="font-semibold text-gray-900">What happens next?</p>
           <p className="text-sm text-gray-700 mt-1">
-            Once payment is confirmed, we’ll deliver your ticket(s) to <span className="font-medium">{order.customer.email}</span>.
+            Once payment is confirmed, we&apos;ll automatically deliver your ticket(s) to{' '}
+            <span className="font-medium">{order.customer.email}</span>.
           </p>
         </div>
 

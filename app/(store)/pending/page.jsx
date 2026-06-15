@@ -12,9 +12,9 @@ export default async function PendingPage({ searchParams }) {
   const orderNumber = sp?.order || ''
 
   const description = method === 'omari'
-    ? "We’ve started your Omari payment. Enter the OTP from Omari below, then refresh the status if needed."
+    ? "We’ve started your Omari payment. Enter the OTP from Omari below to complete your purchase."
     : method === 'ecocash'
-      ? "We've sent a payment prompt to your phone. Please confirm the EcoCash payment, then refresh the status below."
+      ? "We've sent a payment prompt to your phone. Please check your phone and approve the payment."
       : 'Your payment is being processed. Please wait for confirmation.'
 
   return (
@@ -25,7 +25,7 @@ export default async function PendingPage({ searchParams }) {
       backLabel="Back to Shop"
       steps={[
         'Confirm the payment on your phone (if prompted)',
-        'Tap Refresh status to confirm payment',
+        'We automatically check for confirmation',
         'Once confirmed, we’ll proceed with delivery automatically',
       ]}
     >
