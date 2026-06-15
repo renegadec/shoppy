@@ -9,9 +9,9 @@ import { usePaymentMethods } from '@/lib/usePaymentMethods'
 import { detectZwNetwork, validateZwMsisdn } from '@/lib/msisdn'
 
 const NETWORK_INFO = {
-  econet: { label: 'Econet', color: 'bg-red-600', prefix: '077 / 078' },
-  netone: { label: 'NetOne', color: 'bg-blue-700', prefix: '071' },
-  telecel: { label: 'Telecel', color: 'bg-purple-700', prefix: '073' },
+  econet: { label: 'Econet', color: 'bg-blue-700' },
+  netone: { label: 'NetOne', color: 'bg-orange-600' },
+  telecel: { label: 'Telecel', color: 'bg-red-600' },
 }
 
 export default function AirtimePage() {
@@ -232,12 +232,7 @@ export default function AirtimePage() {
                 </p>
               )}
 
-              {/* Network info */}
-              {!recipientTouched && !error && (
-                <p className="text-xs text-gray-500 mt-1.5">
-                  Econet: 077 / 078 &middot; NetOne: 071 &middot; Telecel: 073
-                </p>
-              )}
+
             </div>
 
             {/* Network selector */}

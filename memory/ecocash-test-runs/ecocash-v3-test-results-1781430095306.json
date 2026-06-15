@@ -1,0 +1,58 @@
+[
+  {
+    "testId": "TC001",
+    "scenario": "Payment Request",
+    "description": "Payment request - Valid Pin and Currency Code",
+    "result": "PASS",
+    "comment": "HTTP 200 | Status: PENDING SUBSCRIBER VALIDATION ",
+    "ref": "SHOPPY_TC001_1781430091757"
+  },
+  {
+    "testId": "TC002",
+    "scenario": "Payment Request",
+    "description": "Payment request - Invalid Pin",
+    "result": "FAIL",
+    "comment": "HTTP 200 | {\"id\":2065406336,\"version\":0,\"clientCorrelator\":\"SHOPPY_TC002_1781430092740\",\"endTime\":1781430093996,\"startTime\":1781430093996,\"notifyUrl\":\"https://shoppy.local/api/ecocash/callback\",\"referenceCode\":\"SHOPPY_TC002_1781430092740\",\"endUserId\":\"783726458\",\"serverReferenceCode\":\"SHOPPY_TC002_1781430092740\",\"transactionOperationStatus\":\"PENDING SUBSCRIBER VALIDATION\",\"paymentAmount\":{\"totalAmountCharged\":0,\"charginginformation\":{\"amount\":1,\"cashbackAmount\":null,\"currency\":\"USD\",\"description\":\"TC002: Invalid PIN\"},\"chargeMetaData\":{\"channel\":\"WEB\",\"purchaseCategoryCode\":\"Online Payment\",\"onBeHalfOf\":\"Shoppy\",\"serviceId\":null}},\"ecocashReference\":null,\"merchantCode\":\"287164\",\"merchantPin\":\"9999\",\"merchantNumber\":\"778503033\",\"notificationFormat\":\"https://shoppy.local/api/ecocash/callback\",\"serviceId\":null,\"originalServerReferenceCode\":null,\"originalEcocashReference\":null,\"transactionDate\":0,\"orginalMerchantReference\":null,\"type\":null,\"source\":null,\"countryCode\":\"ZW\",\"currencyCode\":\"USD\",\"superMerchantName\":\"Shoppy\",\"merchantName\":null,\"terminalID\":null,\"location\":null,\"tranType\":null,\"originalClientCorrelator\":null,\"responseCode\":null,\"remarks\":\"TC002: Invalid PIN\"}",
+    "ref": "SHOPPY_TC002_1781430092740"
+  },
+  {
+    "testId": "TC003",
+    "scenario": "Payment Request",
+    "description": "Payment request - Invalid Currency Code",
+    "result": "FAIL",
+    "comment": "HTTP 200 (no response body)",
+    "ref": "SHOPPY_TC003_1781430093594"
+  },
+  {
+    "testId": "TC004",
+    "scenario": "Payment Request",
+    "description": "Payment request - Invalid Amount",
+    "result": "FAIL",
+    "comment": "HTTP 200 | {\"id\":949726149,\"version\":0,\"clientCorrelator\":\"SHOPPY_TC004_1781430093656\",\"endTime\":1781430094866,\"startTime\":1781430094866,\"notifyUrl\":\"https://shoppy.local/api/ecocash/callback\",\"referenceCode\":\"SHOPPY_TC004_1781430093656\",\"endUserId\":\"783726458\",\"serverReferenceCode\":\"SHOPPY_TC004_1781430093656\",\"transactionOperationStatus\":\"PENDING SUBSCRIBER VALIDATION\",\"paymentAmount\":{\"totalAmountCharged\":0,\"charginginformation\":{\"amount\":999999.99,\"cashbackAmount\":null,\"currency\":\"USD\",\"description\":\"TC004: Over Limit\"},\"chargeMetaData\":{\"channel\":\"WEB\",\"purchaseCategoryCode\":\"Online Payment\",\"onBeHalfOf\":\"Shoppy\",\"serviceId\":null}},\"ecocashReference\":null,\"merchantCode\":\"287164\",\"merchantPin\":\"1234\",\"merchantNumber\":\"778503033\",\"notificationFormat\":\"https://shoppy.local/api/ecocash/callback\",\"serviceId\":null,\"originalServerReferenceCode\":null,\"originalEcocashReference\":null,\"transactionDate\":0,\"orginalMerchantReference\":null,\"type\":null,\"source\":null,\"countryCode\":\"ZW\",\"currencyCode\":\"USD\",\"superMerchantName\":\"Shoppy\",\"merchantName\":null,\"terminalID\":null,\"location\":null,\"tranType\":null,\"originalClientCorrelator\":null,\"responseCode\":null,\"remarks\":\"TC004: Excessive Amount\"}",
+    "ref": "SHOPPY_TC004_1781430093656"
+  },
+  {
+    "testId": "TC005",
+    "scenario": "Payment Request",
+    "description": "Payment request - Invalid Account",
+    "result": "FAIL",
+    "comment": "HTTP 200 | Status: PENDING SUBSCRIBER VALIDATION | {\"id\":1837661443,\"version\":0,\"clientCorrelator\":\"SHOPPY_TC005_1781430094461\",\"endTime\":1781430095640,\"startTime\":1781430095640,\"notifyUrl\":\"https://shoppy.local/api/ecocash/callback\",\"referenceCode\":\"SHOPPY_TC005_1781430094461\",\"endUserId\":\"999999999\",\"serverReferenceCode\":\"SHOPPY_TC005_1781430094461\",\"transactionOperationStatus\":\"PENDING SUBSCRIBER VALIDATION\",\"paymentAmount\":{\"totalAmountCharged\":0,\"charginginformation\":{\"amount\":1,\"cashbackAmount\":null,\"currency\":\"USD\",\"description\":\"TC005: Invalid Account\"},\"chargeMetaData\":{\"channel\":\"WEB\",\"purchaseCategoryCode\":\"Online Payment\",\"onBeHalfOf\":\"Shoppy\",\"serviceId\":null}},\"ecocashReference\":null,\"merchantCode\":\"287164\",\"merchantPin\":\"1234\",\"merchantNumber\":\"778503033\",\"notificationFormat\":\"https://shoppy.local/api/ecocash/callback\",\"serviceId\":null,\"originalServerReferenceCode\":null,\"originalEcocashReference\":null,\"transactionDate\":0,\"orginalMerchantReference\":null,\"type\":null,\"source\":null,\"countryCode\":\"ZW\",\"currencyCode\":\"USD\",\"superMerchantName\":\"Shoppy\",\"merchantName\":null,\"terminalID\":null,\"location\":null,\"tranType\":null,\"originalClientCorrelator\":null,\"responseCode\":null,\"remarks\":\"TC005: Invalid Account\"}",
+    "ref": "SHOPPY_TC005_1781430094461"
+  },
+  {
+    "testId": "TC006",
+    "scenario": "Transaction Lookup",
+    "description": "Transaction Lookup",
+    "result": "PASS",
+    "comment": "Lookup of TC001 (SHOPPY_TC001_1781430091757) -> HTTP 200 | Status: PENDING SUBSCRIBER VALIDATION",
+    "ref": "SHOPPY_TC001_1781430091757"
+  },
+  {
+    "testId": "TC007",
+    "scenario": "Transaction Reversal",
+    "description": "Transaction Reversal",
+    "result": "SKIP",
+    "comment": "No COMPLETED transaction available for reversal (preprod needs subscriber to approve)",
+    "ref": "—"
+  }
+]
