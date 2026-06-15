@@ -12,9 +12,9 @@ export default async function AirtimePendingPage({ searchParams }) {
   const orderNumber = sp?.order || ''
 
   const description = method === 'omari'
-    ? "We’ve started your Omari payment. Enter the OTP from Omari below, then refresh the status if needed to complete your airtime order."
+    ? "We've started your Omari payment. Enter the OTP below to complete your airtime order."
     : method === 'ecocash'
-      ? "We've sent a payment prompt to your phone. Please confirm the EcoCash payment, then refresh the status below to complete your airtime order."
+      ? "We've sent a payment prompt to your phone. Approve it to complete your airtime order."
       : 'Your payment is being processed. Please wait for confirmation.'
 
   return (
@@ -25,8 +25,8 @@ export default async function AirtimePendingPage({ searchParams }) {
       backLabel="Back to Airtime"
       steps={[
         'Confirm the payment on your phone',
-        'Refresh status to confirm payment',
-        'We automatically deliver airtime to the recipient number',
+        'We automatically check for confirmation',
+        'We deliver airtime to the recipient number',
       ]}
     >
       {method === 'omari' && orderNumber ? (

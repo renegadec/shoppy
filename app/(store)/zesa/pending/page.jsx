@@ -12,9 +12,9 @@ export default async function ZesaPendingPage({ searchParams }) {
   const orderNumber = sp?.order || ''
 
   const description = method === 'omari'
-    ? "We’ve started your Omari payment. Enter the OTP from Omari below, then refresh the status if needed to complete your ZESA order."
+    ? "We've started your Omari payment. Enter the OTP below to complete your ZESA order."
     : method === 'ecocash'
-      ? "We've sent a payment prompt to your phone. Please confirm the EcoCash payment, then refresh the status below to complete your ZESA order."
+      ? "We've sent a payment prompt to your phone. Approve it to complete your ZESA order."
       : 'Your payment is being processed. Please wait for confirmation.'
 
   return (
@@ -25,8 +25,8 @@ export default async function ZesaPendingPage({ searchParams }) {
       backLabel="Back to ZESA"
       steps={[
         'Confirm the payment on your phone',
-        'Refresh status to confirm payment',
-        'We automatically process the ZESA token purchase',
+        'We automatically check for confirmation',
+        'We process the ZESA token purchase',
       ]}
     >
       {method === 'omari' && orderNumber ? (
