@@ -252,7 +252,7 @@ export default function AirtimePage() {
                   <option value="">Select network</option>
                   {Object.entries(NETWORK_INFO).map(([key, info]) => (
                     <option key={key} value={key}>
-                      {info.label} ({info.prefix})
+                      {info.label}
                     </option>
                   ))}
                 </select>
