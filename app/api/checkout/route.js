@@ -90,7 +90,7 @@ export async function POST(request) {
         customerMsisdn: msisdn,
         amount: product.price,
         currency: 'USD',
-        reason: `${order.orderNumber} - ${product.name}${product.period ? ` - ${product.period}` : ''}`,
+        reason: `Shoppy - ${product.name}`,
         sourceReference,
       })
 

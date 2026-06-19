@@ -119,7 +119,7 @@ export async function POST(request) {
         customerMsisdn: msisdn,
         amount: order.amount,
         currency: 'USD',
-        reason: `${order.orderNumber} - Event Ticket: ${event.title} (${ticketType.name}) x${qty}`,
+        reason: `Shoppy - ${event.title}`,
         sourceReference,
       })
 

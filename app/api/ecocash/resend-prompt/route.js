@@ -58,7 +58,7 @@ export async function POST(request) {
       customerMsisdn: msisdn,
       amount: Number(order.amount),
       currency: order.currency || 'USD',
-      reason: `${order.orderNumber} - Payment retry`,
+      reason: `Shoppy - Payment`,
       sourceReference,
     })
 

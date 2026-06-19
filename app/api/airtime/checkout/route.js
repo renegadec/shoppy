@@ -108,7 +108,7 @@ export async function POST(request) {
         customerMsisdn: msisdn,
         amount: amountToPay,
         currency: 'USD',
-        reason: `${orderNumber} - Airtime ${network} $${roundMoney(amt)} (+2%)`,
+        reason: `Shoppy - ${network} Airtime`,
         sourceReference,
       })
 

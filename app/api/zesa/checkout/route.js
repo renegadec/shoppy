@@ -102,7 +102,7 @@ export async function POST(request) {
         customerMsisdn: msisdn,
         amount: amountToPay,
         currency: 'USD',
-        reason: `${orderNumber} - ZESA $${roundMoney(amt)} (+1%)`,
+        reason: `Shoppy - ZESA Electricity`,
         sourceReference,
       })
 
