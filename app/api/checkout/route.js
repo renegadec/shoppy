@@ -19,6 +19,7 @@ export async function POST(request) {
       customerMsisdn,
       contactMethod,
       contactValue,
+      currency = 'USD',
     } = body
 
     const product = await prisma.product.findUnique({ where: { id: productId } })
@@ -47,6 +48,7 @@ export async function POST(request) {
       email,
       productId: product.id,
       amount: product.price,
+      currency,
       contactMethod: preferredContactMethod,
       contactValue: preferredContactValue,
     })
@@ -89,7 +91,7 @@ export async function POST(request) {
       const ecoCashResp = await createEcoCashInstantC2BPayment({
         customerMsisdn: msisdn,
         amount: product.price,
-        currency: 'USD',
+        currency,
         reason: `Shoppy - ${product.name}`,
         sourceReference,
       })
@@ -120,7 +122,7 @@ export async function POST(request) {
         msisdn,
         reference,
         amount: product.price,
-        currency: 'USD',
+        currency,
         channel: 'WEB',
       })
 

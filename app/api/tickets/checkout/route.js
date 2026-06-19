@@ -20,6 +20,7 @@ export async function POST(request) {
       quantity,
       paymentMethod = 'ecocash',
       customerMsisdn,
+      currency = 'USD',
     } = body
 
     if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 })
@@ -47,6 +48,7 @@ export async function POST(request) {
       customerName,
       eventId: event.id,
       items: [{ ticketTypeId, qty }],
+      currency,
     })
 
     const origin = request.headers.get('origin') || request.headers.get('x-forwarded-host') || ''
@@ -118,7 +120,7 @@ export async function POST(request) {
       await createEcoCashInstantC2BPayment({
         customerMsisdn: msisdn,
         amount: order.amount,
-        currency: 'USD',
+        currency,
         reason: `Shoppy - ${event.title}`,
         sourceReference,
       })
@@ -146,7 +148,7 @@ export async function POST(request) {
         msisdn,
         reference,
         amount: order.amount,
-        currency: 'USD',
+        currency,
         channel: 'WEB',
       })
 

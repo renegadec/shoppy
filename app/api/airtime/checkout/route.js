@@ -5,7 +5,8 @@ import { createCryptoInvoice } from '@/lib/cryptoGateway'
 import { createEcoCashInstantC2BPayment, generateEcoCashRef } from '@/lib/ecocash'
 import { createOmariPaymentAuth } from '@/lib/omari'
 import { sendTelegramNotification } from '@/lib/telegram'
-import { computeMarkupAmount, hotProductIdForNetwork, generateAirtimeOrderNumber, roundMoney } from '@/lib/airtime'
+import { computeMarkupAmount, generateAirtimeOrderNumber, roundMoney } from '@/lib/airtime'
+import { hotProductId } from '@/lib/currencies'
 import { normalizeZwMsisdn } from '@/lib/msisdn'
 import { assertPaymentMethodEnabled } from '@/lib/paymentMethods'
 
@@ -19,6 +20,7 @@ export async function POST(request) {
       network,
       recipientMsisdn,
       airtimeAmount,
+      currency = 'USD',
     } = body
 
     if (!network) return NextResponse.json({ error: 'Network is required' }, { status: 400 })
@@ -55,7 +57,7 @@ export async function POST(request) {
       })
     }
 
-    const hotProductId = hotProductIdForNetwork(network)
+    const hotProductIdVal = hotProductId(network, currency)
 
     const airtimeOrder = await prisma.airtimeOrder.create({
       data: {
@@ -63,10 +65,10 @@ export async function POST(request) {
         airtimeAmount: roundMoney(amt),
         markupRate,
         amount: amountToPay,
-        currency: 'USD',
+        currency,
         network: String(network).toLowerCase(),
         recipientMsisdn: String(recipientMsisdn),
-        hotProductId: hotProductId ?? undefined,
+        hotProductId: hotProductIdVal ?? undefined,
         customerId: customer.id,
         contactMethod,
         contactValue: contactMethod === 'email' ? customerEmail : contactValue,
@@ -107,7 +109,7 @@ export async function POST(request) {
       const ecoCashResp = await createEcoCashInstantC2BPayment({
         customerMsisdn: msisdn,
         amount: amountToPay,
-        currency: 'USD',
+        currency,
         reason: `Shoppy - ${network} Airtime`,
         sourceReference,
       })
@@ -136,7 +138,7 @@ export async function POST(request) {
         msisdn,
         reference,
         amount: amountToPay,
-        currency: 'USD',
+        currency,
         channel: 'WEB',
       })
 

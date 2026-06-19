@@ -89,22 +89,31 @@ export default function AdminPricingPage() {
           <div className="divide-y divide-gray-100">
             {settings.map((s) => {
               const label =
-                s.key === 'airtime_markup_rate'
-                  ? 'Airtime markup'
-                  : s.key
+                s.key === 'airtime_markup_rate' ? 'Airtime markup' :
+                s.key === 'zesa_markup_rate' ? 'ZESA markup' :
+                s.key === 'usd_zig_rate' ? 'USD → ZiG rate' :
+                s.key
+
+              const hint =
+                s.key === 'airtime_markup_rate' ? 'Example: 0.02 = 2%' :
+                s.key === 'zesa_markup_rate' ? 'Example: 0.01 = 1%' :
+                s.key === 'usd_zig_rate' ? '1 USD = X ZiG for ZESA cross-currency purchases' :
+                'Value'
+
+              const step = s.key === 'usd_zig_rate' ? '0.01' : '0.0001'
 
               return (
                 <div key={s.key} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                   <div>
                     <p className="font-semibold text-gray-900">{label}</p>
-                    <p className="text-sm text-gray-500 mt-1">Example: 0.02 = 2%</p>
+                    <p className="text-sm text-gray-500 mt-1">{hint}</p>
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-gray-600">Value</label>
                     <input
                       type="number"
-                      step="0.0001"
+                      step={step}
                       value={s.value}
                       onChange={(e) => patch(s.key, { value: e.target.value })}
                       className="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none"
