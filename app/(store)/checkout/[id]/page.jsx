@@ -19,6 +19,7 @@ export default function CheckoutPage() {
     contactValue: '',
     paymentMethod: 'ecocash',
     customerMsisdn: '',
+    currency: 'USD',
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -102,6 +103,7 @@ export default function CheckoutPage() {
           customerMsisdn: formData.customerMsisdn,
           contactMethod: formData.contactMethod,
           contactValue: formData.contactValue,
+          currency: formData.currency,
         }),
       })
 
@@ -138,6 +140,27 @@ export default function CheckoutPage() {
         </div>
 
         <div className="p-8">
+          {/* Currency toggle */}
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-sm font-medium text-gray-700">Pay in:</span>
+            <div className="flex border border-gray-300 rounded-xl overflow-hidden">
+              {['USD', 'ZWG'].map((cur) => (
+                <button
+                  key={cur}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, currency: cur })}
+                  className={`px-4 py-2 text-sm font-semibold transition-all ${
+                    formData.currency === cur
+                      ? 'bg-emerald-700 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {cur === 'ZWG' ? 'ZiG' : 'USD'}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-emerald-50 rounded-xl p-6 mb-8 border border-emerald-100">
             <h2 className="font-semibold text-gray-900 mb-4">Order Summary</h2>
             <div className="flex items-center justify-between">

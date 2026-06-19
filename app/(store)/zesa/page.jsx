@@ -15,6 +15,7 @@ export default function ZesaPage() {
     meterNumber: '',
     notifyNumber: '',
     tokenAmount: '',
+    currency: 'USD',
   })
 
   const [loading, setLoading] = useState(false)
@@ -92,6 +93,7 @@ export default function ZesaPage() {
         body: JSON.stringify({
           ...formData,
           tokenAmount: Number(formData.tokenAmount),
+          currency: formData.currency,
         }),
       })
 
@@ -222,17 +224,38 @@ export default function ZesaPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Amount (USD)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="5"
-                required
-                value={formData.tokenAmount}
-                onChange={(e) => setFormData({ ...formData, tokenAmount: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
-                placeholder="e.g. 10.00"
-              />
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Token Amount
+              </label>
+              <div className="flex gap-2">
+                {/* Currency toggle */}
+                <div className="flex shrink-0 border border-gray-300 rounded-xl overflow-hidden">
+                  {['USD', 'ZWG'].map((cur) => (
+                    <button
+                      key={cur}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, currency: cur })}
+                      className={`px-3 py-3 text-sm font-semibold transition-all ${
+                        formData.currency === cur
+                          ? 'bg-emerald-700 text-white'
+                          : 'bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {cur === 'ZWG' ? 'ZiG' : 'USD'}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="5"
+                  required
+                  value={formData.tokenAmount}
+                  onChange={(e) => setFormData({ ...formData, tokenAmount: e.target.value })}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                  placeholder={formData.currency === 'ZWG' ? 'e.g. 250' : 'e.g. 10.00'}
+                />
+              </div>
             </div>
 
             <PaymentMethodPicker

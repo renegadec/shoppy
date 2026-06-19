@@ -21,6 +21,7 @@ export default function AirtimePage() {
     network: '',
     recipientMsisdn: '',
     airtimeAmount: '',
+    currency: 'USD',
   })
 
   const [recipientValidation, setRecipientValidation] = useState(null)
@@ -101,6 +102,7 @@ export default function AirtimePage() {
           ...formData,
           airtimeAmount: Number(formData.airtimeAmount),
           recipientMsisdn: validation.normalized,
+          currency: formData.currency,
         }),
       })
 
@@ -282,25 +284,46 @@ export default function AirtimePage() {
               )}
             </div>
 
-            {/* Amount */}
+            {/* Currency + Amount */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Airtime Amount (USD)
+                Airtime Amount
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <span className="text-gray-500 font-semibold text-lg">$</span>
+              <div className="flex gap-2">
+                {/* Currency toggle */}
+                <div className="flex shrink-0 border-2 border-gray-200 rounded-xl overflow-hidden">
+                  {['USD', 'ZWG'].map((cur) => (
+                    <button
+                      key={cur}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, currency: cur })}
+                      className={`px-3 py-3 text-sm font-semibold transition-all ${
+                        formData.currency === cur
+                          ? 'bg-emerald-700 text-white'
+                          : 'bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      {cur === 'ZWG' ? 'ZiG' : 'USD'}
+                    </button>
+                  ))}
                 </div>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0.1"
-                  required
-                  value={formData.airtimeAmount}
-                  onChange={(e) => setFormData({ ...formData, airtimeAmount: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 transition-all"
-                  placeholder="1.00"
-                />
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-gray-500 font-semibold text-lg">
+                      {formData.currency === 'ZWG' ? 'ZiG' : '$'}
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.1"
+                    required
+                    value={formData.airtimeAmount}
+                    onChange={(e) => setFormData({ ...formData, airtimeAmount: e.target.value })}
+                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 transition-all"
+                    placeholder="1.00"
+                  />
+                </div>
               </div>
               <p className="text-xs text-gray-500 mt-1.5">
                 A small markup is added at checkout.

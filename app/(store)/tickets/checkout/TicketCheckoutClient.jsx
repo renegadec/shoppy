@@ -30,6 +30,7 @@ export default function TicketCheckoutClient() {
     [allPaymentMethods]
   )
   const [customerMsisdn, setCustomerMsisdn] = useState('')
+  const [currency, setCurrency] = useState('USD')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -65,6 +66,7 @@ export default function TicketCheckoutClient() {
           quantity: qty,
           paymentMethod,
           customerMsisdn: paymentMethod === 'ecocash' || paymentMethod === 'omari' ? customerMsisdn : undefined,
+          currency,
         }),
       })
 
