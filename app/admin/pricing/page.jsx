@@ -114,6 +114,7 @@ export default function AdminPricingPage() {
                     <input
                       type="number"
                       step={step}
+                      onWheel={(e) => e.target.blur()}
                       value={s.value}
                       onChange={(e) => patch(s.key, { value: e.target.value })}
                       className="mt-1 w-full px-3 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none"

@@ -318,6 +318,7 @@ export default function AirtimePage() {
                     step="0.01"
                     min="0.1"
                     required
+                    onWheel={(e) => e.target.blur()}
                     value={formData.airtimeAmount}
                     onChange={(e) => setFormData({ ...formData, airtimeAmount: e.target.value })}
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 transition-all"

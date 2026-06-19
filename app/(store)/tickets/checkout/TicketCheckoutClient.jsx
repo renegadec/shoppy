@@ -176,6 +176,7 @@ export default function TicketCheckoutClient() {
               <input
                 type="number"
                 min={1}
+                onWheel={(e) => e.target.blur()}
                 value={qty}
                 onChange={(e) => setQty(Math.max(1, Number(e.target.value || 1)))}
                 className="w-24 h-11 rounded-2xl border border-gray-200 bg-white text-gray-900 text-center font-semibold"

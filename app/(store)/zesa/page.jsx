@@ -250,6 +250,7 @@ export default function ZesaPage() {
                   step="0.01"
                   min="5"
                   required
+                  onWheel={(e) => e.target.blur()}
                   value={formData.tokenAmount}
                   onChange={(e) => setFormData({ ...formData, tokenAmount: e.target.value })}
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
