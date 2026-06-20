@@ -9,6 +9,7 @@ import { computeMarkupAmount, generateAirtimeOrderNumber, roundMoney } from '@/l
 import { hotProductId } from '@/lib/currencies'
 import { normalizeZwMsisdn } from '@/lib/msisdn'
 import { assertPaymentMethodEnabled } from '@/lib/paymentMethods'
+import { getPricingSettingFloat } from '@/lib/pricingSettings'
 
 export async function POST(request) {
   try {
@@ -158,9 +159,19 @@ export async function POST(request) {
     } else {
       // NOTE: Do NOT embed large payloads in the crypto gateway order id.
       // We rely on orderNumber + DB lookup in webhook.
+
+      // Convert ZiG to USD for crypto (Plisio) invoices
+      let cryptoAmount = amountToPay
+      let cryptoCurrency = 'usd'
+      if (currency === 'ZWG') {
+        const rate = await getPricingSettingFloat('usd_zig_rate', 25)
+        cryptoAmount = rate > 0 ? roundMoney(amountToPay / rate) : amountToPay
+        cryptoCurrency = 'usd'
+      }
+
       const payment = await createCryptoInvoice({
-        priceAmount: amountToPay,
-        priceCurrency: 'usd',
+        priceAmount: cryptoAmount,
+        priceCurrency: cryptoCurrency,
         orderId: orderNumber,
         orderDescription: `Airtime ${network} $${roundMoney(amt)} (+2%)`,
         successUrl: `${baseUrl}/airtime/success?order=${orderNumber}`,
