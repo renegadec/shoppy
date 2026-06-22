@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import SuccessShell from '@/components/SuccessShell'
+import { ProductOrderSummary } from '@/components/OrderSummary'
 
 export const metadata = {
   title: 'Payment Successful | Shoppy',
@@ -17,19 +18,20 @@ export default async function SuccessPage({ searchParams }) {
     redirect(`/pending?order=${encodeURIComponent(orderNumber)}&method=${encodeURIComponent(method)}`)
   }
 
-  // Look up the order for product-specific messaging
-  let productName = null
+  // Look up the order for summary display
+  let order = null
   if (orderNumber) {
     try {
-      const order = await prisma.order.findUnique({
+      order = await prisma.order.findUnique({
         where: { orderNumber },
-        select: { product: { select: { name: true } } },
+        include: { product: true },
       })
-      productName = order?.product?.name || null
     } catch {
       // best-effort
     }
   }
+
+  const productName = order?.product?.name || null
 
   const description = productName
     ? `Payment received for ${productName}. We'll deliver it to you shortly.`
@@ -48,6 +50,8 @@ export default async function SuccessPage({ searchParams }) {
           : 'We deliver your product via your preferred contact method',
         'You enjoy your purchase',
       ]}
-    />
+    >
+      {order ? <ProductOrderSummary order={order} /> : null}
+    </SuccessShell>
   )
 }

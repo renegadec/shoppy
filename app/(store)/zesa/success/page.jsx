@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
+import prisma from '@/lib/prisma'
 import SuccessShell from '@/components/SuccessShell'
+import { ZesaOrderSummary } from '@/components/OrderSummary'
 
 export const metadata = {
   title: 'ZESA Payment | Shoppy',
@@ -16,7 +18,19 @@ export default async function ZesaSuccessPage({ searchParams }) {
     redirect(`/zesa/pending?order=${encodeURIComponent(orderNumber)}&method=${encodeURIComponent(method)}`)
   }
 
-  const description = 'Payment received. We’re processing your ZESA token now.'
+  // Look up the order for summary display
+  let order = null
+  if (orderNumber) {
+    try {
+      order = await prisma.zesaOrder.findUnique({ where: { orderNumber } })
+    } catch {
+      // best-effort
+    }
+  }
+
+  const description = order
+    ? `Payment received. Your ZESA token of ${order.currency === 'ZWG' ? 'ZiG' : '$'}${Number(order.tokenAmount).toFixed(2)} for meter ${order.meterNumber} is being processed.`
+    : 'Payment received. Your ZESA token is being processed.'
 
   return (
     <SuccessShell
@@ -29,6 +43,8 @@ export default async function ZesaSuccessPage({ searchParams }) {
         'We automatically process the ZESA token purchase',
         'ZETDC sends token notifications to the notify number',
       ]}
-    />
+    >
+      {order ? <ZesaOrderSummary order={order} /> : null}
+    </SuccessShell>
   )
 }
