@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import prisma from '@/lib/prisma'
 import SuccessShell from '@/components/SuccessShell'
 
 export const metadata = {
@@ -16,7 +17,23 @@ export default async function SuccessPage({ searchParams }) {
     redirect(`/pending?order=${encodeURIComponent(orderNumber)}&method=${encodeURIComponent(method)}`)
   }
 
-  const description = "Payment received. We’ll contact you shortly to deliver your product and help with setup."
+  // Look up the order for product-specific messaging
+  let productName = null
+  if (orderNumber) {
+    try {
+      const order = await prisma.order.findUnique({
+        where: { orderNumber },
+        select: { product: { select: { name: true } } },
+      })
+      productName = order?.product?.name || null
+    } catch {
+      // best-effort
+    }
+  }
+
+  const description = productName
+    ? `Payment received for ${productName}. We'll deliver it to you shortly.`
+    : 'Payment received. We\'ll deliver your product to you shortly.'
 
   return (
     <SuccessShell
@@ -26,8 +43,10 @@ export default async function SuccessPage({ searchParams }) {
       backLabel="Back to Shop"
       steps={[
         'We verify payment and confirm your order',
-        'We contact you via your preferred method (Telegram/WhatsApp/Email)',
-        'We deliver your product and help you set it up',
+        productName
+          ? `We deliver ${productName} to your contact method (Telegram/WhatsApp/Email)`
+          : 'We deliver your product via your preferred contact method',
+        'You enjoy your purchase',
       ]}
     />
   )
