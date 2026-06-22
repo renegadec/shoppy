@@ -52,7 +52,12 @@ export default function AirtimePage() {
       setDetectedNetwork(network)
 
       if (network) {
-        setFormData((f) => ({ ...f, network: network.id }))
+        setFormData((f) => ({
+          ...f,
+          network: network.id,
+          // Auto-switch from ZiG to USD when NetOne is detected
+          currency: network.id === 'netone' && f.currency === 'ZWG' ? 'USD' : f.currency,
+        }))
       }
     } else {
       setDetectedNetwork(null)
@@ -243,7 +248,15 @@ export default function AirtimePage() {
               <div className="relative">
                 <select
                   value={formData.network}
-                  onChange={(e) => setFormData({ ...formData, network: e.target.value })}
+                  onChange={(e) => {
+                    const net = e.target.value
+                    // Auto-switch from ZiG to USD when NetOne is selected
+                    setFormData((prev) => ({
+                      ...prev,
+                      network: net,
+                      currency: net === 'netone' && prev.currency === 'ZWG' ? 'USD' : prev.currency,
+                    }))
+                  }}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-500 appearance-none bg-white transition-all"
                 >
                   <option value="">Select network</option>
@@ -292,20 +305,30 @@ export default function AirtimePage() {
               <div className="flex gap-2">
                 {/* Currency toggle */}
                 <div className="flex shrink-0 border-2 border-gray-200 rounded-xl overflow-hidden">
-                  {['USD', 'ZWG'].map((cur) => (
-                    <button
-                      key={cur}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, currency: cur })}
-                      className={`px-3 py-3 text-sm font-semibold transition-all ${
-                        formData.currency === cur
-                          ? 'bg-emerald-700 text-white'
-                          : 'bg-white text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      {cur === 'ZWG' ? 'ZiG' : 'USD'}
-                    </button>
-                  ))}
+                  {['USD', 'ZWG'].map((cur) => {
+                    const isDisabled = cur === 'ZWG' && formData.network === 'netone'
+                    return (
+                      <button
+                        key={cur}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => {
+                          if (isDisabled) return
+                          setFormData({ ...formData, currency: cur })
+                        }}
+                        className={`px-3 py-3 text-sm font-semibold transition-all ${
+                          formData.currency === cur
+                            ? 'bg-emerald-700 text-white'
+                            : isDisabled
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-white text-gray-600 hover:bg-gray-50'
+                        }`}
+                        title={isDisabled ? 'ZiG airtime is not available for NetOne' : ''}
+                      >
+                        {cur === 'ZWG' ? 'ZiG' : 'USD'}
+                      </button>
+                    )
+                  })}
                 </div>
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

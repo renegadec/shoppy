@@ -59,6 +59,12 @@ export async function POST(request) {
     }
 
     const hotProductIdVal = hotProductId(network, currency)
+    if (!hotProductIdVal) {
+      const friendlyNetwork = String(network).charAt(0).toUpperCase() + String(network).slice(1)
+      return NextResponse.json({
+        error: `${friendlyNetwork} ZiG airtime is not available at this time. Please select USD instead.`,
+      }, { status: 400 })
+    }
 
     const airtimeOrder = await prisma.airtimeOrder.create({
       data: {
