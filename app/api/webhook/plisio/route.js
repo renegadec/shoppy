@@ -7,6 +7,7 @@ import { updateTicketOrderFromWebhook } from '@/lib/tickets'
 import { sendTicketEmail } from '@/lib/email'
 import { fulfillAirtimeOrderIfPaid } from '@/lib/airtimeFulfillment'
 import { fulfillZesaOrderIfPaid } from '@/lib/zesaFulfillment'
+import { fulfillTeloneOrderIfPaid } from '@/lib/teloneFulfillment'
 
 function isPaidStatus(status) {
   const s = String(status || '').toLowerCase()
@@ -106,16 +107,19 @@ async function handlePlisioCallback(payload) {
   let isTicketOrder = String(orderNumber).startsWith('EVT-')
   let isAirtimeOrder = String(orderNumber).startsWith('AIR-')
   let isZesaOrder = String(orderNumber).startsWith('ZESA-')
+  let isTeloneOrder = String(orderNumber).startsWith('TELONE-')
 
-  if (!isTicketOrder && !isAirtimeOrder && !isZesaOrder) {
-    const [a, z, t] = await Promise.all([
+  if (!isTicketOrder && !isAirtimeOrder && !isZesaOrder && !isTeloneOrder) {
+    const [a, z, t, tl] = await Promise.all([
       prisma.airtimeOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
       prisma.zesaOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
       prisma.ticketOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
+      prisma.teloneOrder.findUnique({ where: { orderNumber }, select: { id: true } }).catch(() => null),
     ])
     if (t) isTicketOrder = true
     if (a) isAirtimeOrder = true
     if (z) isZesaOrder = true
+    if (tl) isTeloneOrder = true
   }
 
   // If verify_hash is present, validate against providerRef we stored when creating the invoice.
@@ -126,7 +130,9 @@ async function handlePlisioCallback(payload) {
         ? await prisma.airtimeOrder.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
         : isZesaOrder
           ? await prisma.zesaOrder.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
-          : await prisma.order.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
+          : isTeloneOrder
+            ? await prisma.teloneOrder.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
+            : await prisma.order.findUnique({ where: { orderNumber }, select: { providerRef: true } }).catch(() => null)
 
     if (existing?.providerRef && String(existing.providerRef) !== String(verifyHash)) {
       console.error('Plisio webhook: verify_hash mismatch', { orderNumber, verifyHash })
@@ -190,7 +196,21 @@ async function handlePlisioCallback(payload) {
                 include: { customer: true },
               })
               .catch(() => null)
-          : await updateOrderFromWebhook({
+          : isTeloneOrder
+            ? await prisma.teloneOrder
+                .update({
+                  where: { orderNumber },
+                  data: {
+                    status: isPaidStatus(status) ? 'PAID' : 'PENDING',
+                    paymentStatus: String(status),
+                    paidAmount,
+                    paidCurrency,
+                    ...(isPaidStatus(status) ? { paidAt: new Date() } : {}),
+                  },
+                  include: { customer: true },
+                })
+                .catch(() => null)
+            : await updateOrderFromWebhook({
               paymentId: String(operationId),
               orderNumber,
               status,
@@ -213,6 +233,14 @@ async function handlePlisioCallback(payload) {
           await fulfillZesaOrderIfPaid({ orderNumber })
         } catch (e) {
           console.error('ZESA fulfillment failed:', e)
+        }
+
+      } else if (isTeloneOrder) {
+        await sendTelegramNotification(`✅ <b>TELONE BROADBAND PAYMENT CONFIRMED (PLISIO)</b>\n\nOrder: ${orderNumber}`)
+        try {
+          await fulfillTeloneOrderIfPaid({ orderNumber })
+        } catch (e) {
+          console.error('Telone fulfillment failed:', e)
         }
 
       } else if (isTicketOrder) {

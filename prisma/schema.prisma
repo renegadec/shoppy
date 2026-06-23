@@ -38,6 +38,7 @@ model Customer {
   ticketOrders  TicketOrder[]
   airtimeOrders AirtimeOrder[]
   zesaOrders    ZesaOrder[]
+  teloneOrders  TeloneOrder[]
 }
 
 model Order {
@@ -156,6 +157,54 @@ model ZesaOrder {
 
   // Hot Recharge fulfillment
   hotProductId  Int?    @default(41)
+  hotRechargeId Int?
+  hotMessage    String?
+  hotRaw        Json?
+
+  // Contact
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  contactMethod String?
+  contactValue  String?
+
+  delivered     Boolean   @default(false)
+  deliveredAt   DateTime?
+  deliveryNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TeloneOrder {
+  id          String      @id @default(cuid())
+  orderNumber String      @unique // TELONE-YYYYMMDD-XXX
+  status      OrderStatus @default(PENDING)
+
+  // What bundle and amount
+  bundleProductCode Int     // The specific Telone broadband bundle code
+  bundleName        String? // Human-readable bundle name
+  amount            Float   // Customer pays this
+  currency          String  @default("USD")
+  markupRate        Float   @default(0.01)
+
+  // Target + notification
+  target       String // Telone account number or phone number
+  notifyNumber String // Mobile number to notify
+
+  // Payment details
+  paymentMethod String    @default("crypto")
+  paymentId     String?
+  providerRef   String?
+  paymentStatus String?
+  paidAmount    Float?
+  paidCurrency  String?
+  paidAt        DateTime?
+
+  // EcoCash-specific
+  ecocashMsisdn String?
+
+  // Hot Recharge fulfillment
+  hotProductId  Int?    @default(31)
   hotRechargeId Int?
   hotMessage    String?
   hotRaw        Json?

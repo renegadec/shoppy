@@ -4,6 +4,7 @@ import { sendTelegramNotification } from '@/lib/telegram'
 import { sendTicketEmail } from '@/lib/email'
 import { fulfillAirtimeOrderIfPaid } from '@/lib/airtimeFulfillment'
 import { fulfillZesaOrderIfPaid } from '@/lib/zesaFulfillment'
+import { fulfillTeloneOrderIfPaid } from '@/lib/teloneFulfillment'
 import {
   getEcoCashPaidAmount,
   getEcoCashPaidCurrency,
@@ -52,14 +53,11 @@ export async function POST(request) {
     })
     const airtimeOrder = productOrder ? null : await prisma.airtimeOrder.findFirst({ where: matchWhere })
     const zesaOrder = productOrder || airtimeOrder ? null : await prisma.zesaOrder.findFirst({ where: matchWhere })
-    const ticketOrder = productOrder || airtimeOrder || zesaOrder
+    const teloneOrder = productOrder || airtimeOrder || zesaOrder || ticketOrder
       ? null
-      : await prisma.ticketOrder.findFirst({
-          where: matchWhere,
-          include: { customer: true, event: true, items: { include: { ticketType: true } } },
-        })
+      : await prisma.teloneOrder.findFirst({ where: matchWhere })
 
-    const order = productOrder || airtimeOrder || zesaOrder || ticketOrder
+    const order = productOrder || airtimeOrder || zesaOrder || ticketOrder || teloneOrder
     if (!order) {
       await sendTelegramNotification(
         `⚠️ <b>ECOCASH CALLBACK (ORDER NOT FOUND)</b>\n\nReference: ${reference}`
@@ -109,6 +107,16 @@ export async function POST(request) {
           await fulfillZesaOrderIfPaid({ orderNumber: updatedOrder.orderNumber })
         } catch (e) {
           console.error('EcoCash ZESA fulfillment failed:', e)
+        }
+      }
+    } else if (teloneOrder) {
+      kind = 'telone'
+      updatedOrder = await prisma.teloneOrder.update({ where: { id: teloneOrder.id }, data: updateData })
+      if (paid) {
+        try {
+          await fulfillTeloneOrderIfPaid({ orderNumber: updatedOrder.orderNumber })
+        } catch (e) {
+          console.error('EcoCash Telone fulfillment failed:', e)
         }
       }
     } else if (ticketOrder) {

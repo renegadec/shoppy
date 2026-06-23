@@ -57,6 +57,12 @@ export default async function Home() {
                 >
                   Buy ZESA Tokens
                 </Link>
+                <Link
+                  href="/telone"
+                  className="inline-flex justify-center rounded-2xl bg-white border border-gray-200 text-gray-900 px-6 py-3 font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Telone Broadband
+                </Link>
               </div>
 
               <div className="mt-3">
@@ -144,6 +150,12 @@ export default async function Home() {
                   className="inline-flex justify-center rounded-2xl bg-white border border-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-50 transition-colors"
                 >
                   Buy ZESA Tokens
+                </Link>
+                <Link
+                  href="/telone"
+                  className="inline-flex justify-center rounded-2xl bg-white border border-gray-200 text-gray-900 px-5 py-3 font-semibold hover:bg-gray-50 transition-colors"
+                >
+                  Telone Broadband
                 </Link>
                 <Link
                   href="/shop"
