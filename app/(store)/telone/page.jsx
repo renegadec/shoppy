@@ -72,13 +72,17 @@ export default function TelonePage() {
     setLookupData(null)
     try {
       const res = await fetch(`/api/telone/lookup?account=${encodeURIComponent(formData.target)}`)
+      const data = await res.json()
       if (!res.ok) {
-        const d = await res.json().catch(() => ({}))
-        setLookupError(d.error || 'Lookup failed')
+        setLookupError(data.error || 'Lookup failed')
         return
       }
-      const data = await res.json()
-      setLookupData(data.account)
+      if (data.account === null && data.note) {
+        // Hot doesn't support account lookup for broadband; show info instead of error
+        setLookupData({ note: data.note })
+      } else {
+        setLookupData(data.account)
+      }
     } catch {
       setLookupError('Could not reach lookup service')
     } finally {
@@ -208,8 +212,12 @@ export default function TelonePage() {
                 {lookupLoading && <p className="text-xs text-gray-400 mt-1">Looking up account…</p>}
                 {lookupError && <p className="text-xs text-red-500 mt-1">{lookupError}</p>}
                 {lookupData && (
-                  <div className="mt-2 rounded-lg bg-gray-50 p-3 text-sm text-gray-700">
-                    Account details retrieved.
+                  <div className={`mt-2 rounded-lg p-3 text-sm ${
+                    lookupData.note
+                      ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                      : 'bg-gray-50 text-gray-700'
+                  }`}>
+                    {lookupData.note || 'Account details retrieved.'}
                   </div>
                 )}
               </div>
